@@ -367,6 +367,9 @@ function buildWS(){
   var showNr=document.getElementById('showNr').checked;
   var showSol=document.getElementById('showSol').checked;
   var meta=buildMeta();
+  // iOS/Safari skaliert beim Druck nach -> vertikale Abstände etwas stauchen, damit der Footer auf der Seite bleibt
+  var gap=(IS_IOS||IS_SAFARI)?'5mm':'7mm';
+  var footTop=(IS_IOS||IS_SAFARI)?'3mm':'5mm';
   var instr;
   var hasRead=tasks.some(function(t){return t.type==='read';});
   var hasMark=tasks.some(function(t){return t.type==='mark';});
@@ -379,20 +382,20 @@ function buildWS(){
        +(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
   // eine Aufgabe pro Zeile (Strahl braucht Breite), volle Breite
   tasks.forEach(function(t,i){
-    h+='<div style="margin-bottom:7mm;break-inside:avoid;page-break-inside:avoid">';
+    h+='<div style="margin-bottom:'+gap+';break-inside:avoid;page-break-inside:avoid">';
     h+='<div style="font-family:Nunito,sans-serif;font-size:9pt;font-weight:700;color:#1e1b4b;margin-bottom:1mm">';
     if(showNr) h+='<span style="color:#94a3b8;font-weight:800">'+(i+1)+'.</span> ';
     h+=questionText(t)+'</div>';
     h+=strahlSVG(t,false,700);
     h+='</div>';
   });
-  h+='<div style="margin-top:5mm;text-align:center;font-family:Nunito,sans-serif;font-size:8pt;color:#94a3b8">\u2605 \u2605 \u2605 &nbsp; Gut gemacht! &nbsp; \u2605 \u2605 \u2605<br>\u00a9 2026 Sascha Rothenburg</div>';
+  h+='<div style="margin-top:'+footTop+';text-align:center;font-family:Nunito,sans-serif;font-size:8pt;color:#94a3b8;break-inside:avoid;page-break-inside:avoid">\u2605 \u2605 \u2605 &nbsp; Gut gemacht! &nbsp; \u2605 \u2605 \u2605<br>\u00a9 2026 Sascha Rothenburg</div>';
   if(showSol){
     h+='<div style="page-break-before:always;break-before:page;padding-top:4mm"></div>';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #16a34a">'
       +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#16a34a">\u2705 L\u00f6sungen</div></div></div>';
     tasks.forEach(function(t,i){
-      h+='<div style="margin-bottom:7mm;break-inside:avoid;page-break-inside:avoid">';
+      h+='<div style="margin-bottom:'+gap+';break-inside:avoid;page-break-inside:avoid">';
       h+='<div style="font-family:Nunito,sans-serif;font-size:9pt;font-weight:700;color:#1e1b4b;margin-bottom:1mm">';
       if(showNr) h+='<span style="color:#94a3b8;font-weight:800">'+(i+1)+'.</span> ';
       h+=questionText(t)+'</div>';
