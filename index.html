@@ -133,6 +133,14 @@ input{-webkit-user-select:text;user-select:text}
       </div>
       <div class="ss" style="margin-top:6px">Ausschnitte zeigen Bereiche wie 40&ndash;60 statt immer 0 bis Maximum.</div>
     </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Schwierigkeit</label>
+      <div class="opt-row" id="diffOpts">
+        <button class="opt-btn sel" data-v="easy">Leicht<br><span style="font-weight:600;font-size:.66rem">alle Zahlen</span></button>
+        <button class="opt-btn" data-v="hard">Schwer<br><span style="font-weight:600;font-size:.66rem">weniger Zahlen</span></button>
+      </div>
+      <div class="ss" style="margin-top:6px">Bei "schwer" sind weniger Striche beschriftet &ndash; das Kind muss selbst weiterz&auml;hlen.</div>
+    </div>
     <button class="btn bp" style="margin-top:8px" id="btnGen">&#x26A1; Aufgaben generieren</button>
   </div>
 </div>
@@ -200,7 +208,7 @@ function getMulti(id){return Array.from(document.querySelectorAll('#'+id+' .opt-
 function getMultiStr(id){return Array.from(document.querySelectorAll('#'+id+' .opt-btn.sel')).map(function(b){return b.dataset.v;});}
 function getSingle(id){var b=document.querySelector('#'+id+' .opt-btn.sel');return b?parseInt(b.dataset.v):null;}
 function getSingleStr(id){var b=document.querySelector('#'+id+' .opt-btn.sel');return b?b.dataset.v:null;}
-setupMulti('rangeOpts');setupMulti('typeOpts');setupSingle('sectionOpts');
+setupMulti('rangeOpts');setupMulti('typeOpts');setupSingle('sectionOpts');setupSingle('diffOpts');
 
 /* ===== Generator =====
    Eine Aufgabe: {start,end,major,minor,type,value}
@@ -232,12 +240,21 @@ function makeRange(max,section){
   else { span=ri(2,4)*100; major=100; minor=50; var ms=1000-span; start=ri(0,ms/100)*100; }
   return {start:start,end:start+span,major:major,minor:minor};
 }
-function pickValue(r){
-  // Wert auf minor-Raster, nicht exakt auf Bereichsenden (sieht interessanter aus), aber erlaubt minor-Punkte
+function pickValue(r,type){
+  // Wert auf minor-Raster, im Inneren des Bereichs
   var steps=Math.round((r.end-r.start)/r.minor);
-  // wähle einen inneren Schritt (1..steps-1), bevorzugt nicht auf einem major-Strich für 'read' (schwieriger), aber das ist optional
-  var s=ri(1,steps-1);
-  return r.start + s*r.minor;
+  // Kandidaten: alle inneren Minor-Positionen
+  var cands=[];
+  for(var s=1;s<steps;s++){
+    var v=r.start+s*r.minor;
+    cands.push(v);
+  }
+  if(type==='read'){
+    // beim Ablesen NICHT auf einem beschrifteten Major-Strich (sonst trivial)
+    var nonMajor=cands.filter(function(v){return (v % r.major)!==0;});
+    if(nonMajor.length) cands=nonMajor;
+  }
+  return cands[ri(0,cands.length-1)];
 }
 
 function generate(){
@@ -245,13 +262,14 @@ function generate(){
   var ranges=getMulti('rangeOpts'); if(!ranges.length)ranges=[100];
   var types=getMultiStr('typeOpts'); if(!types.length)types=['read'];
   var section=getSingleStr('sectionOpts')||'zero';
+  var diff=getSingleStr('diffOpts')||'easy';
   tasks=[];
   for(var i=0;i<cnt;i++){
     var max=ranges[ri(0,ranges.length-1)];
     var type=types[ri(0,types.length-1)];
     var r=makeRange(max,section);
-    var val=pickValue(r);
-    tasks.push({start:r.start,end:r.end,major:r.major,minor:r.minor,type:type,value:val,max:max});
+    var val=pickValue(r,type);
+    tasks.push({start:r.start,end:r.end,major:r.major,minor:r.minor,type:type,value:val,max:max,diff:diff});
   }
   renderList();
   showTab('list');
@@ -274,15 +292,24 @@ function strahlSVG(t,showSolution,W){
   s+='<polygon points="'+(x1+10)+','+(axisY-4)+' '+(x1+18)+','+axisY+' '+(x1+10)+','+(axisY+4)+'" fill="#0369a1"/>';
   // minor + major Striche
   var v=t.start;
-  // auf saubere Vielfache des minor beginnen
+  var majorCount=Math.round((t.end-t.start)/t.major); // Anzahl Major-Abschnitte
   while(v<=t.end+0.0001){
     var X=px(v);
-    var isMajor=((v - t.start) % t.major === 0) || (v % t.major === 0);
-    // robust: major, wenn v durch major teilbar
-    isMajor = (v % t.major === 0);
+    var isMajor = (v % t.major === 0);
     if(isMajor){
       s+='<line x1="'+X+'" y1="'+(axisY-9)+'" x2="'+X+'" y2="'+(axisY+9)+'" stroke="#0369a1" stroke-width="2"/>';
-      s+='<text x="'+X+'" y="'+(axisY+22)+'" text-anchor="middle" font-size="12" font-weight="800" fill="#1e1b4b">'+v+'</text>';
+      // Beschriftung: bei "easy" alle; bei "hard" nur jeder 2. Major + immer Anfang/Ende
+      var majIndex=Math.round((v-t.start)/t.major);
+      var label=true;
+      if(t.diff==='hard'){
+        var isEnds=(v===t.start)||(v===t.end);
+        label = isEnds || (majIndex%2===0);
+        // bei nur 2 Major-Abschnitten (3 Beschriftungen) immer alle zeigen, sonst zu wenig Orientierung
+        if(majorCount<=2) label=true;
+      }
+      if(label){
+        s+='<text x="'+X+'" y="'+(axisY+22)+'" text-anchor="middle" font-size="12" font-weight="800" fill="#1e1b4b">'+v+'</text>';
+      }
     }else{
       s+='<line x1="'+X+'" y1="'+(axisY-5)+'" x2="'+X+'" y2="'+(axisY+5)+'" stroke="#0369a1" stroke-width="1.3"/>';
     }
