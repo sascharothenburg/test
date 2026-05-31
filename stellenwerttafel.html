@@ -65,6 +65,7 @@ input{-webkit-user-select:text;user-select:text}
 .opt-row{display:flex;gap:6px;flex-wrap:wrap}
 .opt-btn{flex:1;min-width:60px;padding:9px 4px;border-radius:10px;border:2px solid #e2e8f0;background:#f8fafc;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:800;color:#1e1b4b;cursor:pointer}
 .opt-btn.sel{background:#0369a1;color:#fff;border-color:#0369a1}
+.opt-btn.disabled{opacity:.4;pointer-events:none;background:#f1f5f9;color:#94a3b8;border-color:#e2e8f0}
 .tk-list{display:flex;flex-direction:column;gap:12px}
 .tk-item{background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:12px;position:relative}
 .tk-item .del{position:absolute;top:8px;right:8px;background:none;border:none;color:#7dd3fc;font-size:1rem;cursor:pointer;padding:0}
@@ -205,6 +206,25 @@ function getMultiStr(id){return Array.from(document.querySelectorAll('#'+id+' .o
 function getSingle(id){var b=document.querySelector('#'+id+' .opt-btn.sel');return b?parseInt(b.dataset.v):null;}
 setupSingle('placeOpts');setupMulti('typeOpts');setupMulti('reprOpts');
 
+/* Plättchen-Option ab Tausender (4+ Stellen) deaktivieren */
+function updateReprAvailability(){
+  var places=getSingle('placeOpts')||3;
+  var dotsBtn=document.querySelector('#reprOpts .opt-btn[data-v="dots"]');
+  var digitBtn=document.querySelector('#reprOpts .opt-btn[data-v="digit"]');
+  if(!dotsBtn) return;
+  if(places>=4){
+    dotsBtn.classList.add('disabled');
+    dotsBtn.classList.remove('sel');
+    if(!digitBtn.classList.contains('sel')) digitBtn.classList.add('sel'); // immer mind. Ziffern
+  }else{
+    dotsBtn.classList.remove('disabled');
+  }
+}
+document.querySelectorAll('#placeOpts .opt-btn').forEach(function(b){
+  b.addEventListener('click', updateReprAvailability);
+});
+updateReprAvailability();
+
 /* ===== Generator ===== */
 var tasks=[];
 var PLACE_LABELS={1:'E',2:'Z',3:'H',4:'T',5:'ZT',6:'HT'};
@@ -227,6 +247,8 @@ function generate(){
   var places=getSingle('placeOpts')||3;
   var types=getMultiStr('typeOpts'); if(!types.length)types=['num2tab'];
   var reprs=getMultiStr('reprOpts'); if(!reprs.length)reprs=['digit'];
+  // ab Tausender keine Plättchen
+  if(places>=4){ reprs=reprs.filter(function(r){return r!=='dots';}); if(!reprs.length)reprs=['digit']; }
   tasks=[];
   for(var i=0;i<cnt;i++){
     var type=types[ri(0,types.length-1)];
