@@ -53,7 +53,13 @@ input{-webkit-user-select:text;user-select:text}
 .pp-a.sel{background:#0070ba;color:#fff;border-color:#0070ba}
 .pp-inp{width:100%;padding:6px 9px;border:2px solid #e2e8f0;border-radius:9px;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:600;color:#1e1b4b;outline:none;margin-bottom:8px}
 .pp-go{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:10px;background:#0070ba;color:#fff;font-weight:800;font-size:.85rem;text-decoration:none}
-@media print{.app,.sbar{display:none!important}.printarea{display:block!important}body{background:#fff}html,body{height:auto;overflow:visible}@page{size:A4 portrait;margin:12mm 14mm}}
+@media print{
+  .app,.sbar{display:none!important}
+  .printarea{display:block!important;width:100%!important;margin:0!important;padding:0!important}
+  body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html,body{height:auto;overflow:visible;-webkit-text-size-adjust:100%}
+  @page{size:A4 portrait;margin:12mm 14mm}
+}
 .printarea{display:none}
 /* Rechenmauern-spezifisch */
 .opt-row{display:flex;gap:6px;flex-wrap:wrap}
@@ -162,6 +168,10 @@ input{-webkit-user-select:text;user-select:text}
   <button class="btn bp" id="btnGoPre">&#x1F441; Vorschau &amp; Drucken</button>
 </div>
 <script>
+/* ===== Plattform-Erkennung (iOS/Safari Druck-Eigenheiten) ===== */
+var IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+var IS_SAFARI = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent);
+
 /* ===== PayPal ===== */
 var ppA=2;
 function ppToggle(e){e.stopPropagation();document.getElementById('ppBubble').classList.toggle('open');}
@@ -306,9 +316,9 @@ function maxDigitsIn(wallList){
 }
 // Liefert Steindimensionen so, dass die breiteste Mauer (maxBase Steine) in eine Spalte passt
 // und die größte Zahl (digits) bequem hineinpasst.
-function dimFor(cols,digits,maxBase){
-  // verfügbare Spaltenbreite in pt (A4-Inhalt ~515pt), minus Innenpadding 2*3mm (~17pt)
-  var colInner=(515/cols)-17;
+function dimFor(cols,digits,maxBase,pageInner){
+  // verfügbare Spaltenbreite in pt, minus Innenpadding 2*3mm (~17pt)
+  var colInner=((pageInner||515)/cols)-17;
   // Mindestbreite je Zahl: ~7.5pt pro Ziffer + Polster
   var needPerBrick=digits*8+12;
   // verfügbare Breite je Stein in breitester Reihe (inkl. 2*margin)
@@ -349,13 +359,15 @@ function buildWS(){
   var showSol=document.getElementById('showSol').checked;
   var digits=maxDigitsIn(walls);
   var maxBase=0; walls.forEach(function(w){ if(w.rows[0].length>maxBase)maxBase=w.rows[0].length; });
+  // Nutzbare Druckbreite (pt). iOS/Safari skaliert beim Druck nach -> konservativer rechnen.
+  var pageInner = (IS_IOS||IS_SAFARI) ? 495 : 515;
   // Spaltenzahl automatisch maximieren: so viele wie möglich, solange eine Mauer komfortabel passt
   var needPerBrick=digits*8+12; // pt Mindestbreite je Stein
   var cols=4;
-  while(cols>1 && (515/cols-17)/maxBase < needPerBrick) cols--;
+  while(cols>1 && (pageInner/cols-17)/maxBase < needPerBrick) cols--;
   // nie mehr Spalten als Mauern
   if(cols>walls.length) cols=walls.length;
-  var d=dimFor(cols,digits,maxBase);
+  var d=dimFor(cols,digits,maxBase,pageInner);
   var colW=(100/cols).toFixed(4)+'%';
   var meta=buildMeta();
   var h='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #0369a1">'
