@@ -10,29 +10,44 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Nunito',sans-serif;background:#f0f4f8;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
 h1{font-size:1.7rem;font-weight:900;color:#1e1b4b;margin-bottom:6px;text-align:center}
-.sub{color:#6b7280;margin-bottom:28px;text-align:center;font-size:.9rem}
+.sub{color:#6b7280;margin-bottom:22px;text-align:center;font-size:.9rem}
+.tabs{display:flex;gap:8px;width:100%;max-width:340px;margin-bottom:18px}
+.tab{flex:1;padding:11px 0;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;background:#fff;color:#9ca3af;box-shadow:0 2px 8px rgba(0,0,0,.07);transition:all .18s}
+.tab.active.mathe{background:linear-gradient(135deg,#059669,#34d399);color:#fff;box-shadow:0 4px 14px rgba(5,150,105,.3)}
+.tab.active.deutsch{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.3)}
 .btns{display:flex;flex-direction:column;gap:12px;width:100%;max-width:340px}
+.btns.hidden{display:none}
 a.app-link{display:block;padding:17px 22px;border-radius:14px;text-decoration:none;font-weight:800;font-size:1.05rem;text-align:center;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.15)}
-.a1{background:linear-gradient(135deg,#7c3aed,#a855f7)}
-.a2{background:linear-gradient(135deg,#059669,#34d399)}
-.a3{background:linear-gradient(135deg,#0369a1,#38bdf8)}
 small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-height:1.6}
 </style>
 </head>
 <body>
 <h1>&#x1F4DA; Lern-Apps</h1>
 <p class="sub">&copy; 2026 Sascha Rothenburg</p>
-<div class="btns">
-  <a href="schreiben.html" class="app-link a1">&#x270F;&#xFE0F; Schreib&uuml;bung</a>
-  <a href="mathe.html"     class="app-link a2">&#x1F522; Mathe-Aufgaben</a>
-  <a href="lesen.html"     class="app-link a3">&#x1F4D6; Lesen &uuml;ben</a>
+
+<div class="tabs">
+  <button class="tab mathe active" onclick="showTab('mathe')">&#x1F522; Mathe</button>
+  <button class="tab deutsch" onclick="showTab('deutsch')">&#x270F;&#xFE0F; Deutsch</button>
+</div>
+
+<!-- MATHE -->
+<div class="btns mathe" id="g-mathe">
+  <a href="mathe.html"     class="app-link" style="background:linear-gradient(135deg,#059669,#34d399)">&#x1F522; Mathe-Aufgaben</a>
   <a href="einmaleins.html" class="app-link" style="background:linear-gradient(135deg,#0f766e,#2dd4bf)">× 1×1 Trainer</a>
   <a href="uhr.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">&#x1F551; Uhr lernen</a>
   <a href="geld.html" class="app-link" style="background:linear-gradient(135deg,#065f46,#34d399)">&#x1F4B6; Geld rechnen</a>
-  <a href="laengen.html" class="app-link" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa)">&#x1F4CF; Längen &amp; Gewichte</a>
+  <a href="laengen.html" class="app-link" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa)">&#x1F4CF; L&auml;ngen &amp; Gewichte</a>
   <a href="zeit.html" class="app-link" style="background:linear-gradient(135deg,#9a3412,#fb923c)">&#x23F1; Zeit rechnen</a>
 </div>
+
+<!-- DEUTSCH -->
+<div class="btns deutsch hidden" id="g-deutsch">
+  <a href="schreiben.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">&#x270F;&#xFE0F; Schreib&uuml;bung</a>
+  <a href="lesen.html"     class="app-link" style="background:linear-gradient(135deg,#0369a1,#38bdf8)">&#x1F4D6; Lesen &uuml;ben</a>
+</div>
+
 <small>Grundschrift von Christian Urff &middot; Alle Apps funktionieren offline<br><a href="impressum.html" style="color:#9ca3af;text-decoration:underline">Impressum</a></small>
+
 <style>
 .pp-wrap{position:relative;display:inline-block}
 .pp-bubble{display:none;position:absolute;top:calc(100% + 8px);left:0;background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 28px rgba(0,0,0,.18);width:210px;z-index:9999;animation:ppIn .2s ease}
@@ -69,9 +84,15 @@ small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-heig
   </div>
 </div>
 <script>
+function showTab(t){
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active');});
+  document.querySelector('.tab.'+t).classList.add('active');
+  document.getElementById('g-mathe').classList.toggle('hidden', t!=='mathe');
+  document.getElementById('g-deutsch').classList.toggle('hidden', t!=='deutsch');
+}
 function ppToggle(e){e.preventDefault();document.getElementById('ppBubble').classList.toggle('open');}
-function ppAmt(n){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'€';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');if(b.textContent.trim()===n+'€')b.classList.add('sel');});document.getElementById('ppCustom').value='';}
-function ppCustom(v){var n=parseFloat(v);if(n>0){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'€';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');});}}
+function ppAmt(n){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20AC';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');if(b.textContent.trim()===n+'\u20AC')b.classList.add('sel');});document.getElementById('ppCustom').value='';}
+function ppCustom(v){var n=parseFloat(v);if(n>0){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20AC';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');});}}
 document.addEventListener('click',function(e){var w=document.getElementById('ppWrap');if(w&&!w.contains(e.target))document.getElementById('ppBubble').classList.remove('open');});
 </script>
 
