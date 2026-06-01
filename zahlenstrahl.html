@@ -369,7 +369,6 @@ function buildWS(){
   var meta=buildMeta();
   // iOS/Safari skaliert beim Druck nach -> vertikale Abstände etwas stauchen, damit der Footer auf der Seite bleibt
   var gap=(IS_IOS||IS_SAFARI)?'5mm':'7mm';
-  var footTop=(IS_IOS||IS_SAFARI)?'3mm':'5mm';
   var instr;
   var hasRead=tasks.some(function(t){return t.type==='read';});
   var hasMark=tasks.some(function(t){return t.type==='mark';});
@@ -389,7 +388,6 @@ function buildWS(){
     h+=strahlSVG(t,false,700);
     h+='</div>';
   });
-  h+='<div style="margin-top:'+footTop+';text-align:center;font-family:Nunito,sans-serif;font-size:8pt;color:#94a3b8;break-inside:avoid;page-break-inside:avoid">\u2605 \u2605 \u2605 &nbsp; Gut gemacht! &nbsp; \u2605 \u2605 \u2605<br>\u00a9 2026 Sascha Rothenburg</div>';
   if(showSol){
     h+='<div style="page-break-before:always;break-before:page;padding-top:4mm"></div>';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #16a34a">'

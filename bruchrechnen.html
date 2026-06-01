@@ -367,7 +367,6 @@ function buildWS(){
   var showSol=document.getElementById('showSol').checked;
   var meta=buildMeta();
   var gap=(IS_IOS||IS_SAFARI)?'7mm':'9mm';
-  var footTop=(IS_IOS||IS_SAFARI)?'3mm':'5mm';
   var hasRead=tasks.some(function(t){return t.type==='read';});
   var hasColor=tasks.some(function(t){return t.type==='color';});
   var instr;
@@ -389,7 +388,6 @@ function buildWS(){
     h+='</div>';
   });
   h+='</div>';
-  h+='<div style="margin-top:'+footTop+';text-align:center;font-family:Nunito,sans-serif;font-size:8pt;color:#94a3b8;break-inside:avoid;page-break-inside:avoid">\u2605 \u2605 \u2605 &nbsp; Gut gemacht! &nbsp; \u2605 \u2605 \u2605<br>\u00a9 2026 Sascha Rothenburg</div>';
   if(showSol){
     h+='<div style="page-break-before:always;break-before:page;padding-top:4mm"></div>';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #16a34a">'
