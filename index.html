@@ -8,16 +8,27 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Nunito',sans-serif;background:#f0f4f8;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+body{font-family:'Nunito',sans-serif;background:#f0f4f8;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px}
 h1{font-size:1.7rem;font-weight:900;color:#1e1b4b;margin-bottom:6px;text-align:center}
 .sub{color:#6b7280;margin-bottom:22px;text-align:center;font-size:.9rem}
 .tabs{display:flex;gap:8px;width:100%;max-width:340px;margin-bottom:18px}
 .tab{flex:1;padding:11px 0;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;background:#fff;color:#9ca3af;box-shadow:0 2px 8px rgba(0,0,0,.07);transition:all .18s}
 .tab.active.mathe{background:linear-gradient(135deg,#059669,#34d399);color:#fff;box-shadow:0 4px 14px rgba(5,150,105,.3)}
 .tab.active.deutsch{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.3)}
-.btns{display:flex;flex-direction:column;gap:12px;width:100%;max-width:340px}
-.btns.hidden{display:none}
-a.app-link{display:block;padding:17px 22px;border-radius:14px;text-decoration:none;font-weight:800;font-size:1.05rem;text-align:center;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.pane{width:100%;max-width:340px}
+.pane.hidden{display:none}
+
+/* Accordion */
+.acc{margin-bottom:10px;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.acc-head{display:flex;align-items:center;gap:11px;width:100%;border:none;background:#fff;padding:15px 18px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:1.02rem;font-weight:900;color:#1e1b4b;text-align:left}
+.acc-head .ico{font-size:1.15rem;line-height:1}
+.acc-head .cnt{margin-left:auto;font-size:.72rem;font-weight:800;color:#9ca3af;background:#f1f5f9;padding:3px 9px;border-radius:20px}
+.acc-head .chev{margin-left:8px;color:#cbd5e1;transition:transform .25s;font-size:.8rem}
+.acc.open .acc-head .chev{transform:rotate(180deg)}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.acc.open .acc-body{max-height:600px}
+.acc-inner{display:flex;flex-direction:column;gap:10px;padding:4px 14px 16px}
+a.app-link{display:block;padding:15px 20px;border-radius:13px;text-decoration:none;font-weight:800;font-size:1.02rem;text-align:center;color:#fff;box-shadow:0 3px 11px rgba(0,0,0,.14)}
 small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-height:1.6}
 </style>
 </head>
@@ -31,19 +42,50 @@ small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-heig
 </div>
 
 <!-- MATHE -->
-<div class="btns mathe" id="g-mathe">
-  <a href="mathe.html"     class="app-link" style="background:linear-gradient(135deg,#059669,#34d399)">&#x1F522; Mathe-Aufgaben</a>
-  <a href="einmaleins.html" class="app-link" style="background:linear-gradient(135deg,#0f766e,#2dd4bf)">× 1×1 Trainer</a>
-  <a href="uhr.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">&#x1F551; Uhr lernen</a>
-  <a href="geld.html" class="app-link" style="background:linear-gradient(135deg,#065f46,#34d399)">&#x1F4B6; Geld rechnen</a>
-  <a href="laengen.html" class="app-link" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa)">&#x1F4CF; L&auml;ngen &amp; Gewichte</a>
-  <a href="zeit.html" class="app-link" style="background:linear-gradient(135deg,#9a3412,#fb923c)">&#x23F1; Zeit rechnen</a>
+<div class="pane mathe" id="g-mathe">
+
+  <div class="acc">
+    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F522;</span>Grundrechnen<span class="cnt">6</span><span class="chev">&#x25BC;</span></button>
+    <div class="acc-body"><div class="acc-inner">
+      <a href="mathe.html" class="app-link" style="background:linear-gradient(135deg,#059669,#34d399)">&#x1F522; Mathe-Aufgaben</a>
+      <a href="einmaleins.html" class="app-link" style="background:linear-gradient(135deg,#0f766e,#2dd4bf)">× 1×1 Trainer</a>
+      <a href="schriftliches-rechnen.html" class="app-link" style="background:linear-gradient(135deg,#047857,#10b981)">&#x270D;&#xFE0F; Schriftliches Rechnen</a>
+      <a href="rechenmauern.html" class="app-link" style="background:linear-gradient(135deg,#0d9488,#5eead4)">&#x1F9F1; Rechenmauern</a>
+      <a href="stellenwerttafel.html" class="app-link" style="background:linear-gradient(135deg,#15803d,#4ade80)">&#x1F522; Stellenwerttafel</a>
+      <a href="zahlenstrahl.html" class="app-link" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa)">&#x1F4CF; Zahlenstrahl</a>
+    </div></div>
+  </div>
+
+  <div class="acc">
+    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F4D0;</span>Geometrie<span class="cnt">3</span><span class="chev">&#x25BC;</span></button>
+    <div class="acc-body"><div class="acc-inner">
+      <a href="geometrie-formen-symmetrien.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">&#x1F537; Formen &amp; Symmetrien</a>
+      <a href="geometrie-gitter-koerper.html" class="app-link" style="background:linear-gradient(135deg,#6d28d9,#a78bfa)">&#x1F4D0; Gitter &amp; K&ouml;rper</a>
+      <a href="geometrie-wuerfelnetze-koerper.html" class="app-link" style="background:linear-gradient(135deg,#5b21b6,#8b5cf6)">&#x1F9CA; W&uuml;rfelnetze &amp; K&ouml;rper</a>
+    </div></div>
+  </div>
+
+  <div class="acc">
+    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F4CF;</span>Sachrechnen<span class="cnt">4</span><span class="chev">&#x25BC;</span></button>
+    <div class="acc-body"><div class="acc-inner">
+      <a href="uhr.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">&#x1F551; Uhr lernen</a>
+      <a href="geld.html" class="app-link" style="background:linear-gradient(135deg,#065f46,#34d399)">&#x1F4B6; Geld rechnen</a>
+      <a href="laengen.html" class="app-link" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa)">&#x1F4CF; L&auml;ngen &amp; Gewichte</a>
+      <a href="zeit.html" class="app-link" style="background:linear-gradient(135deg,#9a3412,#fb923c)">&#x23F1; Zeit rechnen</a>
+    </div></div>
+  </div>
+
 </div>
 
 <!-- DEUTSCH -->
-<div class="btns deutsch hidden" id="g-deutsch">
-  <a href="schreiben.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">&#x270F;&#xFE0F; Schreib&uuml;bung</a>
-  <a href="lesen.html"     class="app-link" style="background:linear-gradient(135deg,#0369a1,#38bdf8)">&#x1F4D6; Lesen &uuml;ben</a>
+<div class="pane deutsch hidden" id="g-deutsch">
+  <div class="acc open">
+    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x270F;&#xFE0F;</span>Deutsch<span class="cnt">2</span><span class="chev">&#x25BC;</span></button>
+    <div class="acc-body"><div class="acc-inner">
+      <a href="schreiben.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">&#x270F;&#xFE0F; Schreib&uuml;bung</a>
+      <a href="lesen.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#38bdf8)">&#x1F4D6; Lesen &uuml;ben</a>
+    </div></div>
+  </div>
 </div>
 
 <small>Grundschrift von Christian Urff &middot; Alle Apps funktionieren offline<br><a href="impressum.html" style="color:#9ca3af;text-decoration:underline">Impressum</a></small>
@@ -89,6 +131,13 @@ function showTab(t){
   document.querySelector('.tab.'+t).classList.add('active');
   document.getElementById('g-mathe').classList.toggle('hidden', t!=='mathe');
   document.getElementById('g-deutsch').classList.toggle('hidden', t!=='deutsch');
+}
+function toggleAcc(btn){
+  var acc=btn.parentElement;
+  var pane=acc.closest('.pane');
+  var wasOpen=acc.classList.contains('open');
+  pane.querySelectorAll('.acc').forEach(function(a){a.classList.remove('open');});
+  if(!wasOpen)acc.classList.add('open');
 }
 function ppToggle(e){e.preventDefault();document.getElementById('ppBubble').classList.toggle('open');}
 function ppAmt(n){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20AC';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');if(b.textContent.trim()===n+'\u20AC')b.classList.add('sel');});document.getElementById('ppCustom').value='';}
