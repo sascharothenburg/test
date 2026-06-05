@@ -11,11 +11,12 @@
 body{font-family:'Nunito',sans-serif;background:#f0f4f8;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px}
 h1{font-size:1.7rem;font-weight:900;color:#1e1b4b;margin-bottom:6px;text-align:center}
 .sub{color:#6b7280;margin-bottom:22px;text-align:center;font-size:.9rem}
-.tabs{display:flex;gap:8px;width:100%;max-width:340px;margin-bottom:18px}
-.tab{flex:1;padding:11px 0;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;background:#fff;color:#9ca3af;box-shadow:0 2px 8px rgba(0,0,0,.07);transition:all .18s}
+.tabs{display:flex;gap:7px;width:100%;max-width:360px;margin-bottom:18px}
+.tab{flex:1;padding:11px 0;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer;background:#fff;color:#9ca3af;box-shadow:0 2px 8px rgba(0,0,0,.07);transition:all .18s}
 .tab.active.mathe{background:linear-gradient(135deg,#059669,#34d399);color:#fff;box-shadow:0 4px 14px rgba(5,150,105,.3)}
 .tab.active.deutsch{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.3)}
-.pane{width:100%;max-width:340px}
+.tab.active.sach{background:linear-gradient(135deg,#b45309,#f59e0b);color:#fff;box-shadow:0 4px 14px rgba(180,83,9,.3)}
+.pane{width:100%;max-width:360px}
 .pane.hidden{display:none}
 
 /* Accordion */
@@ -26,7 +27,7 @@ h1{font-size:1.7rem;font-weight:900;color:#1e1b4b;margin-bottom:6px;text-align:c
 .acc-head .chev{margin-left:8px;color:#cbd5e1;transition:transform .25s;font-size:.8rem}
 .acc.open .acc-head .chev{transform:rotate(180deg)}
 .acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
-.acc.open .acc-body{max-height:600px}
+.acc.open .acc-body{max-height:700px}
 .acc-inner{display:flex;flex-direction:column;gap:10px;padding:4px 14px 16px}
 a.app-link{display:block;padding:15px 20px;border-radius:13px;text-decoration:none;font-weight:800;font-size:1.02rem;text-align:center;color:#fff;box-shadow:0 3px 11px rgba(0,0,0,.14)}
 small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-height:1.6}
@@ -39,6 +40,7 @@ small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-heig
 <div class="tabs">
   <button class="tab mathe active" onclick="showTab('mathe')">&#x1F522; Mathe</button>
   <button class="tab deutsch" onclick="showTab('deutsch')">&#x270F;&#xFE0F; Deutsch</button>
+  <button class="tab sach" onclick="showTab('sach')">&#x1F30D; Sachk.</button>
 </div>
 
 <!-- MATHE -->
@@ -79,11 +81,49 @@ small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-heig
 
 <!-- DEUTSCH -->
 <div class="pane deutsch hidden" id="g-deutsch">
-  <div class="acc open">
-    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x270F;&#xFE0F;</span>Deutsch<span class="cnt">2</span><span class="chev">&#x25BC;</span></button>
+
+  <div class="acc">
+    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F4D6;</span>Lesen &amp; Schreiben<span class="cnt">2</span><span class="chev">&#x25BC;</span></button>
     <div class="acc-body"><div class="acc-inner">
       <a href="schreiben.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">&#x270F;&#xFE0F; Schreib&uuml;bung</a>
       <a href="lesen.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#38bdf8)">&#x1F4D6; Lesen &uuml;ben</a>
+    </div></div>
+  </div>
+
+  <div class="acc">
+    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F170;&#xFE0F;</span>Rechtschreibung<span class="cnt">1</span><span class="chev">&#x25BC;</span></button>
+    <div class="acc-body"><div class="acc-inner">
+      <a href="grossklein.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#f87171)">&#x1F170;&#xFE0F; Gro&szlig;- &amp; Kleinschreibung</a>
+    </div></div>
+  </div>
+
+  <div class="acc">
+    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F50A;</span>Rechtschreibph&auml;nomene<span class="cnt">5</span><span class="chev">&#x25BC;</span></button>
+    <div class="acc-body"><div class="acc-inner">
+      <a href="auslaut.html" class="app-link" style="background:linear-gradient(135deg,#dc2626,#f87171)">&#x1F50A; Auslautverh&auml;rtung</a>
+      <a href="laute.html" class="app-link" style="background:linear-gradient(135deg,#e11d48,#fb7185)">&#x1F442; &Auml;hnliche Laute</a>
+      <a href="dehnung.html" class="app-link" style="background:linear-gradient(135deg,#be123c,#fb7185)">&#x2194;&#xFE0F; Dehnung</a>
+      <a href="doppelkons.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#ef4444)">&#x1F4D1; Doppelkonsonanten</a>
+      <a href="schaerfung.html" class="app-link" style="background:linear-gradient(135deg,#9f1239,#f43f5e)">&#x270F;&#xFE0F; Sch&auml;rfung</a>
+    </div></div>
+  </div>
+
+  <div class="acc">
+    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F524;</span>Grammatik<span class="cnt">1</span><span class="chev">&#x25BC;</span></button>
+    <div class="acc-body"><div class="acc-inner">
+      <a href="wortarten.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">&#x1F524; Wortarten</a>
+    </div></div>
+  </div>
+
+</div>
+
+<!-- SACHKUNDE -->
+<div class="pane sach hidden" id="g-sach">
+  <div class="acc open">
+    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F30D;</span>Sachkunde<span class="cnt">2</span><span class="chev">&#x25BC;</span></button>
+    <div class="acc-body"><div class="acc-inner">
+      <a href="bundeslaender.html" class="app-link" style="background:linear-gradient(135deg,#b45309,#fbbf24)">&#x1F5FA;&#xFE0F; Bundesl&auml;nder</a>
+      <a href="verkehr.html" class="app-link" style="background:linear-gradient(135deg,#c2410c,#fb923c)">&#x1F6A6; Verkehr</a>
     </div></div>
   </div>
 </div>
@@ -129,8 +169,9 @@ small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-heig
 function showTab(t){
   document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active');});
   document.querySelector('.tab.'+t).classList.add('active');
-  document.getElementById('g-mathe').classList.toggle('hidden', t!=='mathe');
-  document.getElementById('g-deutsch').classList.toggle('hidden', t!=='deutsch');
+  ['mathe','deutsch','sach'].forEach(function(k){
+    document.getElementById('g-'+k).classList.toggle('hidden', k!==t);
+  });
 }
 function toggleAcc(btn){
   var acc=btn.parentElement;
