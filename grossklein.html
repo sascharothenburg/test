@@ -70,7 +70,7 @@ input{-webkit-user-select:text;user-select:text}
   <h1>&#x1F170;&#xFE0F; Gro&szlig;- &amp; Kleinschreibung</h1>
   <p>&#169; 2026 Sascha Rothenburg &#183; Grundschrift von Christian Urff</p>
   <div class="hdr-btns">
-    <a href="index.html" class="hdr-btn">&#x2190; Startseite</a>
+    <a href="index.html#acc-rechtschreibung" class="hdr-btn">&#x2190; Startseite</a>
     <div class="pp-wrap" id="ppWrap">
       <button class="hdr-btn" onclick="ppToggle(event)">&#x2615; Coffee</button>
       <div class="pp-bubble" id="ppBubble">
@@ -135,9 +135,9 @@ input{-webkit-user-select:text;user-select:text}
     <h2>&#x1F4DD; Schreiblinien</h2>
     <div class="ss" style="margin-bottom:8px">Lineatur zum Berichtigen der S&auml;tze</div>
     <div class="seg" id="lineSeg">
-      <button class="seg-b active" data-v="3">Drei Linien</button>
+      <button class="seg-b active" data-v="1">Eine Linie</button>
       <button class="seg-b" data-v="2">Zwei Linien</button>
-      <button class="seg-b" data-v="1">Eine Linie</button>
+      <button class="seg-b" data-v="3">Drei Linien</button>
     </div>
   </div>
   <div class="card">
@@ -247,7 +247,7 @@ function activeModes(){
   return m;
 }
 function diffVal(){var b=document.querySelector('#diffSeg .seg-b.active');return b?b.dataset.v:'12';}
-function lineStyle(){var b=document.querySelector('#lineSeg .seg-b.active');return b?b.dataset.v:'3';}
+function lineStyle(){var b=document.querySelector('#lineSeg .seg-b.active');return b?b.dataset.v:'1';}
 
 function corpus(){return diff==='34'?CORPUS_34:CORPUS_12;}
 function pairs(){return diff==='34'?PAIRS_34:PAIRS_12;}

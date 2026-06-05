@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#7c3aed">
+<meta name="theme-color" content="#0369a1">
 <title>Lern-Apps · Sascha Rothenburg</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap');
@@ -13,9 +13,9 @@ h1{font-size:1.7rem;font-weight:900;color:#1e1b4b;margin-bottom:6px;text-align:c
 .sub{color:#6b7280;margin-bottom:22px;text-align:center;font-size:.9rem}
 .tabs{display:flex;gap:7px;width:100%;max-width:360px;margin-bottom:18px}
 .tab{flex:1;padding:11px 0;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer;background:#fff;color:#9ca3af;box-shadow:0 2px 8px rgba(0,0,0,.07);transition:all .18s}
-.tab.active.mathe{background:linear-gradient(135deg,#059669,#34d399);color:#fff;box-shadow:0 4px 14px rgba(5,150,105,.3)}
-.tab.active.deutsch{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.3)}
-.tab.active.sach{background:linear-gradient(135deg,#b45309,#f59e0b);color:#fff;box-shadow:0 4px 14px rgba(180,83,9,.3)}
+.tab.active.mathe{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;box-shadow:0 4px 14px rgba(3,105,161,.3)}
+.tab.active.deutsch{background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;box-shadow:0 4px 14px rgba(185,28,28,.3)}
+.tab.active.sach{background:linear-gradient(135deg,#15803d,#22c55e);color:#fff;box-shadow:0 4px 14px rgba(21,128,61,.3)}
 .pane{width:100%;max-width:360px}
 .pane.hidden{display:none}
 
@@ -46,34 +46,35 @@ small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-heig
 <!-- MATHE -->
 <div class="pane mathe" id="g-mathe">
 
-  <div class="acc">
-    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F522;</span>Grundrechnen<span class="cnt">6</span><span class="chev">&#x25BC;</span></button>
+  <div class="acc" id="acc-grundrechnen">
+    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F522;</span>Grundrechnen<span class="cnt">7</span><span class="chev">&#x25BC;</span></button>
     <div class="acc-body"><div class="acc-inner">
-      <a href="mathe.html" class="app-link" style="background:linear-gradient(135deg,#059669,#34d399)">&#x1F522; Mathe-Aufgaben</a>
-      <a href="einmaleins.html" class="app-link" style="background:linear-gradient(135deg,#0f766e,#2dd4bf)">× 1×1 Trainer</a>
-      <a href="schriftliches-rechnen.html" class="app-link" style="background:linear-gradient(135deg,#047857,#10b981)">&#x270D;&#xFE0F; Schriftliches Rechnen</a>
-      <a href="rechenmauern.html" class="app-link" style="background:linear-gradient(135deg,#0d9488,#5eead4)">&#x1F9F1; Rechenmauern</a>
-      <a href="stellenwerttafel.html" class="app-link" style="background:linear-gradient(135deg,#15803d,#4ade80)">&#x1F522; Stellenwerttafel</a>
-      <a href="zahlenstrahl.html" class="app-link" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa)">&#x1F4CF; Zahlenstrahl</a>
+      <a href="mathe.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F522; Mathe-Aufgaben</a>
+      <a href="einmaleins.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">× 1×1 Trainer</a>
+      <a href="schriftliches-rechnen.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x270D;&#xFE0F; Schriftliches Rechnen</a>
+      <a href="rechenmauern.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F9F1; Rechenmauern</a>
+      <a href="stellenwerttafel.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F522; Stellenwerttafel</a>
+      <a href="zahlenstrahl.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F4CF; Zahlenstrahl</a>
+      <a href="bruchrechnen.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x00BD; Bruchrechnen</a>
     </div></div>
   </div>
 
-  <div class="acc">
+  <div class="acc" id="acc-geometrie">
     <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F4D0;</span>Geometrie<span class="cnt">3</span><span class="chev">&#x25BC;</span></button>
     <div class="acc-body"><div class="acc-inner">
-      <a href="geometrie-formen-symmetrien.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">&#x1F537; Formen &amp; Symmetrien</a>
-      <a href="geometrie-gitter-koerper.html" class="app-link" style="background:linear-gradient(135deg,#6d28d9,#a78bfa)">&#x1F4D0; Gitter &amp; K&ouml;rper</a>
-      <a href="geometrie-wuerfelnetze-koerper.html" class="app-link" style="background:linear-gradient(135deg,#5b21b6,#8b5cf6)">&#x1F9CA; W&uuml;rfelnetze &amp; K&ouml;rper</a>
+      <a href="geometrie-formen-symmetrien.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F537; Formen &amp; Symmetrien</a>
+      <a href="geometrie-gitter-koerper.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F4D0; Gitter &amp; K&ouml;rper</a>
+      <a href="geometrie-wuerfelnetze-koerper.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F9CA; W&uuml;rfelnetze &amp; K&ouml;rper</a>
     </div></div>
   </div>
 
-  <div class="acc">
+  <div class="acc" id="acc-sachrechnen">
     <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F4CF;</span>Sachrechnen<span class="cnt">4</span><span class="chev">&#x25BC;</span></button>
     <div class="acc-body"><div class="acc-inner">
-      <a href="uhr.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">&#x1F551; Uhr lernen</a>
-      <a href="geld.html" class="app-link" style="background:linear-gradient(135deg,#065f46,#34d399)">&#x1F4B6; Geld rechnen</a>
-      <a href="laengen.html" class="app-link" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa)">&#x1F4CF; L&auml;ngen &amp; Gewichte</a>
-      <a href="zeit.html" class="app-link" style="background:linear-gradient(135deg,#9a3412,#fb923c)">&#x23F1; Zeit rechnen</a>
+      <a href="uhr.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F551; Uhr lernen</a>
+      <a href="geld.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F4B6; Geld rechnen</a>
+      <a href="laengen.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F4CF; L&auml;ngen &amp; Gewichte</a>
+      <a href="zeit.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x23F1; Zeit rechnen</a>
     </div></div>
   </div>
 
@@ -82,36 +83,36 @@ small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-heig
 <!-- DEUTSCH -->
 <div class="pane deutsch hidden" id="g-deutsch">
 
-  <div class="acc">
+  <div class="acc" id="acc-lesen-schreiben">
     <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F4D6;</span>Lesen &amp; Schreiben<span class="cnt">2</span><span class="chev">&#x25BC;</span></button>
     <div class="acc-body"><div class="acc-inner">
-      <a href="schreiben.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">&#x270F;&#xFE0F; Schreib&uuml;bung</a>
-      <a href="lesen.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#38bdf8)">&#x1F4D6; Lesen &uuml;ben</a>
+      <a href="schreiben.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x270F;&#xFE0F; Schreib&uuml;bung</a>
+      <a href="lesen.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x1F4D6; Lesen &uuml;ben</a>
     </div></div>
   </div>
 
-  <div class="acc">
+  <div class="acc" id="acc-rechtschreibung">
     <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F170;&#xFE0F;</span>Rechtschreibung<span class="cnt">1</span><span class="chev">&#x25BC;</span></button>
     <div class="acc-body"><div class="acc-inner">
-      <a href="grossklein.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#f87171)">&#x1F170;&#xFE0F; Gro&szlig;- &amp; Kleinschreibung</a>
+      <a href="grossklein.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x1F170;&#xFE0F; Gro&szlig;- &amp; Kleinschreibung</a>
     </div></div>
   </div>
 
-  <div class="acc">
+  <div class="acc" id="acc-rechtschreibphaenomene">
     <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F50A;</span>Rechtschreibph&auml;nomene<span class="cnt">5</span><span class="chev">&#x25BC;</span></button>
     <div class="acc-body"><div class="acc-inner">
-      <a href="auslaut.html" class="app-link" style="background:linear-gradient(135deg,#dc2626,#f87171)">&#x1F50A; Auslautverh&auml;rtung</a>
-      <a href="laute.html" class="app-link" style="background:linear-gradient(135deg,#e11d48,#fb7185)">&#x1F442; &Auml;hnliche Laute</a>
-      <a href="dehnung.html" class="app-link" style="background:linear-gradient(135deg,#be123c,#fb7185)">&#x2194;&#xFE0F; Dehnung</a>
-      <a href="doppelkons.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#ef4444)">&#x1F4D1; Doppelkonsonanten</a>
-      <a href="schaerfung.html" class="app-link" style="background:linear-gradient(135deg,#9f1239,#f43f5e)">&#x270F;&#xFE0F; Sch&auml;rfung</a>
+      <a href="auslaut.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x1F50A; Auslautverh&auml;rtung</a>
+      <a href="laute.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x1F442; &Auml;hnliche Laute</a>
+      <a href="dehnung.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x2194;&#xFE0F; Dehnung</a>
+      <a href="doppelkons.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x1F4D1; Doppelkonsonanten</a>
+      <a href="schaerfung.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x270F;&#xFE0F; Sch&auml;rfung</a>
     </div></div>
   </div>
 
-  <div class="acc">
+  <div class="acc" id="acc-grammatik">
     <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F524;</span>Grammatik<span class="cnt">1</span><span class="chev">&#x25BC;</span></button>
     <div class="acc-body"><div class="acc-inner">
-      <a href="wortarten.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">&#x1F524; Wortarten</a>
+      <a href="wortarten.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x1F524; Wortarten</a>
     </div></div>
   </div>
 
@@ -119,11 +120,11 @@ small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-heig
 
 <!-- SACHKUNDE -->
 <div class="pane sach hidden" id="g-sach">
-  <div class="acc open">
+  <div class="acc" id="acc-sachkunde">
     <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F30D;</span>Sachkunde<span class="cnt">2</span><span class="chev">&#x25BC;</span></button>
     <div class="acc-body"><div class="acc-inner">
-      <a href="bundeslaender.html" class="app-link" style="background:linear-gradient(135deg,#b45309,#fbbf24)">&#x1F5FA;&#xFE0F; Bundesl&auml;nder</a>
-      <a href="verkehr.html" class="app-link" style="background:linear-gradient(135deg,#c2410c,#fb923c)">&#x1F6A6; Verkehr</a>
+      <a href="bundeslaender.html" class="app-link" style="background:linear-gradient(135deg,#15803d,#22c55e)">&#x1F5FA;&#xFE0F; Bundesl&auml;nder</a>
+      <a href="verkehr.html" class="app-link" style="background:linear-gradient(135deg,#15803d,#22c55e)">&#x1F6A6; Verkehr</a>
     </div></div>
   </div>
 </div>
@@ -184,6 +185,24 @@ function ppToggle(e){e.preventDefault();document.getElementById('ppBubble').clas
 function ppAmt(n){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20AC';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');if(b.textContent.trim()===n+'\u20AC')b.classList.add('sel');});document.getElementById('ppCustom').value='';}
 function ppCustom(v){var n=parseFloat(v);if(n>0){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20AC';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');});}}
 document.addEventListener('click',function(e){var w=document.getElementById('ppWrap');if(w&&!w.contains(e.target))document.getElementById('ppBubble').classList.remove('open');});
+
+// Beim Laden: gemerkten Bereich (aus URL-Anker) wiederherstellen.
+// Anker-Format: #acc-<id>  z.B. index.html#acc-grammatik
+function restoreFromHash(){
+  var h=(location.hash||'').replace('#','');
+  if(!h) return;
+  var acc=document.getElementById(h);
+  if(!acc) return;
+  var pane=acc.closest('.pane');
+  if(pane){
+    var t=pane.id.replace('g-','');   // g-deutsch -> deutsch
+    showTab(t);
+  }
+  acc.classList.add('open');
+  acc.scrollIntoView({block:'center',behavior:'auto'});
+}
+restoreFromHash();
+window.addEventListener('hashchange',restoreFromHash);
 </script>
 
 </body>

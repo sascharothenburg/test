@@ -13,40 +13,40 @@
 @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap");
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
-body{font-family:Nunito,sans-serif;background:#f8f9ff;color:#1e1b4b;-webkit-user-select:none;user-select:none;overscroll-behavior:none}
+body{font-family:Nunito,sans-serif;background:#f0f9ff;color:#1e1b4b;-webkit-user-select:none;user-select:none;overscroll-behavior:none}
 input{-webkit-user-select:text;user-select:text}
 .app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;background:#fff;box-shadow:0 0 40px rgba(0,0,0,.1)}
-.hdr{background:linear-gradient(135deg,#0f766e,#2dd4bf);color:#fff;padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top,0px));flex-shrink:0}
+.hdr{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top,0px));flex-shrink:0}
 .hdr h1{font-size:1.15rem;font-weight:900}
 .hdr p{font-size:.68rem;opacity:.85;margin-top:1px}
 .hdr-btns{display:flex;gap:8px;margin-top:6px;align-items:center}
 .hdr-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;background:rgba(255,255,255,.25);border-radius:20px;color:#fff;font-family:Nunito,sans-serif;font-size:.72rem;font-weight:800;text-decoration:none;cursor:pointer;border:none}
 .tabs{display:flex;background:#fff;border-bottom:2px solid #e2e8f0;flex-shrink:0}
 .tab{flex:1;padding:10px 4px 8px;text-align:center;font-size:.65rem;font-weight:800;color:#6b7280;cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-2px}
-.tab.active{color:#0f766e;border-bottom-color:#0f766e}
+.tab.active{color:#0369a1;border-bottom-color:#0369a1}
 .ti{display:block;font-size:1.1rem;margin-bottom:1px}
 .screens{flex:1;overflow:hidden;position:relative}
 .screen{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(80px + env(safe-area-inset-bottom,0px));display:none}
 .screen.active{display:block}
 .card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.07);padding:14px;margin-bottom:10px;border:1px solid #e2e8f0}
-.card h2{font-size:.72rem;font-weight:800;color:#0f766e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.card h2{font-size:.72rem;font-weight:800;color:#0369a1;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
 .btn{width:100%;padding:12px;border:none;border-radius:12px;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer}
-.bp{background:linear-gradient(135deg,#0f766e,#2dd4bf);color:#fff}
+.bp{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff}
 .tgl{position:relative;width:44px;height:24px;flex-shrink:0}
 .tgl input{opacity:0;width:0;height:0}
 .tgl-s{position:absolute;inset:0;background:#ccc;border-radius:24px;cursor:pointer;transition:.2s}
 .tgl-s::before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
-.tgl input:checked+.tgl-s{background:#0f766e}
+.tgl input:checked+.tgl-s{background:#0369a1}
 .tgl input:checked+.tgl-s::before{transform:translateX(20px)}
 .sr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e2e8f0}
 .sr:last-child{border-bottom:none}
 .sl{font-size:.88rem;font-weight:600}
 .ss{font-size:.73rem;color:#6b7280;margin-top:1px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{padding:6px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:#f8f9ff;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:700;color:#6b7280;cursor:pointer}
-.chip.sel{background:#0f766e;border-color:#0f766e;color:#fff}
-.ni{width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:9px;font-family:Nunito,sans-serif;font-size:.9rem;font-weight:600;color:#1e1b4b;background:#f8f9ff;outline:none}
-.ni:focus{border-color:#0f766e}
+.chip{padding:6px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:#f0f9ff;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:700;color:#6b7280;cursor:pointer}
+.chip.sel{background:#0369a1;border-color:#0369a1;color:#fff}
+.ni{width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:9px;font-family:Nunito,sans-serif;font-size:.9rem;font-weight:600;color:#1e1b4b;background:#f0f9ff;outline:none}
+.ni:focus{border-color:#0369a1}
 .sbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(255,255,255,.97);border-top:1px solid #e2e8f0;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;z-index:100}
 .pp-wrap{position:relative;display:inline-block}
 .pp-bubble{display:none;position:absolute;top:calc(100% + 8px);left:0;background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 28px rgba(0,0,0,.18);width:210px;z-index:9999}
@@ -56,20 +56,20 @@ input{-webkit-user-select:text;user-select:text}
 .pp-a.sel{background:#0070ba;color:#fff;border-color:#0070ba}
 .pp-inp{width:100%;padding:6px 9px;border:2px solid #e2e8f0;border-radius:9px;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:600;color:#1e1b4b;outline:none;margin-bottom:8px}
 .pp-go{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:10px;background:#0070ba;color:#fff;font-weight:800;font-size:.85rem;text-decoration:none}
-.bs{background:#f8f9ff;color:#6b7280;border:2px solid #e2e8f0}
+.bs{background:#f0f9ff;color:#6b7280;border:2px solid #e2e8f0}
 /* Reihen-Auswahl */
 .sel-btns{display:flex;gap:6px;margin-bottom:12px}
-.sel-btns button{flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid #e2e8f0;background:#f8f9ff;font-family:Nunito,sans-serif;font-size:.78rem;font-weight:800;color:#0f766e;cursor:pointer}
-.sel-btns button:active{background:#ccfbf1}
+.sel-btns button{flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid #e2e8f0;background:#f0f9ff;font-family:Nunito,sans-serif;font-size:.78rem;font-weight:800;color:#0369a1;cursor:pointer}
+.sel-btns button:active{background:#f0f9ff}
 .reihen-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:6px}
-.reihe-btn{padding:10px 0;border-radius:10px;border:1.5px solid #e2e8f0;background:#f8f9ff;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;color:#6b7280;cursor:pointer}
-.reihe-btn.sel{background:#0f766e;border-color:#0f766e;color:#fff}
+.reihe-btn{padding:10px 0;border-radius:10px;border:1.5px solid #e2e8f0;background:#f0f9ff;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;color:#6b7280;cursor:pointer}
+.reihe-btn.sel{background:#0369a1;border-color:#0369a1;color:#fff}
 .srow{display:flex;align-items:center;gap:10px}
-.srow input[type=range]{flex:1;accent-color:#0f766e}
-input[type=range]{accent-color:#0f766e}
+.srow input[type=range]{flex:1;accent-color:#0369a1}
+input[type=range]{accent-color:#0369a1}
 /* Arbeitsblatt */
-.ws-hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #0f766e}
-.ws-title{font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#0f766e}
+.ws-hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #0369a1}
+.ws-title{font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#0369a1}
 .ws-sub{font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif}
 .ws-meta{flex-shrink:0}
 .ws-tasks{display:grid;grid-template-columns:1fr;gap:1.5mm 6mm}
@@ -91,7 +91,7 @@ input[type=range]{accent-color:#0f766e}
   <h1>× 1×1 Trainer</h1>
   <p>&#169; 2026 Sascha Rothenburg &#183; Grundschrift von Christian Urff</p>
   <div class="hdr-btns">
-    <a href="index.html" class="hdr-btn">&#x2190; Startseite</a>
+    <a href="index.html#acc-grundrechnen" class="hdr-btn">&#x2190; Startseite</a>
     <div class="pp-wrap" id="ppWrap">
       <button class="hdr-btn" onclick="ppToggle(event)">&#x2615; Coffee</button>
       <div class="pp-bubble" id="ppBubble">
@@ -158,10 +158,10 @@ input[type=range]{accent-color:#0f766e}
       </div>
     </div>
     <div class="sr" style="flex-direction:column;align-items:flex-start;gap:6px;border-bottom:none">
-      <div class="sl">Anzahl Aufgaben: <strong id="countLbl" style="color:#0f766e">20</strong></div>
+      <div class="sl">Anzahl Aufgaben: <strong id="countLbl" style="color:#0369a1">20</strong></div>
       <div class="srow" style="width:100%">
         <input type="range" id="countSlider" min="5" max="100" step="5" value="20">
-        <strong id="countLbl2" style="color:#0f766e;min-width:30px">20</strong>
+        <strong id="countLbl2" style="color:#0369a1;min-width:30px">20</strong>
       </div>
     </div>
   </div>
@@ -298,7 +298,7 @@ function buildWS(){
   h+='</div>';
   if(showSol){
     h+='<div style="margin-top:6mm;padding-top:3mm;border-top:1px solid #e5e7eb">'
-      +'<div style="font-size:7pt;font-weight:800;color:#0f766e;margin-bottom:3mm">LÖSUNGEN</div>'
+      +'<div style="font-size:7pt;font-weight:800;color:#0369a1;margin-bottom:3mm">LÖSUNGEN</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:3mm 6mm;font-family:Nunito,sans-serif;font-size:7pt;color:#777">';
     tasks.forEach(function(t,i){h+='<span>'+(i+1)+'. '+t.sol+'</span>';});
     h+='</div></div>';
@@ -352,7 +352,7 @@ function showTab(n){
     sbar.innerHTML='';
     var b1=document.createElement('button'),b2=document.createElement('button');
     b1.style.cssText='flex:1;padding:13px 0;border-radius:12px;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;background:#f0f4f8;color:#6b7280;border:2px solid #e2e8f0';
-    b2.style.cssText='flex:1;padding:13px 0;border-radius:12px;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#0f766e,#2dd4bf);color:#fff;border:none';
+    b2.style.cssText='flex:1;padding:13px 0;border-radius:12px;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;border:none';
     b1.textContent='\u2190 Zur\u00fcck';b2.textContent='Drucken / PDF';
     b1.onclick=function(){showTab('reihen');};b2.onclick=doPrint;
     sbar.appendChild(b1);sbar.appendChild(b2);
