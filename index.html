@@ -11,10 +11,11 @@
 body{font-family:'Nunito',sans-serif;background:#f0f4f8;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px}
 h1{font-size:1.7rem;font-weight:900;color:#1e1b4b;margin-bottom:6px;text-align:center}
 .sub{color:#6b7280;margin-bottom:22px;text-align:center;font-size:.9rem}
-.tabs{display:flex;gap:7px;width:100%;max-width:360px;margin-bottom:18px}
-.tab{flex:1;padding:11px 0;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer;background:#fff;color:#9ca3af;box-shadow:0 2px 8px rgba(0,0,0,.07);transition:all .18s}
+.tabs{display:flex;flex-wrap:wrap;gap:7px;width:100%;max-width:360px;margin-bottom:18px}
+.tab{flex:1 1 0;min-width:78px;padding:11px 4px;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:.92rem;font-weight:900;cursor:pointer;background:#fff;color:#9ca3af;box-shadow:0 2px 8px rgba(0,0,0,.07);transition:all .18s}
 .tab.active.mathe{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;box-shadow:0 4px 14px rgba(3,105,161,.3)}
 .tab.active.deutsch{background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;box-shadow:0 4px 14px rgba(185,28,28,.3)}
+.tab.active.englisch{background:linear-gradient(135deg,#6d28d9,#a855f7);color:#fff;box-shadow:0 4px 14px rgba(109,40,217,.3)}
 .tab.active.sach{background:linear-gradient(135deg,#15803d,#22c55e);color:#fff;box-shadow:0 4px 14px rgba(21,128,61,.3)}
 .pane{width:100%;max-width:360px}
 .pane.hidden{display:none}
@@ -29,6 +30,7 @@ h1{font-size:1.7rem;font-weight:900;color:#1e1b4b;margin-bottom:6px;text-align:c
 .acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
 .acc.open .acc-body{max-height:700px}
 .acc-inner{display:flex;flex-direction:column;gap:10px;padding:4px 14px 16px}
+.acc-note{font-size:.74rem;font-weight:700;color:#94a3b8;padding:0 4px 8px;line-height:1.4}
 a.app-link{display:block;padding:15px 20px;border-radius:13px;text-decoration:none;font-weight:800;font-size:1.02rem;text-align:center;color:#fff;box-shadow:0 3px 11px rgba(0,0,0,.14)}
 small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-height:1.6}
 </style>
@@ -40,6 +42,7 @@ small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-heig
 <div class="tabs">
   <button class="tab mathe active" onclick="showTab('mathe')">&#x1F522; Mathe</button>
   <button class="tab deutsch" onclick="showTab('deutsch')">&#x270F;&#xFE0F; Deutsch</button>
+  <button class="tab englisch" onclick="showTab('englisch')">&#x1F1EC;&#x1F1E7; Engl.</button>
   <button class="tab sach" onclick="showTab('sach')">&#x1F30D; Sachk.</button>
 </div>
 
@@ -118,6 +121,27 @@ small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-heig
 
 </div>
 
+<!-- ENGLISCH -->
+<div class="pane englisch hidden" id="g-englisch">
+
+  <div class="acc" id="acc-english-worksheets">
+    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F5A8;&#xFE0F;</span>Arbeitsbl&auml;tter<span class="cnt">1</span><span class="chev">&#x25BC;</span></button>
+    <div class="acc-body"><div class="acc-inner">
+      <div class="acc-note">Zum Ausdrucken auf A4.</div>
+      <a href="english.html" class="app-link" style="background:linear-gradient(135deg,#6d28d9,#a855f7)">&#x1F1EC;&#x1F1E7; English Worksheets</a>
+    </div></div>
+  </div>
+
+  <div class="acc" id="acc-english-practice">
+    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F4F1;</span>Interaktiv &uuml;ben<span class="cnt">1</span><span class="chev">&#x25BC;</span></button>
+    <div class="acc-body"><div class="acc-inner">
+      <div class="acc-note">Direkt am Tablet oder PC &uuml;ben &ndash; ohne Druck.</div>
+      <a href="practice.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#c084fc)">&#x1F4F1; English Practice</a>
+    </div></div>
+  </div>
+
+</div>
+
 <!-- SACHKUNDE -->
 <div class="pane sach hidden" id="g-sach">
   <div class="acc" id="acc-sachkunde">
@@ -170,7 +194,7 @@ small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-heig
 function showTab(t){
   document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active');});
   document.querySelector('.tab.'+t).classList.add('active');
-  ['mathe','deutsch','sach'].forEach(function(k){
+  ['mathe','deutsch','englisch','sach'].forEach(function(k){
     document.getElementById('g-'+k).classList.toggle('hidden', k!==t);
   });
 }
