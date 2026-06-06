@@ -112,10 +112,10 @@ input{-webkit-user-select:text;user-select:text}
       <div class="opt-row" id="opOpts">
         <button class="opt-btn sel" data-v="add">Plus +</button>
         <button class="opt-btn sel" data-v="sub">Minus &minus;</button>
-        <button class="opt-btn sel" data-v="mul">Mal &times;</button>
-        <button class="opt-btn sel" data-v="div">Geteilt &divide;</button>
+        <button class="opt-btn" data-v="mul">Mal &times;</button>
+        <button class="opt-btn" data-v="div">Geteilt &divide;</button>
       </div>
-      <div class="ss" style="margin-top:6px">Mehrere w&auml;hlbar &ndash; wird gemischt.</div>
+      <div class="ss" style="margin-top:6px">Plus und Minus lassen sich mischen. Mal und Geteilt brauchen mehr Platz und werden je allein gestellt.</div>
     </div>
     <div style="margin-bottom:12px">
       <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Zahlenl&auml;nge</label>
@@ -189,8 +189,28 @@ function setupMulti(id){
     });
   });
 }
+/* Rechenart mit Sonderregeln: + und - kombinierbar, x und ÷ nur exklusiv allein */
+function setupOps(){
+  var btns=document.querySelectorAll('#opOpts .opt-btn');
+  btns.forEach(function(b){
+    b.addEventListener('click',function(){
+      var v=b.dataset.v;
+      var exclusive=(v==='mul'||v==='div');
+      if(exclusive){
+        // x oder ÷ : alle anderen aus, nur dieser an
+        btns.forEach(function(o){o.classList.toggle('sel',o===b);});
+      }else{
+        // + oder - : x und ÷ immer aus
+        btns.forEach(function(o){if(o.dataset.v==='mul'||o.dataset.v==='div')o.classList.remove('sel');});
+        b.classList.toggle('sel');
+        // mindestens einer von +/- muss aktiv bleiben
+        if(!document.querySelectorAll('#opOpts .opt-btn.sel').length) b.classList.add('sel');
+      }
+    });
+  });
+}
 function getMultiStr(id){return Array.from(document.querySelectorAll('#'+id+' .opt-btn.sel')).map(function(b){return b.dataset.v;});}
-setupMulti('opOpts');setupMulti('lenOpts');setupMulti('divOpts');
+setupOps();setupMulti('lenOpts');setupMulti('divOpts');
 
 function ri(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function shuffle(arr){for(var i=arr.length-1;i>0;i--){var j=ri(0,i);var t=arr[i];arr[i]=arr[j];arr[j]=t;}return arr;}
