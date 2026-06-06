@@ -72,15 +72,17 @@ input[type=range]{accent-color:#0369a1}
 .ws-title{font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#0369a1}
 .ws-sub{font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif}
 .ws-meta{flex-shrink:0}
-.ws-tasks{display:grid;grid-template-columns:1fr;gap:1.5mm 6mm}
-.ws-2col{display:grid;grid-template-columns:1fr 1fr;gap:1.5mm 8mm}
-.ws-3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5mm 6mm}
-.ws-task{display:flex;align-items:baseline;gap:5pt;padding:1mm 0;font-family:Grundschrift,sans-serif;break-inside:avoid;page-break-inside:avoid}
+/* inline-block-Spaltenlayout statt CSS-Grid: break-inside:avoid wird so auf iOS/WebKit zuverlässig respektiert */
+.ws-tasks{font-size:0}
+.ws-tasks.c1 .ws-task{width:100%}
+.ws-tasks.c2 .ws-task{width:50%}
+.ws-tasks.c3 .ws-task{width:33.333%}
+.ws-task{display:inline-flex;align-items:baseline;gap:5pt;padding:1mm 0;font-family:Grundschrift,sans-serif;break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid;vertical-align:top;box-sizing:border-box;padding-right:6mm}
 .ws-nr{color:#94a3b8;font-family:Nunito,sans-serif;font-weight:700;min-width:16pt;flex-shrink:0}
 .ws-eq{font-family:Grundschrift,sans-serif;font-weight:bold;color:#1e1b4b}
 .ws-line{display:inline-block;border-bottom:1.5pt solid #555;min-width:22pt}
 .ws-foot{margin-top:5mm;text-align:center;font-family:Nunito,sans-serif;font-size:7pt;color:#bbb;border-top:1px solid #eee;padding-top:2mm}
-@media print{.app,.sbar{display:none!important}.ws-foot{display:none!important}.printarea{display:block!important}body{background:#fff}html,body{height:auto;overflow:visible}@page{size:A4 portrait;margin:12mm 14mm}}
+@media print{.app,.sbar{display:none!important}.ws-foot{display:none!important}.printarea{display:block!important}body{background:#fff}html,body{height:auto;overflow:visible}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}@page{size:A4 portrait;margin:12mm 14mm}}
 .printarea{display:none}
 
 </style>
@@ -152,16 +154,16 @@ input[type=range]{accent-color:#0369a1}
     <div class="sr">
       <div class="sl">Spalten</div>
       <div style="display:flex;gap:6px">
-        <button class="reihe-btn sel" id="col1" style="padding:6px 14px;font-size:.85rem">1</button>
-        <button class="reihe-btn" id="col2" style="padding:6px 14px;font-size:.85rem">2</button>
+        <button class="reihe-btn" id="col1" style="padding:6px 14px;font-size:.85rem">1</button>
+        <button class="reihe-btn sel" id="col2" style="padding:6px 14px;font-size:.85rem">2</button>
         <button class="reihe-btn" id="col3" style="padding:6px 14px;font-size:.85rem">3</button>
       </div>
     </div>
     <div class="sr" style="flex-direction:column;align-items:flex-start;gap:6px;border-bottom:none">
-      <div class="sl">Anzahl Aufgaben: <strong id="countLbl" style="color:#0369a1">20</strong></div>
+      <div class="sl">Anzahl Aufgaben: <strong id="countLbl" style="color:#0369a1">48</strong></div>
       <div class="srow" style="width:100%">
-        <input type="range" id="countSlider" min="5" max="100" step="5" value="20">
-        <strong id="countLbl2" style="color:#0369a1;min-width:30px">20</strong>
+        <input type="range" id="countSlider" min="4" max="100" step="4" value="48">
+        <strong id="countLbl2" style="color:#0369a1;min-width:30px">48</strong>
       </div>
     </div>
   </div>
@@ -193,7 +195,7 @@ function ppCustomAmt(v){var n=parseFloat(v);if(n>0){document.getElementById('ppG
 document.addEventListener('click',function(e){var w=document.getElementById('ppWrap');if(w&&!w.contains(e.target))document.getElementById('ppBubble').classList.remove('open');});
 
 var selReihen=[2,3,4,5,6,7,8,9];
-var cols=1;
+var cols=2;
 
 function renderReihen(){
   var grid=document.getElementById('reihenGrid');
@@ -286,7 +288,7 @@ function buildWS(){
     +'<div class="ws-title">× Das kleine 1×1</div>'
     +'<div class="ws-sub">Reihen: '+rLabel+(inv?' · Ergebnis vorgegeben':' · Ergebnis eintragen')+'</div>'
     +'</div>'+(meta?'<div class="ws-meta">'+meta+'</div>':'')+'</div>';
-  var gridCls=cols===3?'ws-3col':cols===2?'ws-2col':'ws-tasks';
+  var gridCls='ws-tasks '+(cols===3?'c3':cols===2?'c2':'c1');
   h+='<div class="'+gridCls+'">';
   tasks.forEach(function(t,i){
     var aStr=t.a==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.a);
@@ -297,7 +299,7 @@ function buildWS(){
   });
   h+='</div>';
   if(showSol){
-    h+='<div style="margin-top:6mm;padding-top:3mm;border-top:1px solid #e5e7eb">'
+    h+='<div style="margin-top:6mm;padding-top:3mm;border-top:1px solid #e5e7eb;break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid">'
       +'<div style="font-size:7pt;font-weight:800;color:#0369a1;margin-bottom:3mm">LÖSUNGEN</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:3mm 6mm;font-family:Nunito,sans-serif;font-size:7pt;color:#777">';
     tasks.forEach(function(t,i){h+='<span>'+(i+1)+'. '+t.sol+'</span>';});
@@ -332,11 +334,14 @@ function buildMeta(){
 }
 function buildPreview(){
   try{
-    var c=buildWS(),sw=Math.min(window.innerWidth,480)-28,sc=sw/595;
+    var c=buildWS();
+    // A4-Blatt in echten px (210mm @96dpi ≈ 793.7px), Padding = @page-Ränder 12mm/14mm
+    var pageW=793.7, sw=Math.min(window.innerWidth,480)-28, sc=sw/pageW;
+    var padV=Math.round(12/25.4*96), padH=Math.round(14/25.4*96);
     var wrap=document.getElementById('previewContent');wrap.innerHTML='';
     var outer=document.createElement('div'),inner=document.createElement('div');
     outer.style.cssText='width:'+sw+'px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;background:#fff;margin-bottom:8px';
-    inner.style.cssText='width:595px;transform-origin:top left;transform:scale('+sc.toFixed(4)+');padding:42px 50px;background:#fff;box-sizing:border-box';
+    inner.style.cssText='width:'+pageW+'px;transform-origin:top left;transform:scale('+sc.toFixed(4)+');padding:'+padV+'px '+padH+'px;background:#fff;box-sizing:border-box';
     inner.innerHTML=c;outer.appendChild(inner);wrap.appendChild(outer);
     requestAnimationFrame(function(){outer.style.height=Math.round(inner.scrollHeight*sc)+'px';});
   }catch(e){document.getElementById('previewContent').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
