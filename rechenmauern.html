@@ -109,6 +109,7 @@ input{-webkit-user-select:text;user-select:text}
         <input type="range" id="cnt" min="2" max="16" step="1" value="8" style="flex:1;accent-color:#0369a1">
         <strong id="cntVal" style="color:#0369a1;min-width:24px">8</strong>
       </div>
+      <div class="ss" style="margin-top:6px">Wird automatisch passend zur Seite gewählt. Du kannst den Regler jederzeit selbst verstellen.</div>
     </div>
     <div style="margin-bottom:12px">
       <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Gr&ouml;&szlig;e (Steine unten)</label>
@@ -201,6 +202,39 @@ function getMulti(id){return Array.from(document.querySelectorAll('#'+id+' .opt-
 function getMultiStr(id){return Array.from(document.querySelectorAll('#'+id+' .opt-btn.sel')).map(function(b){return b.dataset.v;});}
 function getSingle(id){var b=document.querySelector('#'+id+' .opt-btn.sel');return b?parseInt(b.dataset.v):null;}
 setupMulti('sizeOpts');setupSingle('rangeOpts');setupMulti('typeOpts');
+
+/* ===== Automatische Anzahl (seitenfüllend) =====
+   Indexiert nach [größte gewählte Steinanzahl][Zahlenraum].
+   Werte = ideale Mauer-Anzahl, damit eine A4-Seite gut gefüllt ist.
+   Diese Werte sind durch Drucktest ermittelt und können hier justiert werden. */
+var AUTO_COUNT={
+  3:{ 20:12, 100:12, 1000:9 },
+  4:{ 20:9,  100:8,  1000:6 },
+  5:{ 20:6,  100:6,  1000:4 }
+};
+var userTouchedSlider=false; // sobald true, übersteuert der manuelle Slider die Automatik
+function autoCount(){
+  var sizes=getMulti('sizeOpts'); if(!sizes.length)sizes=[3];
+  var maxSize=Math.max.apply(null,sizes);       // größte Mauer bestimmt den Platzbedarf
+  var range=getSingle('rangeOpts')||100;
+  var row=AUTO_COUNT[maxSize]||AUTO_COUNT[3];
+  return row[range]||row[100]||8;
+}
+function applyAutoCount(){
+  if(userTouchedSlider) return; // Nutzer hat selbst geregelt -> nicht überschreiben
+  var n=autoCount();
+  var sl=document.getElementById('cnt');
+  n=Math.max(parseInt(sl.min), Math.min(parseInt(sl.max), n));
+  sl.value=n;
+  document.getElementById('cntVal').textContent=n;
+}
+// Bei jeder Options-Änderung: manuelle Übersteuerung zurücksetzen und Anzahl neu vorbelegen
+['sizeOpts','rangeOpts','typeOpts'].forEach(function(id){
+  document.querySelectorAll('#'+id+' .opt-btn').forEach(function(b){
+    b.addEventListener('click',function(){userTouchedSlider=false;applyAutoCount();});
+  });
+});
+applyAutoCount(); // initial passend zur Default-Kombination setzen
 
 /* ===== Generator-Logik ===== */
 var walls=[];
@@ -464,7 +498,7 @@ document.getElementById('t-set').addEventListener('click',function(){showTab('se
 document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
 
 /* ===== Sliders / Buttons ===== */
-document.getElementById('cnt').addEventListener('input',function(){document.getElementById('cntVal').textContent=this.value;});
+document.getElementById('cnt').addEventListener('input',function(){userTouchedSlider=true;document.getElementById('cntVal').textContent=this.value;});
 document.getElementById('btnGen').addEventListener('click',generate);
 document.getElementById('btnGoPre').addEventListener('click',function(){showTab('pre');});
 
