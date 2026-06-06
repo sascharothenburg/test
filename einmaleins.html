@@ -80,7 +80,7 @@ input[type=range]{accent-color:#0369a1}
 .ws-eq{font-family:Grundschrift,sans-serif;font-weight:bold;color:#1e1b4b}
 .ws-line{display:inline-block;border-bottom:1.5pt solid #555;min-width:22pt}
 .ws-foot{margin-top:5mm;text-align:center;font-family:Nunito,sans-serif;font-size:7pt;color:#bbb;border-top:1px solid #eee;padding-top:2mm}
-@media print{.app,.sbar{display:none!important}.ws-foot{display:none!important}.printarea{display:block!important}body{background:#fff}html,body{height:auto;overflow:visible}@page{size:A4 portrait;margin:12mm 14mm}}
+@media print{.app,.sbar{display:none!important}.ws-foot{display:none!important}.printarea{display:block!important}body{background:#fff}html,body{height:auto;overflow:visible}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}@page{size:A4 portrait;margin:12mm 14mm}}
 .printarea{display:none}
 
 </style>
@@ -152,16 +152,16 @@ input[type=range]{accent-color:#0369a1}
     <div class="sr">
       <div class="sl">Spalten</div>
       <div style="display:flex;gap:6px">
-        <button class="reihe-btn sel" id="col1" style="padding:6px 14px;font-size:.85rem">1</button>
-        <button class="reihe-btn" id="col2" style="padding:6px 14px;font-size:.85rem">2</button>
+        <button class="reihe-btn" id="col1" style="padding:6px 14px;font-size:.85rem">1</button>
+        <button class="reihe-btn sel" id="col2" style="padding:6px 14px;font-size:.85rem">2</button>
         <button class="reihe-btn" id="col3" style="padding:6px 14px;font-size:.85rem">3</button>
       </div>
     </div>
     <div class="sr" style="flex-direction:column;align-items:flex-start;gap:6px;border-bottom:none">
-      <div class="sl">Anzahl Aufgaben: <strong id="countLbl" style="color:#0369a1">20</strong></div>
+      <div class="sl">Anzahl Aufgaben: <strong id="countLbl" style="color:#0369a1">48</strong></div>
       <div class="srow" style="width:100%">
-        <input type="range" id="countSlider" min="5" max="100" step="5" value="20">
-        <strong id="countLbl2" style="color:#0369a1;min-width:30px">20</strong>
+        <input type="range" id="countSlider" min="4" max="100" step="4" value="48">
+        <strong id="countLbl2" style="color:#0369a1;min-width:30px">48</strong>
       </div>
     </div>
   </div>
@@ -193,7 +193,7 @@ function ppCustomAmt(v){var n=parseFloat(v);if(n>0){document.getElementById('ppG
 document.addEventListener('click',function(e){var w=document.getElementById('ppWrap');if(w&&!w.contains(e.target))document.getElementById('ppBubble').classList.remove('open');});
 
 var selReihen=[2,3,4,5,6,7,8,9];
-var cols=1;
+var cols=2;
 
 function renderReihen(){
   var grid=document.getElementById('reihenGrid');
@@ -297,7 +297,7 @@ function buildWS(){
   });
   h+='</div>';
   if(showSol){
-    h+='<div style="margin-top:6mm;padding-top:3mm;border-top:1px solid #e5e7eb">'
+    h+='<div style="margin-top:6mm;padding-top:3mm;border-top:1px solid #e5e7eb;break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid">'
       +'<div style="font-size:7pt;font-weight:800;color:#0369a1;margin-bottom:3mm">LÖSUNGEN</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:3mm 6mm;font-family:Nunito,sans-serif;font-size:7pt;color:#777">';
     tasks.forEach(function(t,i){h+='<span>'+(i+1)+'. '+t.sol+'</span>';});
@@ -332,16 +332,28 @@ function buildMeta(){
 }
 function buildPreview(){
   try{
-    var c=buildWS(),sw=Math.min(window.innerWidth,480)-28,sc=sw/595;
+    var c=buildWS();
+    // A4-Blatt in echten px (210mm @96dpi ≈ 793.7px), Padding = @page-Ränder 12mm/14mm
+    var pageW=793.7, sw=Math.min(window.innerWidth,480)-28, sc=sw/pageW;
+    var padV=Math.round(12/25.4*96), padH=Math.round(14/25.4*96);
     var wrap=document.getElementById('previewContent');wrap.innerHTML='';
     var outer=document.createElement('div'),inner=document.createElement('div');
     outer.style.cssText='width:'+sw+'px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;background:#fff;margin-bottom:8px';
-    inner.style.cssText='width:595px;transform-origin:top left;transform:scale('+sc.toFixed(4)+');padding:42px 50px;background:#fff;box-sizing:border-box';
+    inner.style.cssText='width:'+pageW+'px;transform-origin:top left;transform:scale('+sc.toFixed(4)+');padding:'+padV+'px '+padH+'px;background:#fff;box-sizing:border-box';
     inner.innerHTML=c;outer.appendChild(inner);wrap.appendChild(outer);
     requestAnimationFrame(function(){outer.style.height=Math.round(inner.scrollHeight*sc)+'px';});
   }catch(e){document.getElementById('previewContent').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
 }
-async function doPrint(){await document.fonts.ready;document.getElementById('printArea').innerHTML=buildWS();setTimeout(function(){window.print();},150);}
+function doPrint(){
+  // Inhalt SYNCHRON im Klick-Kontext setzen, damit Safari den Druck nicht als "automatisch" blockt
+  document.getElementById('printArea').innerHTML=buildWS();
+  if(document.fonts&&document.fonts.status!=='loaded'){
+    // Schriften noch nicht fertig: kurz warten, dann drucken (Safari erlaubt das nach erfolgter Nutzerinteraktion meist)
+    document.fonts.ready.then(function(){window.print();});
+  } else {
+    window.print();
+  }
+}
 var sbar=document.getElementById('sbar');
 function showTab(n){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
