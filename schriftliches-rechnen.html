@@ -400,6 +400,10 @@ function buildWS(){
   var withCells=document.getElementById('showCells').checked;
   var meta=buildMeta();
   var gap=(IS_IOS||IS_SAFARI)?'8mm':'10mm';
+  // Breite der Divisionsaufgaben dynamisch: wenn NUR Divisionen -> 50% (zwei nebeneinander),
+  // bei gemischten Aufgaben -> 66.66% (Division breit, schmale Aufgaben 33.33%)
+  var onlyDiv=tasks.every(function(t){return t.op==='div';});
+  var divW=onlyDiv?'50%':'66.66%';
   var h='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #0369a1">'
        +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#0369a1">\u270f\ufe0f Schriftliches Rechnen</div>'
        +'<div style="font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif">Rechne schriftlich und schreibe das Ergebnis auf.</div></div>'
@@ -407,7 +411,10 @@ function buildWS(){
   // 3 Spalten
   h+='<div style="font-size:0;text-align:left">';
   tasks.forEach(function(t,i){
-    h+='<div style="display:inline-block;vertical-align:top;width:33.33%;box-sizing:border-box;padding:0 3mm;text-align:center;margin-bottom:'+gap+';break-inside:avoid;page-break-inside:avoid">';
+    var isDiv=(t.op==='div');
+    var wPct=isDiv?divW:'33.33%';
+    var align=isDiv?'left':'center';
+    h+='<div style="display:inline-block;vertical-align:top;width:'+wPct+';box-sizing:border-box;padding:0 3mm;text-align:'+align+';margin-bottom:'+gap+';break-inside:avoid;page-break-inside:avoid">';
     if(showNr) h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:4pt;text-align:left">'+(i+1)+'.</div>';
     h+=taskRender(t,false,true,withCells,true);
     h+='</div>';
@@ -419,7 +426,10 @@ function buildWS(){
       +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#16a34a">\u2705 L\u00f6sungen</div></div></div>';
     h+='<div style="font-size:0;text-align:left">';
     tasks.forEach(function(t,i){
-      h+='<div style="display:inline-block;vertical-align:top;width:33.33%;box-sizing:border-box;padding:0 3mm;text-align:center;margin-bottom:'+gap+';break-inside:avoid;page-break-inside:avoid">';
+      var isDiv=(t.op==='div');
+      var wPct=isDiv?divW:'33.33%';
+      var align=isDiv?'left':'center';
+      h+='<div style="display:inline-block;vertical-align:top;width:'+wPct+';box-sizing:border-box;padding:0 3mm;text-align:'+align+';margin-bottom:'+gap+';break-inside:avoid;page-break-inside:avoid">';
       if(showNr) h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:4pt;text-align:left">'+(i+1)+'.</div>';
       h+=taskRender(t,true,true,withCells,true);
       h+='</div>';
