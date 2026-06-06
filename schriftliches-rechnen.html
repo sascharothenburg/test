@@ -103,8 +103,8 @@ input{-webkit-user-select:text;user-select:text}
     <div style="margin-bottom:12px">
       <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Anzahl Aufgaben</label>
       <div style="display:flex;align-items:center;gap:10px">
-        <input type="range" id="cnt" min="2" max="20" step="1" value="9" style="flex:1;accent-color:#0369a1">
-        <strong id="cntVal" style="color:#0369a1;min-width:24px">9</strong>
+        <input type="range" id="cnt" min="2" max="20" step="1" value="12" style="flex:1;accent-color:#0369a1">
+        <strong id="cntVal" style="color:#0369a1;min-width:24px">12</strong>
       </div>
     </div>
     <div style="margin-bottom:12px">
@@ -337,37 +337,36 @@ function divCalc(t,showSol,cell,withGrid){
   var cw=cell, ch=Math.round(cell*1.18);
   var fsCell=Math.round(cell*0.62);
   var tblW=cw*cols;
-  // obere Zeile: Dividend-Kästchen (mit Ziffern) + rechts ": b = ___ (Rest __)"
-  var h='<div style="display:inline-flex;align-items:flex-start;gap:'+Math.round(cell*0.5)+'pt">';
-  // linke Spalte: Kästchen-Tabelle (Dividend oben, dann leere Rechenzeilen)
-  var grid='<table style="border-collapse:collapse;margin:0;table-layout:fixed;width:'+tblW+'pt;flex-shrink:0">';
+  // Dividend-Kästchen UND ": b = ___" in EINER Tabelle -> garantiert bündig zur Gitterzeile
+  var grid='<table style="border-collapse:collapse;margin:0;table-layout:fixed;border-spacing:0">';
   grid+='<colgroup>';
   for(var cg=0;cg<cols;cg++) grid+='<col style="width:'+cw+'pt">';
+  grid+='<col>'; // zusätzliche Spalte für ": b = ___", nimmt restliche Breite
   grid+='</colgroup>';
-  // Dividend-Zeile
+  // rechter Teil: : b = Linie, darunter ggf. Rest
+  var rightInner=OPSYM.div+' '+t.b+' = '+line;
+  if(t.rest>0){
+    rightInner+='<div style="margin-top:'+Math.round(ch*0.4)+'pt">Rest '+restLine+'</div>';
+  }
+  // Dividend-Zeile + rechte Zelle (vertikal mittig zur Dividend-Zeile)
   grid+='<tr>';
   for(var c=0;c<cols;c++){
     grid+='<td style="height:'+ch+'pt;border:1px solid #cbd5e1;text-align:center;vertical-align:middle;font-family:Nunito,sans-serif;font-weight:800;font-size:'+fsCell+'pt;color:#1e1b4b">'+aStr[c]+'</td>';
   }
+  // rechte Zelle: gleiche Zeilenhöhe, vertikal mittig -> sitzt exakt auf Höhe der Dividend-Ziffern
+  grid+='<td style="height:'+ch+'pt;vertical-align:middle;padding-left:'+Math.round(cell*0.5)+'pt;font-family:Nunito,sans-serif;font-weight:800;font-size:'+fs+'pt;color:#1e1b4b;white-space:nowrap">'+rightInner+'</td>';
   grid+='</tr>';
-  // leere Rechenzeilen
+  // leere Rechenzeilen (rechte Spalte bleibt leer)
   for(var r=0;r<rows;r++){
     grid+='<tr>';
     for(var c2=0;c2<cols;c2++){
       grid+='<td style="height:'+ch+'pt;border:1px solid #cbd5e1;padding:0"></td>';
     }
+    grid+='<td></td>';
     grid+='</tr>';
   }
   grid+='</table>';
-  // rechts: : b = Linie, darunter ggf. Rest (vertikal, spart Breite)
-  var rightInner=OPSYM.div+' '+t.b+' = '+line;
-  if(t.rest>0){
-    rightInner+='<div style="margin-top:'+Math.round(ch*0.4)+'pt">Rest '+restLine+'</div>';
-  }
-  var right='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:'+fs+'pt;color:#1e1b4b;white-space:nowrap;padding-top:'+Math.round(ch*0.25)+'pt;flex-shrink:0">'
-    +rightInner+'</div>';
-  h+=grid+right+'</div>';
-  return h;
+  return grid;
 }
 function taskRender(t,showSol,big,withCells,withGrid){
   var cell=big?15:12;
