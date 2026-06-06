@@ -77,9 +77,9 @@ input[type=range]{accent-color:#0369a1}
 .ws-tasks.c1 .ws-task{width:100%}
 .ws-tasks.c2 .ws-task{width:50%}
 .ws-tasks.c3 .ws-task{width:33.333%}
-.ws-task{display:inline-flex;align-items:baseline;gap:5pt;padding:1mm 0;font-family:Grundschrift,sans-serif;break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid;vertical-align:top;box-sizing:border-box;padding-right:6mm}
+.ws-task{display:inline-flex;align-items:baseline;gap:5pt;padding:1mm 0;font-family:Grundschrift,sans-serif;break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid;vertical-align:top;box-sizing:border-box;padding-right:4mm;white-space:nowrap}
 .ws-nr{color:#94a3b8;font-family:Nunito,sans-serif;font-weight:700;min-width:16pt;flex-shrink:0}
-.ws-eq{font-family:Grundschrift,sans-serif;font-weight:bold;color:#1e1b4b}
+.ws-eq{font-family:Grundschrift,sans-serif;font-weight:bold;color:#1e1b4b;white-space:nowrap;flex-shrink:0}
 .ws-line{display:inline-block;border-bottom:1.5pt solid #555;min-width:22pt}
 .ws-foot{margin-top:5mm;text-align:center;font-family:Nunito,sans-serif;font-size:7pt;color:#bbb;border-top:1px solid #eee;padding-top:2mm}
 @media print{.app,.sbar{display:none!important}.ws-foot{display:none!important}.printarea{display:block!important}body{background:#fff}html,body{height:auto;overflow:visible}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}@page{size:A4 portrait;margin:12mm 14mm}}
@@ -346,7 +346,16 @@ function buildPreview(){
     requestAnimationFrame(function(){outer.style.height=Math.round(inner.scrollHeight*sc)+'px';});
   }catch(e){document.getElementById('previewContent').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
 }
-async function doPrint(){await document.fonts.ready;document.getElementById('printArea').innerHTML=buildWS();setTimeout(function(){window.print();},150);}
+function doPrint(){
+  // Inhalt SYNCHRON im Klick-Kontext setzen, damit Safari den Druck nicht als "automatisch" blockt
+  document.getElementById('printArea').innerHTML=buildWS();
+  if(document.fonts&&document.fonts.status!=='loaded'){
+    // Schriften noch nicht fertig: kurz warten, dann drucken (Safari erlaubt das nach erfolgter Nutzerinteraktion meist)
+    document.fonts.ready.then(function(){window.print();});
+  } else {
+    window.print();
+  }
+}
 var sbar=document.getElementById('sbar');
 function showTab(n){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
