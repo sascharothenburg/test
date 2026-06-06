@@ -252,6 +252,8 @@ function generate(){
 
 /* ===== Darstellung: schriftliche Rechnung ===== */
 var OPSYM={add:'+',sub:'\u2212',mul:'\u00d7',div:':'};
+// Lineatur 8F: Kästchen 5mm breit x 7mm hoch (echte Schulheft-Maße)
+var CELL_W=5, CELL_H=7;
 function maxLen(t){
   return Math.max((''+t.a).length,(''+t.b).length,(''+t.res).length);
 }
@@ -279,16 +281,16 @@ function vertCalc(t,showSol,cell,withCells){
   var r2=rowCells(bStr,OPSYM[t.op],true);
   var resStr=(''+t.res);
   var r3=rowCells(resStr,'',showSol);
-  // bauen
-  var cw=cell, ch=Math.round(cell*1.18);
-  var fs=Math.round(cell*0.62);
+  // bauen: Kästchen 5mm breit x 7mm hoch (Schulheft-Lineatur 8F)
+  var cw=CELL_W+'mm', ch=CELL_H+'mm';
+  var fs=Math.round(CELL_W*2.0); // Schriftgröße proportional zur Kästchenbreite (pt)
   function tr(cells,opts){
     opts=opts||{};
     var s='<tr>';
     cells.forEach(function(c,idx){
       var border = withCells? 'border:1px solid #cbd5e1;' : '';
       var col = opts.col||'#1e1b4b';
-      s+='<td style="width:'+cw+'pt;height:'+ch+'pt;text-align:center;vertical-align:middle;font-family:Nunito,sans-serif;font-weight:800;font-size:'+fs+'pt;'+border+'color:'+col+'">'+(c||'&nbsp;')+'</td>';
+      s+='<td style="width:'+cw+';height:'+ch+';text-align:center;vertical-align:middle;font-family:Nunito,sans-serif;font-weight:800;font-size:'+fs+'pt;'+border+'color:'+col+'">'+(c||'&nbsp;')+'</td>';
     });
     s+='</tr>';
     return s;
@@ -318,9 +320,9 @@ function vertCalc(t,showSol,cell,withCells){
 }
 /* Division: Dividend in Kästchen, daneben : b = Ergebnis (Rest r), darunter kariertes Rechenfeld */
 function divCalc(t,showSol,cell,withGrid){
-  var fs=Math.round(cell*0.72);
-  var line='<span style="display:inline-block;border-bottom:2pt solid #1e1b4b;min-width:'+(cell*2.6)+'pt;text-align:center">'+(showSol?'<span style="color:#16a34a">'+t.res+'</span>':'&nbsp;')+'</span>';
-  var restLine='<span style="display:inline-block;border-bottom:2pt solid #1e1b4b;min-width:'+(cell*1.6)+'pt;text-align:center">'+(showSol?'<span style="color:#16a34a">'+t.rest+'</span>':'&nbsp;')+'</span>';
+  var fs=Math.round(CELL_W*2.4);
+  var line='<span style="display:inline-block;border-bottom:2pt solid #1e1b4b;min-width:'+(CELL_W*7.3)+'pt;text-align:center">'+(showSol?'<span style="color:#16a34a">'+t.res+'</span>':'&nbsp;')+'</span>';
+  var restLine='<span style="display:inline-block;border-bottom:2pt solid #1e1b4b;min-width:'+(CELL_W*4.5)+'pt;text-align:center">'+(showSol?'<span style="color:#16a34a">'+t.rest+'</span>':'&nbsp;')+'</span>';
   var restPart='';
   if(t.rest>0){
     restPart=' <span style="font-size:'+(fs*0.9)+'pt">Rest</span> '+restLine;
@@ -330,37 +332,36 @@ function divCalc(t,showSol,cell,withGrid){
     return '<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:'+fs+'pt;color:#1e1b4b;white-space:nowrap;text-align:center">'
       +t.a+' '+OPSYM.div+' '+t.b+' = '+line+restPart+'</div>';
   }
-  // Druck: Dividend in Kästchen + Rechenfeld
+  // Druck: Dividend in Kästchen + Rechenfeld, Kästchen 5mm breit x 7mm hoch (Lineatur 8F)
   var aStr=(''+t.a);
   var cols=aStr.length;
   var rows=cols+2;
-  var cw=cell, ch=Math.round(cell*1.18);
-  var fsCell=Math.round(cell*0.62);
-  var tblW=cw*cols;
+  var cw=CELL_W+'mm', ch=CELL_H+'mm';
+  var fsCell=Math.round(CELL_W*2.0);
   // Dividend-Kästchen UND ": b = ___" in EINER Tabelle -> garantiert bündig zur Gitterzeile
   var grid='<table style="border-collapse:collapse;margin:0;table-layout:fixed;border-spacing:0">';
   grid+='<colgroup>';
-  for(var cg=0;cg<cols;cg++) grid+='<col style="width:'+cw+'pt">';
+  for(var cg=0;cg<cols;cg++) grid+='<col style="width:'+cw+'">';
   grid+='<col>'; // zusätzliche Spalte für ": b = ___", nimmt restliche Breite
   grid+='</colgroup>';
   // rechter Teil: : b = Linie, darunter ggf. Rest
   var rightInner=OPSYM.div+' '+t.b+' = '+line;
   if(t.rest>0){
-    rightInner+='<div style="margin-top:'+Math.round(ch*0.4)+'pt">Rest '+restLine+'</div>';
+    rightInner+='<div style="margin-top:2mm">Rest '+restLine+'</div>';
   }
   // Dividend-Zeile + rechte Zelle (vertikal mittig zur Dividend-Zeile)
   grid+='<tr>';
   for(var c=0;c<cols;c++){
-    grid+='<td style="height:'+ch+'pt;border:1px solid #cbd5e1;text-align:center;vertical-align:middle;font-family:Nunito,sans-serif;font-weight:800;font-size:'+fsCell+'pt;color:#1e1b4b">'+aStr[c]+'</td>';
+    grid+='<td style="width:'+cw+';height:'+ch+';border:1px solid #cbd5e1;text-align:center;vertical-align:middle;font-family:Nunito,sans-serif;font-weight:800;font-size:'+fsCell+'pt;color:#1e1b4b">'+aStr[c]+'</td>';
   }
   // rechte Zelle: gleiche Zeilenhöhe, vertikal mittig -> sitzt exakt auf Höhe der Dividend-Ziffern
-  grid+='<td style="height:'+ch+'pt;vertical-align:middle;padding-left:'+Math.round(cell*0.5)+'pt;font-family:Nunito,sans-serif;font-weight:800;font-size:'+fs+'pt;color:#1e1b4b;white-space:nowrap">'+rightInner+'</td>';
+  grid+='<td style="height:'+ch+';vertical-align:middle;padding-left:3mm;font-family:Nunito,sans-serif;font-weight:800;font-size:'+fs+'pt;color:#1e1b4b;white-space:nowrap">'+rightInner+'</td>';
   grid+='</tr>';
   // leere Rechenzeilen (rechte Spalte bleibt leer)
   for(var r=0;r<rows;r++){
     grid+='<tr>';
     for(var c2=0;c2<cols;c2++){
-      grid+='<td style="height:'+ch+'pt;border:1px solid #cbd5e1;padding:0"></td>';
+      grid+='<td style="width:'+cw+';height:'+ch+';border:1px solid #cbd5e1;padding:0"></td>';
     }
     grid+='<td></td>';
     grid+='</tr>';
