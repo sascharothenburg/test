@@ -217,9 +217,26 @@ document.getElementById('btnAll') && document.getElementById('btnAll').addEventL
 document.getElementById('btnNone') && document.getElementById('btnNone').addEventListener('click',function(){selReihen=[];renderReihen();});
 document.getElementById('btnRnd') && document.getElementById('btnRnd').addEventListener('click',function(){var n=Math.floor(Math.random()*3)+3;var pool=[2,3,4,5,6,7,8,9];selReihen=[];while(selReihen.length<n&&pool.length>0){var i=Math.floor(Math.random()*pool.length);selReihen.push(pool.splice(i,1)[0]);}renderReihen();});
 
+// Automatische Aufgabenanzahl je Spaltenzahl (seitenfüllend A4): 1 Sp.->24, 2 Sp.->48, 3 Sp.->72
+var AUTO_COUNT_COLS={1:24,2:48,3:72};
+var userTouchedSlider=false; // sobald true, übersteuert der manuelle Slider die Automatik
+function applyAutoCount(){
+  if(userTouchedSlider) return;
+  var n=AUTO_COUNT_COLS[cols]||48;
+  var sl=document.getElementById('countSlider');
+  n=Math.max(parseInt(sl.min), Math.min(parseInt(sl.max), n));
+  sl.value=n;
+  document.getElementById('countLbl').textContent=n;
+  document.getElementById('countLbl2').textContent=n;
+}
 [1,2,3].forEach(function(c){
   var el=document.getElementById('col'+c);
-  if(el) el.addEventListener('click',function(){cols=c;[1,2,3].forEach(function(x){var el2=document.getElementById('col'+x);if(el2)el2.classList.toggle('sel',x===c);});});
+  if(el) el.addEventListener('click',function(){
+    cols=c;
+    [1,2,3].forEach(function(x){var el2=document.getElementById('col'+x);if(el2)el2.classList.toggle('sel',x===c);});
+    userTouchedSlider=false; // Spaltenwechsel -> Automatik wieder aktiv
+    applyAutoCount();
+  });
 });
 
 function updateInfo(){
@@ -230,9 +247,11 @@ function updateInfo(){
 }
 
 document.getElementById('countSlider').addEventListener('input',function(){
+  userTouchedSlider=true;
   document.getElementById('countLbl').textContent=this.value;
   document.getElementById('countLbl2').textContent=this.value;
 });
+applyAutoCount(); // initial passend zur Default-Spaltenzahl (2 -> 48)
 
 function generateTasks(){
   var no0=document.getElementById('no0').checked;
