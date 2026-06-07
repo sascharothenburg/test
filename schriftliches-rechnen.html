@@ -189,6 +189,17 @@ function setupMulti(id){
     });
   });
 }
+/* Automatische Aufgabenanzahl je Rechenart (seitenfüllend A4): Geteilt->6, sonst (+,-,x)->12 */
+var userTouchedSlider=false; // sobald true, übersteuert der manuelle Slider die Automatik
+function applyAutoCount(){
+  if(userTouchedSlider) return;
+  var ops=getMultiStr('opOpts');
+  var n=(ops.indexOf('div')>=0)?6:12; // Division braucht mehr Platz
+  var sl=document.getElementById('cnt');
+  n=Math.max(parseInt(sl.min), Math.min(parseInt(sl.max), n));
+  sl.value=n;
+  document.getElementById('cntVal').textContent=n;
+}
 /* Rechenart mit Sonderregeln: + und - kombinierbar, x und ÷ nur exklusiv allein */
 function setupOps(){
   var btns=document.querySelectorAll('#opOpts .opt-btn');
@@ -206,6 +217,8 @@ function setupOps(){
         // mindestens einer von +/- muss aktiv bleiben
         if(!document.querySelectorAll('#opOpts .opt-btn.sel').length) b.classList.add('sel');
       }
+      userTouchedSlider=false; // Rechenart-Wechsel -> Automatik wieder aktiv
+      applyAutoCount();
     });
   });
 }
@@ -520,7 +533,8 @@ document.getElementById('t-gen').addEventListener('click',function(){showTab('ge
 document.getElementById('t-list').addEventListener('click',function(){showTab('list');});
 document.getElementById('t-set').addEventListener('click',function(){showTab('set');});
 document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
-document.getElementById('cnt').addEventListener('input',function(){document.getElementById('cntVal').textContent=this.value;});
+document.getElementById('cnt').addEventListener('input',function(){userTouchedSlider=true;document.getElementById('cntVal').textContent=this.value;});
+applyAutoCount(); // initial passend zur Default-Rechenart (+/- -> 12)
 document.getElementById('btnGen').addEventListener('click',generate);
 document.getElementById('btnGoPre').addEventListener('click',function(){showTab('pre');});
 
