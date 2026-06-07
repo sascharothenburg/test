@@ -106,7 +106,7 @@ input{-webkit-user-select:text;user-select:text}
     <div style="margin-bottom:12px">
       <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Anzahl Mauern</label>
       <div style="display:flex;align-items:center;gap:10px">
-        <input type="range" id="cnt" min="2" max="16" step="1" value="8" style="flex:1;accent-color:#0369a1">
+        <input type="range" id="cnt" min="2" max="20" step="1" value="8" style="flex:1;accent-color:#0369a1">
         <strong id="cntVal" style="color:#0369a1;min-width:24px">8</strong>
       </div>
       <div class="ss" style="margin-top:6px">Wird automatisch passend zur Seite gewählt. Du kannst den Regler jederzeit selbst verstellen.</div>
@@ -208,9 +208,9 @@ setupMulti('sizeOpts');setupSingle('rangeOpts');setupMulti('typeOpts');
    Werte = ideale Mauer-Anzahl, damit eine A4-Seite gut gefüllt ist.
    Diese Werte sind durch Drucktest ermittelt und können hier justiert werden. */
 var AUTO_COUNT={
-  3:{ 20:12, 100:12, 1000:9 },
-  4:{ 20:9,  100:8,  1000:6 },
-  5:{ 20:6,  100:6,  1000:4 }
+  3:{ 20:20, 100:20, 1000:12 },
+  4:{ 20:12, 100:12, 1000:12 },
+  5:{ 20:12, 100:12, 1000:6 }
 };
 var userTouchedSlider=false; // sobald true, übersteuert der manuelle Slider die Automatik
 function autoCount(){
