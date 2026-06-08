@@ -198,6 +198,34 @@ function getMultiStr(id){return Array.from(document.querySelectorAll('#'+id+' .o
 function getSingleStr(id){var b=document.querySelector('#'+id+' .opt-btn.sel');return b?b.dataset.v:null;}
 setupMulti('areaOpts');setupMulti('shapeTypeOpts');setupSingle('setOpts');
 
+/* ===== Automatische Aufgabenanzahl (seitenfüllend A4) =====
+   - Bereich = nur Symmetrie -> 12
+   - Bereich = nur Formen UND Aufgabe = nur Wort->Form -> 14
+   - sonst (Formen dabei / gemischt) -> 8 */
+var userTouchedSlider=false; // sobald true, übersteuert der manuelle Slider die Automatik
+function autoCount(){
+  var areas=getMultiStr('areaOpts'); if(!areas.length)areas=['shape'];
+  var types=getMultiStr('shapeTypeOpts'); if(!types.length)types=['pickShape'];
+  var hasShape=areas.indexOf('shape')>=0;
+  var hasSym=areas.indexOf('sym')>=0;
+  if(!hasShape && hasSym) return 12;                 // nur Symmetrie
+  if(hasShape && !hasSym && types.length===1 && types[0]==='pickShape') return 14; // nur Formen + nur Wort->Form
+  return 8;                                          // Formen dabei / gemischt
+}
+function applyAutoCount(){
+  if(userTouchedSlider) return;
+  var n=autoCount();
+  var sl=document.getElementById('cnt');
+  n=Math.max(parseInt(sl.min), Math.min(parseInt(sl.max), n));
+  sl.value=n;
+  document.getElementById('cntVal').textContent=n;
+}
+['areaOpts','shapeTypeOpts','setOpts'].forEach(function(id){
+  document.querySelectorAll('#'+id+' .opt-btn').forEach(function(b){
+    b.addEventListener('click', function(){userTouchedSlider=false;applyAutoCount();});
+  });
+});
+
 /* ===== Formen-Bibliothek =====
    Jede Form: name, draw(size)->svg-inhalt (zentriert in viewBox sizeXsize), axes: Anzahl Symmetrieachsen,
    axisLines(size): Linien für Lösung (Symmetrieachsen einzeichnen)
@@ -471,7 +499,8 @@ document.getElementById('t-gen').addEventListener('click',function(){showTab('ge
 document.getElementById('t-list').addEventListener('click',function(){showTab('list');});
 document.getElementById('t-set').addEventListener('click',function(){showTab('set');});
 document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
-document.getElementById('cnt').addEventListener('input',function(){document.getElementById('cntVal').textContent=this.value;});
+document.getElementById('cnt').addEventListener('input',function(){userTouchedSlider=true;document.getElementById('cntVal').textContent=this.value;});
+applyAutoCount(); // initial passend zur Default-Auswahl
 document.getElementById('btnGen').addEventListener('click',generate);
 document.getElementById('btnGoPre').addEventListener('click',function(){showTab('pre');});
 
