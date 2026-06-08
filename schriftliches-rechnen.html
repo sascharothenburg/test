@@ -103,7 +103,7 @@ input{-webkit-user-select:text;user-select:text}
     <div style="margin-bottom:12px">
       <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Anzahl Aufgaben</label>
       <div style="display:flex;align-items:center;gap:10px">
-        <input type="range" id="cnt" min="2" max="20" step="1" value="12" style="flex:1;accent-color:#0369a1">
+        <input type="range" id="cnt" min="2" max="36" step="1" value="12" style="flex:1;accent-color:#0369a1">
         <strong id="cntVal" style="color:#0369a1;min-width:24px">12</strong>
       </div>
     </div>
@@ -194,7 +194,10 @@ var userTouchedSlider=false; // sobald true, übersteuert der manuelle Slider di
 function applyAutoCount(){
   if(userTouchedSlider) return;
   var ops=getMultiStr('opOpts');
-  var n=(ops.indexOf('div')>=0)?6:12; // Division braucht mehr Platz
+  var n;
+  if(ops.indexOf('div')>=0) n=6;        // Geteilt: breite Gitter
+  else if(ops.indexOf('mul')>=0) n=12;  // Mal
+  else n=18;                            // Plus/Minus
   var sl=document.getElementById('cnt');
   n=Math.max(parseInt(sl.min), Math.min(parseInt(sl.max), n));
   sl.value=n;
