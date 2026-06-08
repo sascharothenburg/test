@@ -225,6 +225,23 @@ document.querySelectorAll('#placeOpts .opt-btn').forEach(function(b){
 });
 updateReprAvailability();
 
+/* ===== Automatische Aufgabenanzahl je Stellenzahl (seitenfüllend A4) =====
+   places: 2=ZE, 3=HZE, 4=T, 5=ZT, 6=HT */
+var AUTO_COUNT_PLACES={2:20, 3:16, 4:15, 5:18, 6:12};
+var userTouchedSlider=false; // sobald true, übersteuert der manuelle Slider die Automatik
+function applyAutoCount(){
+  if(userTouchedSlider) return;
+  var places=getSingle('placeOpts')||3;
+  var n=AUTO_COUNT_PLACES[places]||16;
+  var sl=document.getElementById('cnt');
+  n=Math.max(parseInt(sl.min), Math.min(parseInt(sl.max), n));
+  sl.value=n;
+  document.getElementById('cntVal').textContent=n;
+}
+document.querySelectorAll('#placeOpts .opt-btn').forEach(function(b){
+  b.addEventListener('click', function(){userTouchedSlider=false;applyAutoCount();});
+});
+
 /* ===== Generator ===== */
 var tasks=[];
 var PLACE_LABELS={1:'E',2:'Z',3:'H',4:'T',5:'ZT',6:'HT'};
@@ -360,8 +377,9 @@ function buildWS(){
   var showSol=document.getElementById('showSol').checked;
   var places=tasks[0].places;
   var pageInner=(IS_IOS||IS_SAFARI)?495:515;
-  // Spaltenzahl automatisch: eine Tafel braucht ~ places*minCell. Mindestzellbreite 18pt + Polster.
-  var minCell=18;
+  // Spaltenzahl automatisch: eine Tafel braucht ~ places*minCell. Mindestzellbreite so gewählt,
+  // dass die Kästchen bei allen Stellenzahlen mind. so groß wie bei HZE (~12,4mm) bleiben.
+  var minCell=30;
   var tableMin=places*minCell+10;
   var cols=4;
   while(cols>1 && (pageInner/cols-17) < tableMin) cols--;
@@ -463,7 +481,8 @@ document.getElementById('t-gen').addEventListener('click',function(){showTab('ge
 document.getElementById('t-list').addEventListener('click',function(){showTab('list');});
 document.getElementById('t-set').addEventListener('click',function(){showTab('set');});
 document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
-document.getElementById('cnt').addEventListener('input',function(){document.getElementById('cntVal').textContent=this.value;});
+document.getElementById('cnt').addEventListener('input',function(){userTouchedSlider=true;document.getElementById('cntVal').textContent=this.value;});
+applyAutoCount(); // initial passend zur Default-Stellenzahl (HZE -> 16)
 document.getElementById('btnGen').addEventListener('click',generate);
 document.getElementById('btnGoPre').addEventListener('click',function(){showTab('pre');});
 
