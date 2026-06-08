@@ -147,6 +147,7 @@ function setDiff(d){
   [1,2,3].forEach(function(x){document.getElementById('diff'+x).classList.toggle('sel',x===d);});
 }
 document.getElementById('countSlider').addEventListener('input',function(){
+  userTouchedSlider=true;
   document.getElementById('countLbl').textContent=this.value;
   document.getElementById('countLbl2').textContent=this.value;
 });
@@ -158,6 +159,21 @@ function toggleType(t,el){
   var idx=activeTypes.indexOf(t);
   if(idx===-1){activeTypes.push(t);el.classList.add('sel');}
   else if(activeTypes.length>1){activeTypes.splice(idx,1);el.classList.remove('sel');}
+  userTouchedSlider=false; // Typ-Wechsel -> Automatik wieder aktiv
+  applyAutoCount();
+}
+/* Automatische Aufgabenanzahl (seitenfüllend A4):
+   addieren/vergleichen/€<->Cent -> 20; sobald Wechselgeld oder Einkauf dabei (mehr Platz) -> 12 */
+var userTouchedSlider=false;
+function applyAutoCount(){
+  if(userTouchedSlider) return;
+  var heavy=(activeTypes.indexOf('wechsel')>=0)||(activeTypes.indexOf('einkauf')>=0);
+  var n=heavy?12:20;
+  var sl=document.getElementById('countSlider');
+  n=Math.max(parseInt(sl.min), Math.min(parseInt(sl.max), n));
+  sl.value=n;
+  document.getElementById('countLbl').textContent=n;
+  document.getElementById('countLbl2').textContent=n;
 }
 function rndCent(maxEuro){
   var cents=[0,5,10,20,25,50,75,99];
@@ -234,11 +250,13 @@ function buildWS(){
   var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   var fs=isIOS?12:15;
   var h=wsHead('&#x1F4B6;','Mit Geld rechnen','Berechne und löse die Aufgaben');
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:4mm 6mm">';
+  h+='<div style="font-size:0;text-align:left">';
   tasks.forEach(function(t,i){
-    h+='<div style="border:1pt solid #e5e7eb;border-radius:6pt;padding:3mm;min-height:18mm;break-inside:avoid;page-break-inside:avoid">'
+    h+='<div style="display:inline-block;vertical-align:top;width:50%;box-sizing:border-box;break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:4mm;padding:0 3mm 0 0">'
+      +'<div style="border:1pt solid #e5e7eb;border-radius:6pt;padding:3mm;min-height:18mm;box-sizing:border-box">'
       +'<div style="font-size:7pt;color:#0369a1;font-weight:800;margin-bottom:1.5mm">'+(i+1)+'. '+t.type+'</div>'
       +'<div style="font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;line-height:1.5;color:#1e1b4b">'+t.q+'</div>'
+      +'</div>'
       +'</div>';
   });
   h+='</div>';
@@ -302,6 +320,7 @@ document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click'
 document.getElementById('btnGoPre').onclick=function(){showTab('pre');};
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 document.addEventListener('selectstart',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;e.preventDefault();});
+applyAutoCount(); // initial passend zur Default-Typauswahl (wechsel dabei -> 12)
 
 </script>
 </body>
