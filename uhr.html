@@ -110,8 +110,8 @@ input{-webkit-user-select:text;user-select:text}
     <div class="sr" style="flex-direction:column;align-items:flex-start;border:none;padding-bottom:0">
       <div class="sl">Anzahl Aufgaben: <strong id="countLbl" style="color:#0369a1">12</strong></div>
       <div style="display:flex;align-items:center;gap:10px;width:100%;margin-top:8px">
-        <input type="range" id="countSlider" min="4" max="24" step="2" value="12" style="flex:1;accent-color:#0369a1" oninput="document.getElementById('countLbl').textContent=this.value">
-        <strong style="color:#0369a1;min-width:24px">12</strong>
+        <input type="range" id="countSlider" min="4" max="24" step="1" value="15" style="flex:1;accent-color:#0369a1" oninput="userTouchedSlider=true;document.getElementById('countLbl').textContent=this.value;this.parentNode.querySelector('strong').textContent=this.value">
+        <strong style="color:#0369a1;min-width:24px">15</strong>
       </div>
     </div>
   </div>
@@ -145,7 +145,19 @@ document.addEventListener('click',function(e){var w=document.getElementById('ppW
 
 var difficulty=1,taskType='lesen';
 function setDiff(d){difficulty=d;[1,2,3].forEach(function(x){document.getElementById('d'+x).classList.toggle('sel',x===d);});}
-function setType(t){taskType=t;['lesen','zeiger','beide'].forEach(function(x){document.getElementById('ty-'+x).classList.toggle('sel',x===t);});}
+function setType(t){taskType=t;['lesen','zeiger','beide'].forEach(function(x){document.getElementById('ty-'+x).classList.toggle('sel',x===t);});userTouchedSlider=false;applyAutoCount();}
+/* Automatische Aufgabenanzahl je Typ (seitenfüllend A4): Uhr ablesen->18, Zeiger/Beides->15 */
+var userTouchedSlider=false;
+function applyAutoCount(){
+  if(userTouchedSlider) return;
+  var n=(taskType==='lesen')?18:15;
+  var sl=document.getElementById('countSlider');
+  n=Math.max(parseInt(sl.min), Math.min(parseInt(sl.max), n));
+  sl.value=n;
+  document.getElementById('countLbl').textContent=n;
+  var s2=sl.parentNode.querySelector('strong');
+  if(s2) s2.textContent=n;
+}
 
 function rndTime(){
   var h,m,use24=document.getElementById('h24').checked;
@@ -257,6 +269,7 @@ document.getElementById('t-pre').onclick=function(){showTab('pre');};
 document.getElementById('btnGoPre').onclick=function(){showTab('pre');};
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 document.addEventListener('selectstart',function(e){if(e.target.tagName==='INPUT')return;e.preventDefault();});
+applyAutoCount(); // initial passend zum Default-Typ (lesen -> 18)
 
 </script>
 </body>
