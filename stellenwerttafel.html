@@ -338,7 +338,7 @@ function tablePrint(t,showSol,d){
   else{filled=true;showNum=showSol;}
   var cellW=d.w, cellH=Math.round(d.w*0.82);
   var bw=d.bw, fs=d.fs;
-  var h='<div style="text-align:center">';
+  var h='<div style="text-align:center;break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;display:inline-block;width:100%">';
   // Zahl-Zeile
   if(showNum){
     h+='<div style="font-family:Nunito,sans-serif;font-weight:900;font-size:'+(fs*1.15)+'pt;color:#1e1b4b;margin-bottom:3pt">'+t.num.toLocaleString('de-DE')+'</div>';

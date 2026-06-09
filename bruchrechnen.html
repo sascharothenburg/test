@@ -386,9 +386,11 @@ function buildWS(){
       var t=tasks[r+c];
       if(t){
         h+='<td style="width:50%;vertical-align:top;text-align:center;padding:0 3mm '+gap+' 3mm">';
+        h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;display:inline-block;width:100%">';
         if(showNr) h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:2pt">'+(r+c+1)+'.</div>';
         if(t.type==='color') h+='<div style="font-family:Nunito,sans-serif;font-size:8.5pt;color:#555;margin-bottom:3pt">F\u00e4rbe diesen Bruch an:</div>';
         h+=taskPrintHTML(t,false,d);
+        h+='</div>';
         h+='</td>';
       } else h+='<td style="width:50%"></td>';
     }
@@ -406,8 +408,10 @@ function buildWS(){
         var t=tasks[r+c];
         if(t){
           h+='<td style="width:50%;vertical-align:top;text-align:center;padding:0 3mm '+gap+' 3mm">';
+          h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;display:inline-block;width:100%">';
           if(showNr) h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:2pt">'+(r+c+1)+'.</div>';
           h+=taskPrintHTML(t,true,d);
+          h+='</div>';
           h+='</td>';
         } else h+='<td style="width:50%"></td>';
       }
