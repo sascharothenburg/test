@@ -266,13 +266,19 @@ function buildWS(){
   const meta=buildMeta();
   let h='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #0369a1"><div><div class="ws-title">\ud83d\udd22 Mathe-Aufgaben</div><div class="ws-sub">L\u00f6se die Aufgaben</div></div>'+(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
   if(twoCol){
-    h+='<div style="column-count:2;column-gap:'+colGap+'pt;column-rule:1px dashed #ddd">';
-    probs.forEach(p=>{ h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;padding:'+(gapH/2).toFixed(1)+'pt 0">'+renderProblemHTML(p,mL,mR,mRes,fontSize)+'</div>'; });
-    h+='</div>';
+    h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+    for(var i=0;i<probs.length;i+=2){
+      h+='<tr style="break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid">';
+      h+='<td style="width:50%;vertical-align:top;padding:'+(gapH/2).toFixed(1)+'pt '+(colGap/2)+'pt '+(gapH/2).toFixed(1)+'pt 0">'+renderProblemHTML(probs[i],mL,mR,mRes,fontSize)+'</td>';
+      if(probs[i+1]) h+='<td style="width:50%;vertical-align:top;padding:'+(gapH/2).toFixed(1)+'pt 0 '+(gapH/2).toFixed(1)+'pt '+(colGap/2)+'pt;border-left:1px dashed #ddd">'+renderProblemHTML(probs[i+1],mL,mR,mRes,fontSize)+'</td>';
+      else h+='<td style="width:50%"></td>';
+      h+='</tr>';
+    }
+    h+='</table>';
   }else{
-    h+='<div>';
-    probs.forEach(p=>{ h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;padding:'+(gapH/2).toFixed(1)+'pt 0">'+renderProblemHTML(p,mL,mR,mRes,fontSize)+'</div>'; });
-    h+='</div>';
+    h+='<table style="width:100%;border-collapse:collapse">';
+    probs.forEach(p=>{ h+='<tr style="break-inside:avoid;page-break-inside:avoid"><td style="padding:'+(gapH/2).toFixed(1)+'pt 0">'+renderProblemHTML(p,mL,mR,mRes,fontSize)+'</td></tr>'; });
+    h+='</table>';
   }
   h+='<div class="ws-foot">\u2605 \u2605 \u2605 &nbsp; Toll gemacht! &nbsp; \u2605 \u2605 \u2605<br>\u00a9 2026 Sascha Rothenburg \u00b7 Grundschrift von Christian Urff</div>';
   return h;

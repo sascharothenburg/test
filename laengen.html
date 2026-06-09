@@ -240,14 +240,21 @@ function buildWS(){
   var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   var fs=isIOS?12:14;
   var h=wsHead('&#x1F4CF;','Längen &amp; Gewichte','Rechne um und vergleiche');
-  h+='<div style="column-count:2;column-gap:5mm">';
-  tasks.forEach(function(t,i){
-    h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;border-bottom:1px solid #e5e7eb;padding:2.5mm 0">'
-      +'<span style="font-size:8pt;color:#0369a1;font-weight:800;min-width:16pt;display:inline-block">'+(i+1)+'.</span>'
-      +'<span style="font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;color:#1e1b4b">'+t.q+'</span>'
-      +'</div>';
-  });
-  h+='</div>';
+  h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+  for(var r=0;r<tasks.length;r+=2){
+    h+='<tr style="break-inside:avoid;page-break-inside:avoid">';
+    for(var c=0;c<2;c++){
+      var t=tasks[r+c];
+      if(t){
+        h+='<td style="width:50%;vertical-align:baseline;border-bottom:1px solid #e5e7eb;padding:2.5mm 5mm 2.5mm 0">'
+          +'<span style="font-size:8pt;color:#0369a1;font-weight:800;min-width:16pt;display:inline-block">'+(r+c+1)+'.</span>'
+          +'<span style="font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;color:#1e1b4b">'+t.q+'</span>'
+          +'</td>';
+      } else h+='<td style="width:50%"></td>';
+    }
+    h+='</tr>';
+  }
+  h+='</table>';
   h+=wsFoot(sols);
   return h;
 }

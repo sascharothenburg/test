@@ -212,18 +212,28 @@ function buildWS(){
   var sz=isIOS?70:88;
   var meta=buildMeta();
   var h='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #0369a1"><div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#0369a1">&#x1F551; Uhr lernen</div><div style="font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif">Wie viel Uhr ist es?</div></div>'+(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
-  h+='<div style="column-count:3;column-gap:5mm">';
   var sols=[];
+  var cells=[];
   for(var i=0;i<count;i++){
     var tm=rndTime(),hr=tm[0],mn=tm[1];
     var isLesen=(taskType==='lesen')||(taskType==='beide'&&Math.random()<0.5);
     var ts=fmtTime(hr,mn);
-    h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;text-align:center;border:1px solid #e5e7eb;border-radius:8pt;padding:3mm;margin-bottom:5mm"><div style="font-size:8pt;color:#0369a1;font-weight:800;margin-bottom:2mm">'+(i+1)+'.</div>';
-    if(isLesen){h+=clockSVG(hr%12||12,mn,sz);h+='<div style="margin-top:2mm;border-bottom:1.5px solid #0369a1;min-width:50pt;display:inline-block;padding:0 8pt">&nbsp;</div>';sols.push(ts);}
-    else{h+=emptySVG(sz);h+='<div style="margin-top:2mm;font-family:Grundschrift,sans-serif;font-weight:bold;font-size:12pt;color:#1e1b4b">'+ts+'</div>';sols.push('Zeiger eintragen');}
-    h+='</div>';
+    var inner='<div style="text-align:center;border:1px solid #e5e7eb;border-radius:8pt;padding:3mm"><div style="font-size:8pt;color:#0369a1;font-weight:800;margin-bottom:2mm">'+(i+1)+'.</div>';
+    if(isLesen){inner+=clockSVG(hr%12||12,mn,sz);inner+='<div style="margin-top:2mm;border-bottom:1.5px solid #0369a1;min-width:50pt;display:inline-block;padding:0 8pt">&nbsp;</div>';sols.push(ts);}
+    else{inner+=emptySVG(sz);inner+='<div style="margin-top:2mm;font-family:Grundschrift,sans-serif;font-weight:bold;font-size:12pt;color:#1e1b4b">'+ts+'</div>';sols.push('Zeiger eintragen');}
+    inner+='</div>';
+    cells.push(inner);
   }
-  h+='</div>';
+  h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+  for(var r=0;r<cells.length;r+=3){
+    h+='<tr style="break-inside:avoid;page-break-inside:avoid">';
+    for(var c=0;c<3;c++){
+      if(cells[r+c]) h+='<td style="width:33.33%;vertical-align:top;padding:0 2.5mm 5mm 2.5mm">'+cells[r+c]+'</td>';
+      else h+='<td style="width:33.33%"></td>';
+    }
+    h+='</tr>';
+  }
+  h+='</table>';
   if(showSol){h+='<div style="margin-top:5mm;padding-top:3mm;border-top:1px solid #e5e7eb"><div style="font-size:7pt;font-weight:800;color:#0369a1;margin-bottom:2mm;font-family:Nunito,sans-serif">LOESUNGEN</div><div style="display:flex;flex-wrap:wrap;gap:2mm 5mm;font-family:Nunito,sans-serif;font-size:7pt;color:#777">';sols.forEach(function(s,i){h+='<span>'+(i+1)+'. '+s+'</span>';});h+='</div></div>';}
   h+='<div style="margin-top:5mm;text-align:center;font-family:Nunito,sans-serif;font-size:7pt;color:#bbb;border-top:1px solid #eee;padding-top:2mm">\u2605 \u2605 \u2605 Toll gemacht! \u2605 \u2605 \u2605<br>\u00a9 2026 Sascha Rothenburg \u00b7 Grundschrift von Christian Urff</div>';
   return h;

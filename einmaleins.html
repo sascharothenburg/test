@@ -72,10 +72,7 @@ input[type=range]{accent-color:#0369a1}
 .ws-title{font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#0369a1}
 .ws-sub{font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif}
 .ws-meta{flex-shrink:0}
-.ws-tasks{column-count:1}
-.ws-2col{column-count:2;column-gap:8mm}
-.ws-3col{column-count:3;column-gap:6mm}
-.ws-task{padding:1mm 0;font-family:Grundschrift,sans-serif;break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid}
+.ws-task{padding:1mm 0;font-family:Grundschrift,sans-serif}
 .ws-nr{color:#94a3b8;font-family:Nunito,sans-serif;font-weight:700;min-width:16pt;display:inline-block}
 .ws-eq{font-family:Grundschrift,sans-serif;font-weight:bold;color:#1e1b4b}
 .ws-nr{margin-right:5pt}
@@ -306,16 +303,24 @@ function buildWS(){
     +'<div class="ws-title">× Das kleine 1×1</div>'
     +'<div class="ws-sub">Reihen: '+rLabel+(inv?' · Ergebnis vorgegeben':' · Ergebnis eintragen')+'</div>'
     +'</div>'+(meta?'<div class="ws-meta">'+meta+'</div>':'')+'</div>';
-  var gridCls=cols===3?'ws-3col':cols===2?'ws-2col':'ws-tasks';
-  h+='<div class="'+gridCls+'">';
-  tasks.forEach(function(t,i){
-    var aStr=t.a==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.a);
-    var bStr=t.b==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.b);
-    var rStr=t.res==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.res);
-    h+='<div class="ws-task"><span class="ws-nr" style="font-size:9pt">'+(i+1)+'.</span>'
-      +'<span class="ws-eq" style="font-size:'+fs+'pt">'+aStr+' × '+bStr+' = '+rStr+'</span></div>';
-  });
-  h+='</div>';
+  h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+  var colW=(100/cols).toFixed(4)+'%';
+  for(var r=0;r<tasks.length;r+=cols){
+    h+='<tr style="break-inside:avoid;page-break-inside:avoid">';
+    for(var c=0;c<cols;c++){
+      var t=tasks[r+c];
+      if(t){
+        var idx=r+c;
+        var aStr=t.a==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.a);
+        var bStr=t.b==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.b);
+        var rStr=t.res==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.res);
+        h+='<td style="width:'+colW+';vertical-align:baseline;padding:1mm 3mm 1mm 0"><span class="ws-nr" style="font-size:9pt">'+(idx+1)+'.</span>'
+          +'<span class="ws-eq" style="font-size:'+fs+'pt">'+aStr+' × '+bStr+' = '+rStr+'</span></td>';
+      } else h+='<td style="width:'+colW+'"></td>';
+    }
+    h+='</tr>';
+  }
+  h+='</table>';
   if(showSol){
     h+='<div style="margin-top:6mm;padding-top:3mm;border-top:1px solid #e5e7eb;break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid">'
       +'<div style="font-size:7pt;font-weight:800;color:#0369a1;margin-bottom:3mm">LÖSUNGEN</div>'

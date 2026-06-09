@@ -379,27 +379,41 @@ function buildWS(){
        +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#0369a1">\ud83c\udf55 Bruchrechnen</div>'
        +'<div style="font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif">'+instr+'</div></div>'
        +(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
-  h+='<div style="column-count:2;column-gap:6mm">';
-  tasks.forEach(function(t,i){
-    h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;box-sizing:border-box;text-align:center;margin-bottom:'+gap+'">';
-    if(showNr) h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:2pt">'+(i+1)+'.</div>';
-    if(t.type==='color') h+='<div style="font-family:Nunito,sans-serif;font-size:8.5pt;color:#555;margin-bottom:3pt">F\u00e4rbe diesen Bruch an:</div>';
-    h+=taskPrintHTML(t,false,d);
-    h+='</div>';
-  });
-  h+='</div>';
+  h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+  for(var r=0;r<tasks.length;r+=2){
+    h+='<tr style="break-inside:avoid;page-break-inside:avoid">';
+    for(var c=0;c<2;c++){
+      var t=tasks[r+c];
+      if(t){
+        h+='<td style="width:50%;vertical-align:top;text-align:center;padding:0 3mm '+gap+' 3mm">';
+        if(showNr) h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:2pt">'+(r+c+1)+'.</div>';
+        if(t.type==='color') h+='<div style="font-family:Nunito,sans-serif;font-size:8.5pt;color:#555;margin-bottom:3pt">F\u00e4rbe diesen Bruch an:</div>';
+        h+=taskPrintHTML(t,false,d);
+        h+='</td>';
+      } else h+='<td style="width:50%"></td>';
+    }
+    h+='</tr>';
+  }
+  h+='</table>';
   if(showSol){
     h+='<div style="page-break-before:always;break-before:page;padding-top:4mm"></div>';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #16a34a">'
       +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#16a34a">\u2705 L\u00f6sungen</div></div></div>';
-    h+='<div style="column-count:2;column-gap:6mm">';
-    tasks.forEach(function(t,i){
-      h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;box-sizing:border-box;text-align:center;margin-bottom:'+gap+'">';
-      if(showNr) h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:2pt">'+(i+1)+'.</div>';
-      h+=taskPrintHTML(t,true,d);
-      h+='</div>';
-    });
-    h+='</div>';
+    h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+    for(var r=0;r<tasks.length;r+=2){
+      h+='<tr style="break-inside:avoid;page-break-inside:avoid">';
+      for(var c=0;c<2;c++){
+        var t=tasks[r+c];
+        if(t){
+          h+='<td style="width:50%;vertical-align:top;text-align:center;padding:0 3mm '+gap+' 3mm">';
+          if(showNr) h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:2pt">'+(r+c+1)+'.</div>';
+          h+=taskPrintHTML(t,true,d);
+          h+='</td>';
+        } else h+='<td style="width:50%"></td>';
+      }
+      h+='</tr>';
+    }
+    h+='</table>';
   }
   return h;
 }

@@ -408,26 +408,42 @@ function buildWS(){
        +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#0369a1">\ud83e\uddf1 Rechenmauern</div>'
        +'<div style="font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif">Rechne die fehlenden Steine aus. Jeder Stein = Summe der beiden darunter.</div></div>'
        +(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
-  h+='<div style="column-count:'+cols+';column-gap:6mm">';
-  walls.forEach(function(w,i){
-    h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;box-sizing:border-box;text-align:center;margin-bottom:8mm">';
-    if(showNr) h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:3pt">'+(i+1)+'.</div>';
-    h+=pyramidPrint(w,false,d);
-    h+='</div>';
-  });
-  h+='</div>';
+  h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+  var cwM=(100/cols).toFixed(4)+'%';
+  for(var r=0;r<walls.length;r+=cols){
+    h+='<tr style="break-inside:avoid;page-break-inside:avoid">';
+    for(var c=0;c<cols;c++){
+      var w=walls[r+c];
+      if(w){
+        h+='<td style="width:'+cwM+';vertical-align:top;text-align:center;padding:0 3mm 8mm 3mm">';
+        if(showNr) h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:3pt">'+(r+c+1)+'.</div>';
+        h+=pyramidPrint(w,false,d);
+        h+='</td>';
+      } else h+='<td style="width:'+cwM+'"></td>';
+    }
+    h+='</tr>';
+  }
+  h+='</table>';
   if(showSol){
     h+='<div style="page-break-before:always;break-before:page;padding-top:4mm"></div>';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #16a34a">'
       +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#16a34a">\u2705 L\u00f6sungen</div></div></div>';
-    h+='<div style="column-count:'+cols+';column-gap:6mm">';
-    walls.forEach(function(w,i){
-      h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;box-sizing:border-box;text-align:center;margin-bottom:8mm">';
-      if(showNr) h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:3pt">'+(i+1)+'.</div>';
-      h+=pyramidPrint(w,true,d);
-      h+='</div>';
-    });
-    h+='</div>';
+    h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+    var cwM2=(100/cols).toFixed(4)+'%';
+    for(var r=0;r<walls.length;r+=cols){
+      h+='<tr style="break-inside:avoid;page-break-inside:avoid">';
+      for(var c=0;c<cols;c++){
+        var w=walls[r+c];
+        if(w){
+          h+='<td style="width:'+cwM2+';vertical-align:top;text-align:center;padding:0 3mm 8mm 3mm">';
+          if(showNr) h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:3pt">'+(r+c+1)+'.</div>';
+          h+=pyramidPrint(w,true,d);
+          h+='</td>';
+        } else h+='<td style="width:'+cwM2+'"></td>';
+      }
+      h+='</tr>';
+    }
+    h+='</table>';
   }
   return h;
 }
