@@ -212,13 +212,13 @@ function buildWS(){
   var sz=isIOS?70:88;
   var meta=buildMeta();
   var h='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #0369a1"><div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#0369a1">&#x1F551; Uhr lernen</div><div style="font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif">Wie viel Uhr ist es?</div></div>'+(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
-  h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5mm">';
+  h+='<div style="column-count:3;column-gap:5mm">';
   var sols=[];
   for(var i=0;i<count;i++){
     var tm=rndTime(),hr=tm[0],mn=tm[1];
     var isLesen=(taskType==='lesen')||(taskType==='beide'&&Math.random()<0.5);
     var ts=fmtTime(hr,mn);
-    h+='<div style="text-align:center;border:1px solid #e5e7eb;border-radius:8pt;padding:3mm"><div style="font-size:8pt;color:#0369a1;font-weight:800;margin-bottom:2mm">'+(i+1)+'.</div>';
+    h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;text-align:center;border:1px solid #e5e7eb;border-radius:8pt;padding:3mm;margin-bottom:5mm"><div style="font-size:8pt;color:#0369a1;font-weight:800;margin-bottom:2mm">'+(i+1)+'.</div>';
     if(isLesen){h+=clockSVG(hr%12||12,mn,sz);h+='<div style="margin-top:2mm;border-bottom:1.5px solid #0369a1;min-width:50pt;display:inline-block;padding:0 8pt">&nbsp;</div>';sols.push(ts);}
     else{h+=emptySVG(sz);h+='<div style="margin-top:2mm;font-family:Grundschrift,sans-serif;font-weight:bold;font-size:12pt;color:#1e1b4b">'+ts+'</div>';sols.push('Zeiger eintragen');}
     h+='</div>';

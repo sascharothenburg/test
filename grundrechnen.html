@@ -94,13 +94,13 @@ input{-webkit-user-select:text;user-select:text}
   </div>
 </div>
 <div class="tabs">
-  <button class="tab active" id="t-tasks"><span class="ti">&#x2795;</span>Aufgaben</button>
-  <button class="tab" id="t-gen"><span class="ti">&#x26A1;</span>Generator</button>
+  <button class="tab active" id="t-gen"><span class="ti">&#x26A1;</span>Generator</button>
+  <button class="tab" id="t-tasks"><span class="ti">&#x2795;</span>Aufgaben</button>
   <button class="tab" id="t-set"><span class="ti">&#x2699;</span>Einst.</button>
   <button class="tab" id="t-pre"><span class="ti">&#x1F441;</span>Vorschau</button>
 </div>
 <div class="screens">
-<div class="screen active" id="s-tasks">
+<div class="screen" id="s-tasks">
   <div class="card">
     <h2>&#x270F;&#xFE0F; Aufgaben eingeben</h2>
     <div class="hint-box">
@@ -112,7 +112,7 @@ input{-webkit-user-select:text;user-select:text}
     <button class="btn bs btn-sm" onclick="addEmptyProb()" style="margin-top:8px">+ Aufgabe hinzuf&#252;gen</button>
   </div>
 </div>
-<div class="screen" id="s-gen">
+<div class="screen active" id="s-gen">
   <div class="card">
     <h2>&#x26A1; Automatisch generieren</h2>
     <div class="chips" id="genChips"></div>
@@ -266,24 +266,12 @@ function buildWS(){
   const meta=buildMeta();
   let h='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #0369a1"><div><div class="ws-title">\ud83d\udd22 Mathe-Aufgaben</div><div class="ws-sub">L\u00f6se die Aufgaben</div></div>'+(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
   if(twoCol){
-    const half=Math.ceil(probs.length/2);
-    const col1=probs.slice(0,half), col2=probs.slice(half);
-    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 '+colGap+'pt">';
-    const maxLen=Math.max(col1.length,col2.length);
-    for(let i=0;i<maxLen;i++){
-      const p1=col1[i];
-      h+='<div style="padding:'+(gapH/2).toFixed(1)+'pt 0">';
-      if(p1)h+=renderProblemHTML(p1,mL,mR,mRes,fontSize);
-      h+='</div>';
-      const p2=col2[i];
-      h+='<div style="padding:'+(gapH/2).toFixed(1)+'pt 0;border-left:1px dashed #ddd;padding-left:'+(colGap/2)+'pt">';
-      if(p2)h+=renderProblemHTML(p2,mL,mR,mRes,fontSize);
-      h+='</div>';
-    }
+    h+='<div style="column-count:2;column-gap:'+colGap+'pt;column-rule:1px dashed #ddd">';
+    probs.forEach(p=>{ h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;padding:'+(gapH/2).toFixed(1)+'pt 0">'+renderProblemHTML(p,mL,mR,mRes,fontSize)+'</div>'; });
     h+='</div>';
   }else{
     h+='<div>';
-    probs.forEach(p=>{ h+='<div style="padding:'+(gapH/2).toFixed(1)+'pt 0">'+renderProblemHTML(p,mL,mR,mRes,fontSize)+'</div>'; });
+    probs.forEach(p=>{ h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;padding:'+(gapH/2).toFixed(1)+'pt 0">'+renderProblemHTML(p,mL,mR,mRes,fontSize)+'</div>'; });
     h+='</div>';
   }
   h+='<div class="ws-foot">\u2605 \u2605 \u2605 &nbsp; Toll gemacht! &nbsp; \u2605 \u2605 \u2605<br>\u00a9 2026 Sascha Rothenburg \u00b7 Grundschrift von Christian Urff</div>';

@@ -410,39 +410,29 @@ function buildWS(){
        +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#0369a1">\ud83d\udcd0 Geometrie &ndash; Formen &amp; Symmetrien</div>'
        +'<div style="font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif">Benenne die Formen, kreuze richtig an und arbeite mit den Symmetrieachsen.</div></div>'
        +(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 8mm">';
-  (function(){
-    var half=Math.ceil(tasks.length/2), c1=tasks.slice(0,half), c2=tasks.slice(half), mx=Math.max(c1.length,c2.length);
-    function cell(t,gi){
-      if(!t) return '<div></div>';
-      var c='<div style="box-sizing:border-box;margin-bottom:'+gap+'">';
-      c+='<div style="font-family:Nunito,sans-serif;font-size:9pt;font-weight:700;color:#1e1b4b;margin-bottom:3pt">';
-      if(showNr) c+='<span style="color:#94a3b8;font-weight:800">'+(gi+1)+'.</span> ';
-      c+=questionText(t)+'</div>';
-      c+=taskPrint(t,false,82);
-      return c+'</div>';
-    }
-    for(var i=0;i<mx;i++){ h+=cell(c1[i],i); h+=cell(c2[i],i+half); }
-  })();
+  h+='<div style="column-count:2;column-gap:8mm">';
+  tasks.forEach(function(t,i){
+    h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;box-sizing:border-box;margin-bottom:'+gap+'">';
+    h+='<div style="font-family:Nunito,sans-serif;font-size:9pt;font-weight:700;color:#1e1b4b;margin-bottom:3pt">';
+    if(showNr) h+='<span style="color:#94a3b8;font-weight:800">'+(i+1)+'.</span> ';
+    h+=questionText(t)+'</div>';
+    h+=taskPrint(t,false,82);
+    h+='</div>';
+  });
   h+='</div>';
   if(showSol){
     h+='<div style="page-break-before:always;break-before:page;padding-top:4mm"></div>';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #16a34a">'
       +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#16a34a">\u2705 L\u00f6sungen</div></div></div>';
-    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 8mm">';
-    (function(){
-      var half=Math.ceil(tasks.length/2), c1=tasks.slice(0,half), c2=tasks.slice(half), mx=Math.max(c1.length,c2.length);
-      function cell(t,gi){
-        if(!t) return '<div></div>';
-        var c='<div style="box-sizing:border-box;margin-bottom:'+gap+'">';
-        c+='<div style="font-family:Nunito,sans-serif;font-size:9pt;font-weight:700;color:#1e1b4b;margin-bottom:3pt">';
-        if(showNr) c+='<span style="color:#94a3b8;font-weight:800">'+(gi+1)+'.</span> ';
-        c+=questionText(t)+'</div>';
-        c+=taskPrint(t,true,82);
-        return c+'</div>';
-      }
-      for(var i=0;i<mx;i++){ h+=cell(c1[i],i); h+=cell(c2[i],i+half); }
-    })();
+    h+='<div style="column-count:2;column-gap:8mm">';
+    tasks.forEach(function(t,i){
+      h+='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;box-sizing:border-box;margin-bottom:'+gap+'">';
+      h+='<div style="font-family:Nunito,sans-serif;font-size:9pt;font-weight:700;color:#1e1b4b;margin-bottom:3pt">';
+      if(showNr) h+='<span style="color:#94a3b8;font-weight:800">'+(i+1)+'.</span> ';
+      h+=questionText(t)+'</div>';
+      h+=taskPrint(t,true,82);
+      h+='</div>';
+    });
     h+='</div>';
   }
   return h;
