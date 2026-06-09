@@ -242,7 +242,7 @@ function buildWS(){
   var h=wsHead('&#x1F4CF;','Längen &amp; Gewichte','Rechne um und vergleiche');
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:3mm 5mm">';
   tasks.forEach(function(t,i){
-    h+='<div style="border-bottom:1px solid #e5e7eb;padding:2.5mm 0;display:flex;align-items:baseline;gap:3mm;break-inside:avoid;page-break-inside:avoid">'
+    h+='<div style="border-bottom:1px solid #e5e7eb;padding:2.5mm 0;display:flex;align-items:baseline;gap:3mm">'
       +'<span style="font-size:8pt;color:#0369a1;font-weight:800;min-width:16pt">'+(i+1)+'.</span>'
       +'<span style="font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;color:#1e1b4b">'+t.q+'</span>'
       +'</div>';

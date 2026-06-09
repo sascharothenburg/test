@@ -250,15 +250,19 @@ function buildWS(){
   var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   var fs=isIOS?12:15;
   var h=wsHead('&#x1F4B6;','Mit Geld rechnen','Berechne und löse die Aufgaben');
-  h+='<div style="font-size:0;text-align:left">';
-  tasks.forEach(function(t,i){
-    h+='<div style="display:inline-block;vertical-align:top;width:50%;box-sizing:border-box;break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:4mm;padding:0 3mm 0 0">'
-      +'<div style="border:1pt solid #e5e7eb;border-radius:6pt;padding:3mm;min-height:18mm;box-sizing:border-box">'
-      +'<div style="font-size:7pt;color:#0369a1;font-weight:800;margin-bottom:1.5mm">'+(i+1)+'. '+t.type+'</div>'
-      +'<div style="font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;line-height:1.5;color:#1e1b4b">'+t.q+'</div>'
-      +'</div>'
-      +'</div>';
-  });
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 4mm">';
+  (function(){
+    var half=Math.ceil(tasks.length/2), c1=tasks.slice(0,half), c2=tasks.slice(half), mx=Math.max(c1.length,c2.length);
+    function cell(t,gi){
+      if(!t) return '<div></div>';
+      return '<div style="box-sizing:border-box;margin-bottom:4mm">'
+        +'<div style="border:1pt solid #e5e7eb;border-radius:6pt;padding:3mm;min-height:18mm;box-sizing:border-box">'
+        +'<div style="font-size:7pt;color:#0369a1;font-weight:800;margin-bottom:1.5mm">'+(gi+1)+'. '+t.type+'</div>'
+        +'<div style="font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;line-height:1.5;color:#1e1b4b">'+t.q+'</div>'
+        +'</div></div>';
+    }
+    for(var i=0;i<mx;i++){ h+=cell(c1[i],i); h+=cell(c2[i],i+half); }
+  })();
   h+='</div>';
   h+=wsFoot(sols);
   return h;

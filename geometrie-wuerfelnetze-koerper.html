@@ -103,8 +103,8 @@ input{-webkit-user-select:text;user-select:text}
     <div style="margin-bottom:12px">
       <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Anzahl Aufgaben</label>
       <div style="display:flex;align-items:center;gap:10px">
-        <input type="range" id="cnt" min="2" max="8" step="1" value="8" style="flex:1;accent-color:#0369a1">
-        <strong id="cntVal" style="color:#0369a1;min-width:24px">8</strong>
+        <input type="range" id="cnt" min="2" max="24" step="1" value="12" style="flex:1;accent-color:#0369a1">
+        <strong id="cntVal" style="color:#0369a1;min-width:24px">12</strong>
       </div>
     </div>
     <div style="margin-bottom:12px">
@@ -403,30 +403,40 @@ function buildWS(){
        +'<div><div style="font-size:13pt;font-weight:900;font-family:Nunito,sans-serif;color:#0369a1">\ud83d\udce6 Geometrie \u2013 W\u00fcrfelnetze &amp; K\u00f6rper</div>'
        +'<div style="font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif">W\u00fcrfelnetze pr\u00fcfen und K\u00f6rper erkennen.</div></div>'
        +(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
-  // 2 Spalten (Original-Layout)
-  h+='<div style="font-size:0;text-align:left">';
-  tasks.forEach(function(t,i){
-    h+='<div style="display:inline-block;vertical-align:top;width:50%;box-sizing:border-box;padding:0 4mm;text-align:center;margin-bottom:'+gap+';break-inside:avoid;page-break-inside:avoid">';
-    h+='<div style="font-family:Nunito,sans-serif;font-size:9pt;font-weight:700;color:#1e1b4b;margin-bottom:4pt;text-align:left">';
-    if(showNr) h+='<span style="color:#94a3b8;font-weight:800">'+(i+1)+'.</span> ';
-    h+=questionText(t)+'</div>';
-    h+=taskInline(t,false,1.05);
-    h+='</div>';
-  });
+  // 2 Spalten als interleaved Grid (saubere iOS-Druckumbrüche)
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 8mm">';
+  (function(){
+    var half=Math.ceil(tasks.length/2), c1=tasks.slice(0,half), c2=tasks.slice(half), mx=Math.max(c1.length,c2.length);
+    function cell(t,gi){
+      if(!t) return '<div></div>';
+      var c='<div style="box-sizing:border-box;text-align:center;margin-bottom:'+gap+'">';
+      c+='<div style="font-family:Nunito,sans-serif;font-size:9pt;font-weight:700;color:#1e1b4b;margin-bottom:4pt;text-align:left">';
+      if(showNr) c+='<span style="color:#94a3b8;font-weight:800">'+(gi+1)+'.</span> ';
+      c+=questionText(t)+'</div>';
+      c+=taskInline(t,false,1.05);
+      return c+'</div>';
+    }
+    for(var i=0;i<mx;i++){ h+=cell(c1[i],i); h+=cell(c2[i],i+half); }
+  })();
   h+='</div>';
   if(showSol){
     h+='<div style="page-break-before:always;break-before:page;padding-top:4mm"></div>';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #16a34a">'
       +'<div><div style="font-size:13pt;font-weight:900;font-family:Nunito,sans-serif;color:#16a34a">\u2705 L\u00f6sungen</div></div></div>';
-    h+='<div style="font-size:0;text-align:left">';
-    tasks.forEach(function(t,i){
-      h+='<div style="display:inline-block;vertical-align:top;width:50%;box-sizing:border-box;padding:0 4mm;text-align:center;margin-bottom:'+gap+';break-inside:avoid;page-break-inside:avoid">';
-      h+='<div style="font-family:Nunito,sans-serif;font-size:9pt;font-weight:700;color:#1e1b4b;margin-bottom:4pt;text-align:left">';
-      if(showNr) h+='<span style="color:#94a3b8;font-weight:800">'+(i+1)+'.</span> ';
-      h+=questionText(t)+'</div>';
-      h+=taskInline(t,true,1.05);
-      h+='</div>';
-    });
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 8mm">';
+    (function(){
+      var half=Math.ceil(tasks.length/2), c1=tasks.slice(0,half), c2=tasks.slice(half), mx=Math.max(c1.length,c2.length);
+      function cell(t,gi){
+        if(!t) return '<div></div>';
+        var c='<div style="box-sizing:border-box;text-align:center;margin-bottom:'+gap+'">';
+        c+='<div style="font-family:Nunito,sans-serif;font-size:9pt;font-weight:700;color:#1e1b4b;margin-bottom:4pt;text-align:left">';
+        if(showNr) c+='<span style="color:#94a3b8;font-weight:800">'+(gi+1)+'.</span> ';
+        c+=questionText(t)+'</div>';
+        c+=taskInline(t,true,1.05);
+        return c+'</div>';
+      }
+      for(var i=0;i<mx;i++){ h+=cell(c1[i],i); h+=cell(c2[i],i+half); }
+    })();
     h+='</div>';
   }
   return h;
