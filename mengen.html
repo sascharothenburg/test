@@ -109,12 +109,9 @@ input{-webkit-user-select:text;user-select:text}
     </div>
   </div>
   <div class="card">
-    <h2>&#x1F522; Anzahl Aufgaben</h2>
-    <div style="display:flex;align-items:center;gap:10px">
-      <input type="range" id="countSlider" min="2" max="20" step="1" value="8" style="flex:1;accent-color:#0369a1" oninput="onSlider(this.value)">
-      <strong id="countVal" style="color:#0369a1;min-width:28px">8</strong>
-    </div>
-    <p style="font-size:.7rem;color:#6b7280;margin-top:6px" id="countTip">Automatisch passend zur Darstellung. Manuell &uuml;bersteuerbar.</p>
+    <h2>&#x1F4C4; Seitenzahl</h2>
+    <div class="chips" id="pageChips"></div>
+    <p style="font-size:.7rem;color:#6b7280;margin-top:8px" id="pageTip">Die Aufgabenzahl pro Seite ist passend zum Aufgabentyp festgelegt.</p>
   </div>
 </div>
 <div class="screen" id="s-tasks">
@@ -189,30 +186,20 @@ var selField=FIELDS[0]; // wird vom Wuerfel-Button gesetzt; Standard Zehnerfeld
 var selMode=MODES[0];
 var selArrange=ARRANGE[0];
 var lastLimit=10; // zuletzt gewuerfelter Zahlenraum (10/20)
-var userTouchedSlider=false;
+var numPages=1;   // 1 oder 2 Seiten
 var tasks=[]; // jede Aufgabe: {a, b} fuer compare; sonst {n}
 
-/* ===== Auto-Count Lookup =====
-   Bestimmt sinnvolle Standard-Anzahl je Darstellung x Modus (real getestet, konservativ).
-   Vergleich/Zerlegung brauchen mehr Platz pro Item -> weniger. */
-var AUTO_COUNT={
-  feld10:{draw:12,count:12,compare:8,split:8},
-  feld20:{draw:8, count:8, compare:6,split:6}
+/* ===== Feste Aufgabenzahl PRO SEITE (druckgetestet) ===== */
+var PER_PAGE={
+  feld10:{draw:12,count:10,compare:10,split:12},
+  feld20:{draw:12,count:12,compare:10,split:12}
 };
-function autoCount(){
-  var f=AUTO_COUNT[selField.id]||{};
-  return f[selMode.id]||8;
+function perPage(){
+  var f=PER_PAGE[selField.id]||{};
+  return f[selMode.id]||10;
 }
-function applyAutoCount(){
-  if(userTouchedSlider)return;
-  var c=autoCount();
-  var sl=document.getElementById('countSlider');
-  sl.value=c;
-  document.getElementById('countVal').textContent=c;
-}
-function onSlider(v){
-  userTouchedSlider=true;
-  document.getElementById('countVal').textContent=v;
+function totalCount(){
+  return perPage()*numPages;
 }
 
 /* ===== Chips ===== */
@@ -227,12 +214,22 @@ function initChips(){
       document.querySelectorAll('#modeChips .chip').forEach(function(x){x.classList.remove('sel');});
       el.classList.add('sel');
       document.getElementById('modeHint').textContent=m.hint;
-      userTouchedSlider=false;
-      applyAutoCount();
     };
     mc.appendChild(el);
   });
   document.getElementById('modeHint').textContent=selMode.hint;
+  var pc=document.getElementById('pageChips');pc.innerHTML='';
+  [{n:1,l:'1 Seite'},{n:2,l:'2 Seiten'}].forEach(function(o){
+    var el=document.createElement('div');
+    el.className='chip'+(o.n===numPages?' sel':'');
+    el.textContent=o.l;
+    el.onclick=function(){
+      numPages=o.n;
+      document.querySelectorAll('#pageChips .chip').forEach(function(x){x.classList.remove('sel');});
+      el.classList.add('sel');
+    };
+    pc.appendChild(el);
+  });
   var ac=document.getElementById('arrangeChips');ac.innerHTML='';
   ARRANGE.forEach(function(a){
     var el=document.createElement('div');
@@ -257,31 +254,38 @@ function generate(limit){
   lastLimit=limit;
   // Darstellung automatisch passend zum Zahlenraum
   selField=(limit===10)?FIELDS[0]:FIELDS[1];
-  userTouchedSlider=false;applyAutoCount();
-  var count=parseInt(document.getElementById('countSlider').value);
+  var count=totalCount();
   var out=[];
   var hi=limit;
   var lo=(limit===20)?11:1; // bis20 garantiert >10 (zweite Zehnerzeile)
   if(selMode.id==='compare'){
     var seen=new Set(),att=0;
-    while(out.length<count&&att<count*40){
+    while(out.length<count&&att<count*60){
       att++;
-      var a=rint(lo,hi),b=rint((limit===20?1:1),hi);
+      var a=rint(lo,hi),b=rint(1,hi);
       if(a===b&&Math.random()<0.6)continue; // gleiche seltener, aber moeglich (=)
       var key=a+'_'+b;if(seen.has(key))continue;seen.add(key);
       out.push({a:a,b:b});
     }
+    // ggf. mit Wiederholungen auffuellen
+    while(out.length<count){var a2=rint(lo,hi),b2=rint(1,hi);out.push({a:a2,b:b2});}
   }else{
-    var seen2=new Set(),att2=0;
-    while(out.length<count&&att2<count*40){
+    var splo=(selMode.id==='split')?Math.max(2,lo):lo; // Zerlegung braucht >=2
+    var poolSize=hi-splo+1;
+    var seen2=new Set();
+    // 1) erst moeglichst viele eindeutige Werte
+    var att2=0;
+    while(out.length<Math.min(count,poolSize)&&att2<poolSize*40){
       att2++;
-      var n=rint(lo,hi);
-      if(selMode.id==='split'&&n<2)continue; // Zerlegung braucht >=2
-      var k=String(n);
-      // Wiederholungen vermeiden solange genug Auswahl
-      if(seen2.has(k)&&seen2.size<(hi-lo+1))continue;
-      seen2.add(k);
+      var n=rint(splo,hi);var k=String(n);
+      if(seen2.has(k))continue;seen2.add(k);
       out.push({n:n});
+    }
+    // 2) Rest mit Wiederholungen auffuellen (kein gleicher Wert direkt hintereinander)
+    while(out.length<count){
+      var n2=rint(splo,hi);
+      if(out.length&&out[out.length-1].n===n2&&poolSize>1)continue;
+      out.push({n:n2});
     }
   }
   tasks=out;
@@ -325,8 +329,8 @@ var PAD=5; // pt
 // splitRed: bei Zerlegung Anzahl roter Punkte (Rest blau); sonst null -> Standardfaerbung
 function dotField(cells,cols,filled,arrange,opts){
   opts=opts||{};
-  var R=opts.scale==='small'?6.5:9;
-  var GAP=opts.scale==='small'?4:6;
+  var R=opts.scale==='tiny'?5.5:(opts.scale==='small'?6:9);
+  var GAP=opts.scale==='tiny'?3.5:(opts.scale==='small'?3.5:6);
   var rows=Math.ceil(cells/cols);
   var step=R*2+GAP;
   var groupGap=(cols>=10)?4:0; // Fuenfergliederung beim Zwanzigerfeld
@@ -382,34 +386,44 @@ function splitLine(wPt){
 function taskHTML(t,small){
   var cells=selField.cells, cols=selField.cols, arr=selArrange.id;
   var scale=small?'small':'big';
-  // Defensive: Werte koennen Feldkapazitaet nicht ueberschreiten
   var clamp=function(v){return Math.max(0,Math.min(v,cells));};
-  var wrap='<div style="display:flex;align-items:center;gap:9pt;flex-wrap:wrap">';
+  // stacked = Antwort unter dem Feld (kompaktes feld20 in 2 Spalten); sonst daneben
+  var stacked=small;
   if(selMode.id==='draw'){
-    wrap+=dotField(cells,cols,clamp(t.n),arr,{scale:scale});
-    wrap+='<span style="font-family:Nunito,sans-serif;font-size:13pt;font-weight:800;color:#1e293b">=</span>'+answerLine();
+    var dot=dotField(cells,cols,clamp(t.n),arr,{scale:scale});
+    var eqLine='<span style="font-family:Nunito,sans-serif;font-size:13pt;font-weight:800;color:#1e293b">=</span>'+answerLine(stacked?70:60);
+    if(stacked) return '<div style="display:flex;flex-direction:column;gap:5pt">'+dot+'<div style="display:flex;align-items:center;gap:7pt;padding-left:3pt">'+eqLine+'</div></div>';
+    return '<div style="display:flex;align-items:center;gap:9pt;flex-wrap:nowrap">'+dot+eqLine+'</div>';
   }else if(selMode.id==='count'){
-    wrap+='<span style="font-family:\'Grundschrift\',sans-serif;font-weight:bold;font-size:24pt;color:#1e293b;min-width:34pt;text-align:center">'+clamp(t.n)+'</span>';
-    wrap+='<span style="font-family:Nunito,sans-serif;font-size:13pt;font-weight:800;color:#1e293b">&#x2192;</span>';
-    wrap+=dotField(cells,cols,-1,arr,{scale:scale});
+    var num='<span style="font-family:\'Grundschrift\',sans-serif;font-weight:bold;font-size:22pt;color:#1e293b">'+clamp(t.n)+'</span>';
+    var arrow='<span style="font-family:Nunito,sans-serif;font-size:13pt;font-weight:800;color:#1e293b">&#x2193;</span>';
+    if(stacked){
+      // Zahl + Abwaerts-Pfeil oben, leeres Feld darunter (spart Breite)
+      return '<div style="display:flex;flex-direction:column;gap:4pt">'+
+        '<div style="display:flex;align-items:center;gap:7pt;padding-left:3pt">'+num+arrow+'</div>'+
+        dotField(cells,cols,-1,arr,{scale:'small'})+'</div>';
+    }
+    return '<div style="display:flex;align-items:center;gap:9pt;flex-wrap:nowrap">'+
+      '<span style="font-family:\'Grundschrift\',sans-serif;font-weight:bold;font-size:24pt;color:#1e293b;min-width:30pt;text-align:center">'+clamp(t.n)+'</span>'+
+      '<span style="font-family:Nunito,sans-serif;font-size:13pt;font-weight:800;color:#1e293b">&#x2192;</span>'+
+      dotField(cells,cols,-1,arr,{scale:'big'})+'</div>';
   }else if(selMode.id==='compare'){
-    // Beide Mengen kompakt nebeneinander mit Kaestchen in der Mitte (kein Umbruch)
-    var cscale=(selField.id==='feld20')?'small':'big';
+    var cmp=(selField.id==='feld20')?'small':'big';
     return '<div style="display:flex;align-items:center;gap:8pt;flex-wrap:nowrap">'+
-      dotField(cells,cols,clamp(t.a),arr,{scale:cscale})+
+      dotField(cells,cols,clamp(t.a),arr,{scale:cmp})+
       compareBox()+
-      dotField(cells,cols,clamp(t.b),arr,{scale:cscale})+
+      dotField(cells,cols,clamp(t.b),arr,{scale:cmp})+
       '</div>';
   }else if(selMode.id==='split'){
     var n=clamp(t.n);
     var redPart=(n>=5)?5:Math.ceil(n/2);
-    if(n>10)redPart=10; // ab 11: erster Zehner rot, Rest blau
-    wrap+=dotField(cells,cols,n,arr,{scale:scale,splitRed:redPart});
-    wrap+='<span style="font-family:Nunito,sans-serif;font-size:13pt;font-weight:800;color:#1e293b">'+n+' =</span>';
-    wrap+=splitLine()+'<span style="font-family:Nunito,sans-serif;font-size:13pt;font-weight:800;color:#dc2626">+</span>'+splitLine();
+    if(n>10)redPart=10;
+    var sdot=dotField(cells,cols,n,arr,{scale:scale,splitRed:redPart});
+    var sEq='<span style="font-family:Nunito,sans-serif;font-size:13pt;font-weight:800;color:#1e293b;white-space:nowrap">'+n+' =</span>'+splitLine()+'<span style="font-family:Nunito,sans-serif;font-size:13pt;font-weight:800;color:#dc2626">+</span>'+splitLine();
+    if(stacked) return '<div style="display:flex;flex-direction:column;gap:5pt">'+sdot+'<div style="display:flex;align-items:center;gap:6pt;padding-left:3pt">'+sEq+'</div></div>';
+    return '<div style="display:flex;align-items:center;gap:8pt;flex-wrap:nowrap">'+sdot+sEq+'</div>';
   }
-  wrap+='</div>';
-  return wrap;
+  return '';
 }
 
 /* ===== Kopfzeile ===== */
@@ -495,7 +509,8 @@ function buildPreview(){
     var wrap=document.getElementById('previewContent');wrap.innerHTML='';
     var outer=document.createElement('div'),inner=document.createElement('div');
     outer.style.cssText='width:'+sw+'px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;background:#fff;margin-bottom:8px';
-    inner.style.cssText='width:595px;transform-origin:top left;transform:scale('+sc.toFixed(4)+');padding:42px 50px;background:#fff;box-sizing:border-box';
+    // Druckgeometrie spiegeln: A4 595px breit, @page margin 12mm 14mm -> ~34px/40px
+    inner.style.cssText='width:595px;transform-origin:top left;transform:scale('+sc.toFixed(4)+');padding:34px 40px;background:#fff;box-sizing:border-box';
     inner.innerHTML=c;outer.appendChild(inner);wrap.appendChild(outer);
     requestAnimationFrame(function(){outer.style.height=Math.round(inner.scrollHeight*sc)+'px';});
   }catch(e){document.getElementById('previewContent').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
@@ -512,7 +527,6 @@ document.addEventListener('selectstart',function(e){if(e.target.tagName==='INPUT
 
 /* ===== Init ===== */
 initChips();
-applyAutoCount();
 renderTaskList();
 
 /* ===== PWA manifest ===== */
