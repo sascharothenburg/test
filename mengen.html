@@ -189,17 +189,30 @@ var lastLimit=10; // zuletzt gewuerfelter Zahlenraum (10/20)
 var numPages=1;   // 1 oder 2 Seiten
 var tasks=[]; // jede Aufgabe: {a, b} fuer compare; sonst {n}
 
-/* ===== Feste Aufgabenzahl PRO SEITE (druckgetestet) ===== */
+/* ===== Feste Aufgabenzahl PRO SEITE (druckgetestet) =====
+   p1 = Seite 1 (mit Header), p2 = jede Folgeseite (ohne Header -> mehr Platz).
+   Fehlt p2, gilt p1 auch fuer Folgeseiten. */
 var PER_PAGE={
-  feld10:{draw:12,count:10,compare:10,split:12},
-  feld20:{draw:12,count:12,compare:10,split:12}
+  feld10:{draw:{p1:12,p2:27},count:{p1:10,p2:20},compare:{p1:7,p2:15},split:{p1:12,p2:24}},
+  feld20:{draw:{p1:14,p2:30},count:{p1:12,p2:24},compare:{p1:10,p2:21},split:{p1:14,p2:30}}
 };
-function perPage(){
+function pageCfg(){
   var f=PER_PAGE[selField.id]||{};
-  return f[selMode.id]||10;
+  return f[selMode.id]||{p1:10};
 }
+function perPage(){ return pageCfg().p1; }
 function totalCount(){
-  return perPage()*numPages;
+  var c=pageCfg();
+  if(numPages<=1)return c.p1;
+  // p2 = GESAMTzahl bei 2 Seiten
+  return (c.p2!=null)?c.p2:(c.p1*2);
+}
+// Aufgaben pro Seite als Array (Chunk-Groessen)
+function pageSplits(){
+  var c=pageCfg();
+  if(numPages<=1)return [c.p1];
+  var total=(c.p2!=null)?c.p2:(c.p1*2);
+  return [c.p1, total-c.p1]; // Seite1 = p1, Seite2 = Rest
 }
 
 /* ===== Chips ===== */
@@ -449,32 +462,56 @@ var MODE_TITLE={
   compare:'Vergleiche die Mengen. Schreibe <, = oder >.',
   split:'Zerlege die Menge: rot + blau.'
 };
-function buildWS(){
-  var twoCol=document.getElementById('twoCol').checked;
-  if(!tasks.length)return '<div style="text-align:center;color:#999;padding:20mm 0;font-family:Nunito,sans-serif;font-size:11pt">Keine Aufgaben &ndash; bitte im Generator w&uuml;rfeln.</div>';
-  var meta=buildMeta();
-  var sub=MODE_TITLE[selMode.id]||'';
-  var h='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #0369a1"><div><div class="ws-title">&#x1F535;&#x1F534; Mengen</div><div class="ws-sub">'+sub+'</div></div>'+(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
-  // compare braucht immer volle Breite (zwei Felder nebeneinander)
-  var forceOne=(selMode.id==='compare');
-  // Zwanzigerfeld in 2 Spalten -> kompakte Punkte
-  var twoColActive=(twoCol&&!forceOne);
-  var small=(selField.id==='feld20'&&twoColActive);
-  if(twoColActive){
+function renderTable(slice,startIdx,ncols,small){
+  var h='';
+  if(ncols>=2){
+    var wpct=(100/ncols).toFixed(4)+'%';
     h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
-    for(var i=0;i<tasks.length;i+=2){
-      h+='<tr><td style="width:50%;vertical-align:top;padding:5pt 12pt 11pt 0"><div style="display:flex;align-items:flex-start;gap:7pt"><span style="font-family:Nunito,sans-serif;font-size:10pt;font-weight:800;color:#0369a1;min-width:16pt">'+(i+1)+'.</span><div>'+taskHTML(tasks[i],small)+'</div></div></td>';
-      if(tasks[i+1])h+='<td style="width:50%;vertical-align:top;padding:5pt 0 11pt 12pt;border-left:1px dashed #ddd"><div style="display:flex;align-items:flex-start;gap:7pt"><span style="font-family:Nunito,sans-serif;font-size:10pt;font-weight:800;color:#0369a1;min-width:16pt">'+(i+2)+'.</span><div>'+taskHTML(tasks[i+1],small)+'</div></div></td>';
-      else h+='<td style="width:50%"></td>';
+    for(var i=0;i<slice.length;i+=ncols){
+      h+='<tr>';
+      for(var c=0;c<ncols;c++){
+        var k=i+c;
+        if(k<slice.length){
+          var pl=(c===0)?'0':'12pt', bl=(c===0)?'':'border-left:1px dashed #ddd;';
+          h+='<td style="width:'+wpct+';vertical-align:top;padding:5pt 8pt 11pt '+pl+';'+bl+'"><div style="display:flex;align-items:flex-start;gap:6pt"><span style="font-family:Nunito,sans-serif;font-size:10pt;font-weight:800;color:#0369a1;min-width:15pt">'+(startIdx+i+c+1)+'.</span><div>'+taskHTML(slice[k],small)+'</div></div></td>';
+        } else {
+          h+='<td style="width:'+wpct+'"></td>';
+        }
+      }
       h+='</tr>';
     }
     h+='</table>';
   }else{
     h+='<table style="width:100%;border-collapse:collapse">';
-    tasks.forEach(function(t,i){
-      h+='<tr><td style="padding:6pt 0 12pt"><div style="display:flex;align-items:center;gap:8pt"><span style="font-family:Nunito,sans-serif;font-size:10pt;font-weight:800;color:#0369a1;min-width:16pt">'+(i+1)+'.</span><div>'+taskHTML(t,false)+'</div></div></td></tr>';
+    slice.forEach(function(t,i){
+      h+='<tr><td style="padding:6pt 0 12pt"><div style="display:flex;align-items:center;gap:8pt"><span style="font-family:Nunito,sans-serif;font-size:10pt;font-weight:800;color:#0369a1;min-width:16pt">'+(startIdx+i+1)+'.</span><div>'+taskHTML(t,false)+'</div></div></td></tr>';
     });
     h+='</table>';
+  }
+  return h;
+}
+function buildWS(){
+  if(!tasks.length)return '<div style="text-align:center;color:#999;padding:20mm 0;font-family:Nunito,sans-serif;font-size:11pt">Keine Aufgaben &ndash; bitte im Generator w&uuml;rfeln.</div>';
+  var meta=buildMeta();
+  var sub=MODE_TITLE[selMode.id]||'';
+  var header='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #0369a1"><div><div class="ws-title">&#x1F535;&#x1F534; Mengen</div><div class="ws-sub">'+sub+'</div></div>'+(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
+  // Spaltenzahl bestimmen
+  var twoColOn=document.getElementById('twoCol').checked;
+  var ncols;
+  if(selMode.id==='compare'){ ncols=1; }
+  else if(selMode.id==='draw'&&selField.id==='feld10'){ ncols=twoColOn?3:1; }
+  else { ncols=twoColOn?2:1; }
+  var small=(ncols>=2)&&(selField.id==='feld20'||((selMode.id==='draw'||selMode.id==='split')&&selField.id==='feld10'));
+  // In Seiten-Chunks aufteilen (pageSplits liefert Aufgaben pro Seite)
+  var splits=pageSplits();
+  var h='', start=0;
+  for(var pg=0;pg<splits.length;pg++){
+    var slice=tasks.slice(start,start+splits[pg]);
+    if(!slice.length)break;
+    var brk=(pg>0)?'break-before:page;page-break-before:always;':'';
+    var pageHeader=(pg===0)?header:'<div style="height:2mm"></div>';
+    h+='<div style="'+brk+'">'+pageHeader+renderTable(slice,start,ncols,small)+'</div>';
+    start+=splits[pg];
   }
   return h;
 }
