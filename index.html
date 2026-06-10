@@ -28,9 +28,10 @@ h1{font-size:1.7rem;font-weight:900;color:#1e1b4b;margin-bottom:6px;text-align:c
 .acc-head .chev{margin-left:8px;color:#cbd5e1;transition:transform .25s;font-size:.8rem}
 .acc.open .acc-head .chev{transform:rotate(180deg)}
 .acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
-.acc.open .acc-body{max-height:700px}
+.acc.open .acc-body{max-height:1100px}
 .acc-inner{display:flex;flex-direction:column;gap:10px;padding:4px 14px 16px}
 .acc-note{font-size:.74rem;font-weight:700;color:#94a3b8;padding:0 4px 8px;line-height:1.4}
+.acc-divider{margin:6px 0 2px;padding-top:12px;border-top:2px dashed #e2e8f0;font-size:.72rem;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px}
 a.app-link{display:block;padding:15px 20px;border-radius:13px;text-decoration:none;font-weight:800;font-size:1.02rem;text-align:center;color:#fff;box-shadow:0 3px 11px rgba(0,0,0,.14)}
 small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-height:1.6}
 </style>
@@ -50,15 +51,18 @@ small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-heig
 <div class="pane mathe" id="g-mathe">
 
   <div class="acc" id="acc-grundrechnen">
-    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F522;</span>Grundrechnen<span class="cnt">7</span><span class="chev">&#x25BC;</span></button>
+    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F522;</span>Grundrechnen<span class="cnt">9</span><span class="chev">&#x25BC;</span></button>
     <div class="acc-body"><div class="acc-inner">
-      <a href="grundrechnen.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F522; Grundrechenarten + und -</a>
-      <a href="einmaleins.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">× 1×1 Trainer</a>
+      <a href="mathe.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F522; Mathe-Aufgaben</a>
+      <a href="einmaleins.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x2716;&#xFE0F; 1×1 Trainer</a>
       <a href="schriftliches-rechnen.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x270D;&#xFE0F; Schriftliches Rechnen</a>
       <a href="rechenmauern.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F9F1; Rechenmauern</a>
       <a href="stellenwerttafel.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F522; Stellenwerttafel</a>
       <a href="zahlenstrahl.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F4CF; Zahlenstrahl</a>
       <a href="bruchrechnen.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x00BD; Bruchrechnen</a>
+      <div class="acc-divider">&#x1F4F1; Interaktiv &uuml;ben</div>
+      <a href="interaktiv-grundrechnen.html" class="app-link" style="background:linear-gradient(135deg,#0e7490,#22d3ee)">&#x2795; Plus &amp; Minus &uuml;ben</a>
+      <a href="interaktiv-einmaleins.html" class="app-link" style="background:linear-gradient(135deg,#0e7490,#22d3ee)">&#x2716;&#xFE0F; 1×1 &uuml;ben</a>
     </div></div>
   </div>
 
@@ -135,8 +139,8 @@ small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-heig
   <div class="acc" id="acc-english-practice">
     <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F4F1;</span>Interaktiv &uuml;ben<span class="cnt">1</span><span class="chev">&#x25BC;</span></button>
     <div class="acc-body"><div class="acc-inner">
-      <div class="acc-note">Direkt am Tablet oder PC &uuml;ben &ndash; ohne drucken.</div>
-      <a href="interaktiv-english.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#c084fc)">&#x1F4F1; English Interactive</a>
+      <div class="acc-note">Direkt am Tablet oder PC &uuml;ben &ndash; ohne Druck.</div>
+      <a href="interaktiv-english.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#c084fc)">&#x1F4F1; Englisch &uuml;ben</a>
     </div></div>
   </div>
 
@@ -153,7 +157,7 @@ small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-heig
   </div>
 </div>
 
-<small>Grundschrift von Christian Urff<br><a href="hilfe.html" style="color:#9ca3af;text-decoration:underline">Hilfe &amp; Anleitung</a> &middot; <a href="impressum.html" style="color:#9ca3af;text-decoration:underline">Impressum</a></small>
+<small>&#x1F5A8;&#xFE0F; Druck-Tipp: Zum Ausdrucken am besten <strong>Chrome unter iOS</strong> verwenden &ndash; bitte die <a href="hilfe.html" style="color:#9ca3af;text-decoration:underline">Hilfe &amp; Anleitung</a> beachten.<br>Grundschrift von Christian Urff<br><a href="impressum.html" style="color:#9ca3af;text-decoration:underline">Impressum</a></small>
 
 <style>
 .pp-wrap{position:relative;display:inline-block}
