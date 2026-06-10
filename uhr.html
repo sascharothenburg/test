@@ -218,7 +218,7 @@ function buildWS(){
     var tm=rndTime(),hr=tm[0],mn=tm[1];
     var isLesen=(taskType==='lesen')||(taskType==='beide'&&Math.random()<0.5);
     var ts=fmtTime(hr,mn);
-    var inner='<div style="text-align:center;border:1px solid #e5e7eb;border-radius:8pt;padding:3mm"><div style="font-size:8pt;color:#0369a1;font-weight:800;margin-bottom:2mm">'+(i+1)+'.</div>';
+    var inner='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;text-align:center;border:1px solid #e5e7eb;border-radius:8pt;padding:3mm"><div style="font-size:8pt;color:#0369a1;font-weight:800;margin-bottom:2mm">'+(i+1)+'.</div>';
     if(isLesen){inner+=clockSVG(hr%12||12,mn,sz);inner+='<div style="margin-top:2mm;border-bottom:1.5px solid #0369a1;min-width:50pt;display:inline-block;padding:0 8pt">&nbsp;</div>';sols.push(ts);}
     else{inner+=emptySVG(sz);inner+='<div style="margin-top:2mm;font-family:Grundschrift,sans-serif;font-weight:bold;font-size:12pt;color:#1e1b4b">'+ts+'</div>';sols.push('Zeiger eintragen');}
     inner+='</div>';

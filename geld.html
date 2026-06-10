@@ -257,7 +257,7 @@ function buildWS(){
       var t=tasks[r+c];
       if(t){
         h+='<td style="width:50%;vertical-align:top;padding:0 2mm 4mm 2mm">'
-          +'<div style="border:1pt solid #e5e7eb;border-radius:6pt;padding:3mm;min-height:18mm;box-sizing:border-box">'
+          +'<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;border:1pt solid #e5e7eb;border-radius:6pt;padding:3mm;min-height:18mm;box-sizing:border-box">'
           +'<div style="font-size:7pt;color:#0369a1;font-weight:800;margin-bottom:1.5mm">'+(r+c+1)+'. '+t.type+'</div>'
           +'<div style="font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;line-height:1.5;color:#1e1b4b">'+t.q+'</div>'
           +'</div></td>';
