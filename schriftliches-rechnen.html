@@ -102,7 +102,7 @@ input{-webkit-user-select:text;user-select:text}
     <h2>Einstellungen</h2>
     <div style="margin-bottom:12px">
       <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Seitenzahl</label>
-      <div class="chips" id="pageChips"></div>
+      <div class="opt-row" id="pageChips"></div>
       <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Aufgabenzahl pro Seite ist passend zur Rechenart festgelegt.</p>
     </div>
     <div style="margin-bottom:12px">
@@ -210,9 +210,9 @@ function initPageChips(){
   var pc=document.getElementById('pageChips'); if(!pc)return; pc.innerHTML='';
   [{n:1,l:'1 Seite'},{n:2,l:'2 Seiten'}].forEach(function(o){
     var el=document.createElement('div');
-    el.className='chip'+(o.n===numPages?' sel':'');
+    el.className='opt-btn'+(o.n===numPages?' sel':'');
     el.textContent=o.l;
-    el.onclick=function(){ numPages=o.n; document.querySelectorAll('#pageChips .chip').forEach(function(x){x.classList.remove('sel');}); el.classList.add('sel'); };
+    el.onclick=function(){ numPages=o.n; document.querySelectorAll('#pageChips .opt-btn').forEach(function(x){x.classList.remove('sel');}); el.classList.add('sel'); };
     pc.appendChild(el);
   });
 }
