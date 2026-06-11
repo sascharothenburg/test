@@ -156,11 +156,9 @@ input[type=range]{accent-color:#0369a1}
       </div>
     </div>
     <div class="sr" style="flex-direction:column;align-items:flex-start;gap:6px;border-bottom:none">
-      <div class="sl">Anzahl Aufgaben: <strong id="countLbl" style="color:#0369a1">48</strong></div>
-      <div class="srow" style="width:100%">
-        <input type="range" id="countSlider" min="4" max="100" step="4" value="48">
-        <strong id="countLbl2" style="color:#0369a1;min-width:30px">48</strong>
-      </div>
+      <div class="sl">Seitenzahl</div>
+      <div class="chips" id="pageChips" style="margin-top:4px"></div>
+      <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Aufgabenzahl pro Seite ist passend zur Spaltenzahl festgelegt.</p>
     </div>
   </div>
 </div>
@@ -216,24 +214,29 @@ document.getElementById('btnNone') && document.getElementById('btnNone').addEven
 document.getElementById('btnRnd') && document.getElementById('btnRnd').addEventListener('click',function(){var n=Math.floor(Math.random()*3)+3;var pool=[2,3,4,5,6,7,8,9];selReihen=[];while(selReihen.length<n&&pool.length>0){var i=Math.floor(Math.random()*pool.length);selReihen.push(pool.splice(i,1)[0]);}renderReihen();});
 
 // Automatische Aufgabenanzahl je Spaltenzahl (seitenfüllend A4): 1 Sp.->24, 2 Sp.->48, 3 Sp.->72
-var AUTO_COUNT_COLS={1:24,2:48,3:72};
-var userTouchedSlider=false; // sobald true, übersteuert der manuelle Slider die Automatik
-function applyAutoCount(){
-  if(userTouchedSlider) return;
-  var n=AUTO_COUNT_COLS[cols]||48;
-  var sl=document.getElementById('countSlider');
-  n=Math.max(parseInt(sl.min), Math.min(parseInt(sl.max), n));
-  sl.value=n;
-  document.getElementById('countLbl').textContent=n;
-  document.getElementById('countLbl2').textContent=n;
+/* ===== Seitenzahl-Steuerung (feste Aufgabenzahl pro Seite, druckgetestet) =====
+   p1 = Seite 1 (mit Header), p2 = GESAMTzahl bei 2 Seiten. Lookup nach Spaltenzahl.
+   p2-Werte sind Startwerte und werden am iPad nachjustiert. */
+var numPages=1;
+var PER_PAGE={1:{p1:24,p2:55},2:{p1:48,p2:110},3:{p1:72,p2:165}};
+function pageCfg(){ return PER_PAGE[cols]||PER_PAGE[2]; }
+function totalCount(){ var c=pageCfg(); return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
+function pageSplits(){ var c=pageCfg(); if(numPages<=1)return [c.p1]; var t=(c.p2!=null?c.p2:c.p1*2); return [c.p1,t-c.p1]; }
+function initPageChips(){
+  var pc=document.getElementById('pageChips'); if(!pc)return; pc.innerHTML='';
+  [{n:1,l:'1 Seite'},{n:2,l:'2 Seiten'}].forEach(function(o){
+    var el=document.createElement('div');
+    el.className='chip'+(o.n===numPages?' sel':'');
+    el.textContent=o.l;
+    el.onclick=function(){ numPages=o.n; document.querySelectorAll('#pageChips .chip').forEach(function(x){x.classList.remove('sel');}); el.classList.add('sel'); };
+    pc.appendChild(el);
+  });
 }
 [1,2,3].forEach(function(c){
   var el=document.getElementById('col'+c);
   if(el) el.addEventListener('click',function(){
     cols=c;
     [1,2,3].forEach(function(x){var el2=document.getElementById('col'+x);if(el2)el2.classList.toggle('sel',x===c);});
-    userTouchedSlider=false; // Spaltenwechsel -> Automatik wieder aktiv
-    applyAutoCount();
   });
 });
 
@@ -244,12 +247,7 @@ function updateInfo(){
            : n+' Reihe'+(n!==1?'n':'')+' ausgewählt';
 }
 
-document.getElementById('countSlider').addEventListener('input',function(){
-  userTouchedSlider=true;
-  document.getElementById('countLbl').textContent=this.value;
-  document.getElementById('countLbl2').textContent=this.value;
-});
-applyAutoCount(); // initial passend zur Default-Spaltenzahl (2 -> 48)
+initPageChips();
 
 function generateTasks(){
   var no0=document.getElementById('no0').checked;
@@ -257,7 +255,7 @@ function generateTasks(){
   var doShuf=document.getElementById('doShuffle').checked;
   var doTausch=document.getElementById('tausch').checked;
   var inv=document.getElementById('inverted').checked;
-  var count=parseInt(document.getElementById('countSlider').value);
+  var count=totalCount();
   if(selReihen.length===0) return [];
   var pool=[];
   selReihen.forEach(function(r){
@@ -303,24 +301,39 @@ function buildWS(){
     +'<div class="ws-title">× Das kleine 1×1</div>'
     +'<div class="ws-sub">Reihen: '+rLabel+(inv?' · Ergebnis vorgegeben':' · Ergebnis eintragen')+'</div>'
     +'</div>'+(meta?'<div class="ws-meta">'+meta+'</div>':'')+'</div>';
-  h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
   var colW=(100/cols).toFixed(4)+'%';
-  for(var r=0;r<tasks.length;r+=cols){
-    h+='<tr style="break-inside:avoid;page-break-inside:avoid">';
-    for(var c=0;c<cols;c++){
-      var t=tasks[r+c];
-      if(t){
-        var idx=r+c;
-        var aStr=t.a==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.a);
-        var bStr=t.b==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.b);
-        var rStr=t.res==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.res);
-        h+='<td style="width:'+colW+';vertical-align:baseline;padding:1mm 3mm 1mm 0"><span class="ws-nr" style="font-size:9pt">'+(idx+1)+'.</span>'
-          +'<span class="ws-eq" style="font-size:'+fs+'pt">'+aStr+' × '+bStr+' = '+rStr+'</span></td>';
-      } else h+='<td style="width:'+colW+'"></td>';
+  function renderTaskTable(slice,startIdx){
+    var tt='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+    for(var r=0;r<slice.length;r+=cols){
+      tt+='<tr style="break-inside:avoid;page-break-inside:avoid">';
+      for(var c=0;c<cols;c++){
+        var t=slice[r+c];
+        if(t){
+          var idx=startIdx+r+c;
+          var aStr=t.a==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.a);
+          var bStr=t.b==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.b);
+          var rStr=t.res==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.res);
+          tt+='<td style="width:'+colW+';vertical-align:baseline;padding:1mm 3mm 1mm 0"><span class="ws-nr" style="font-size:9pt">'+(idx+1)+'.</span>'
+            +'<span class="ws-eq" style="font-size:'+fs+'pt">'+aStr+' × '+bStr+' = '+rStr+'</span></td>';
+        } else tt+='<td style="width:'+colW+'"></td>';
+      }
+      tt+='</tr>';
     }
-    h+='</tr>';
+    return tt+'</table>';
   }
-  h+='</table>';
+  var splits=pageSplits();
+  var start=0;
+  for(var pg=0;pg<splits.length;pg++){
+    var slice=tasks.slice(start,start+splits[pg]);
+    if(!slice.length)break;
+    if(pg>0){ h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>'; }
+    h+=renderTaskTable(slice,start);
+    start+=splits[pg];
+  }
+  if(start<tasks.length){
+    h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>';
+    h+=renderTaskTable(tasks.slice(start),start);
+  }
   if(showSol){
     h+='<div style="margin-top:6mm;padding-top:3mm;border-top:1px solid #e5e7eb;break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid">'
       +'<div style="font-size:7pt;font-weight:800;color:#0369a1;margin-bottom:3mm">LÖSUNGEN</div>'

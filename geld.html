@@ -108,11 +108,9 @@ input[type=range]{accent-color:#0369a1}
       </div>
     </div>
     <div class="sr" style="flex-direction:column;align-items:flex-start;gap:6px;border:none">
-      <div class="sl">Anzahl Aufgaben: <strong id="countLbl" style="color:#0369a1">16</strong></div>
-      <div class="srow" style="width:100%">
-        <input type="range" id="countSlider" min="4" max="32" step="4" value="16" oninput="document.getElementById('countLbl').textContent=this.value">
-        <strong id="countLbl2" style="color:#0369a1;min-width:24px">16</strong>
-      </div>
+      <div class="sl">Seitenzahl</div>
+      <div class="chips" id="pageChips" style="margin-top:4px"></div>
+      <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Aufgabenzahl pro Seite ist passend zum Aufgabentyp festgelegt.</p>
     </div>
   </div>
 </div>
@@ -146,11 +144,6 @@ function setDiff(d){
   difficulty=d;
   [1,2,3].forEach(function(x){document.getElementById('diff'+x).classList.toggle('sel',x===d);});
 }
-document.getElementById('countSlider').addEventListener('input',function(){
-  userTouchedSlider=true;
-  document.getElementById('countLbl').textContent=this.value;
-  document.getElementById('countLbl2').textContent=this.value;
-});
 
 var activeTypes=['zusammen','wechsel','vergleich'];
 var difficulty=1;
@@ -159,21 +152,27 @@ function toggleType(t,el){
   var idx=activeTypes.indexOf(t);
   if(idx===-1){activeTypes.push(t);el.classList.add('sel');}
   else if(activeTypes.length>1){activeTypes.splice(idx,1);el.classList.remove('sel');}
-  userTouchedSlider=false; // Typ-Wechsel -> Automatik wieder aktiv
-  applyAutoCount();
 }
-/* Automatische Aufgabenanzahl (seitenfüllend A4):
-   addieren/vergleichen/€<->Cent -> 20; sobald Wechselgeld oder Einkauf dabei (mehr Platz) -> 12 */
-var userTouchedSlider=false;
-function applyAutoCount(){
-  if(userTouchedSlider) return;
+/* ===== Seitenzahl-Steuerung (feste Aufgabenzahl pro Seite, druckgetestet) =====
+   p1 = Seite 1 (mit Header), p2 = GESAMTzahl bei 2 Seiten.
+   addieren/vergleichen/Cent -> mehr; Wechselgeld/Einkauf (mehr Platz) -> weniger.
+   p2-Werte sind Startwerte und werden am iPad nachjustiert. */
+var numPages=1;
+function pageCfg(){
   var heavy=(activeTypes.indexOf('wechsel')>=0)||(activeTypes.indexOf('einkauf')>=0);
-  var n=heavy?12:20;
-  var sl=document.getElementById('countSlider');
-  n=Math.max(parseInt(sl.min), Math.min(parseInt(sl.max), n));
-  sl.value=n;
-  document.getElementById('countLbl').textContent=n;
-  document.getElementById('countLbl2').textContent=n;
+  return heavy?{p1:12,p2:28}:{p1:20,p2:46};
+}
+function totalCount(){ var c=pageCfg(); return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
+function pageSplits(){ var c=pageCfg(); if(numPages<=1)return [c.p1]; var t=(c.p2!=null?c.p2:c.p1*2); return [c.p1,t-c.p1]; }
+function initPageChips(){
+  var pc=document.getElementById('pageChips'); if(!pc)return; pc.innerHTML='';
+  [{n:1,l:'1 Seite'},{n:2,l:'2 Seiten'}].forEach(function(o){
+    var el=document.createElement('div');
+    el.className='chip'+(o.n===numPages?' sel':'');
+    el.textContent=o.l;
+    el.onclick=function(){ numPages=o.n; document.querySelectorAll('#pageChips .chip').forEach(function(x){x.classList.remove('sel');}); el.classList.add('sel'); };
+    pc.appendChild(el);
+  });
 }
 function rndCent(maxEuro){
   var cents=[0,5,10,20,25,50,75,99];
@@ -244,28 +243,43 @@ function wsFoot(sols){
 }
 
 function buildWS(){
-  var count=parseInt(document.getElementById('countSlider').value);
+  var count=totalCount();
   var tasks=[],sols=[];
   for(var i=0;i<count;i++){var t=genTask();tasks.push(t);sols.push(t.s);}
   var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   var fs=isIOS?12:15;
-  var h=wsHead('&#x1F4B6;','Mit Geld rechnen','Berechne und löse die Aufgaben');
-  h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
-  for(var r=0;r<tasks.length;r+=2){
-    h+='<tr style="break-inside:avoid;page-break-inside:avoid">';
-    for(var c=0;c<2;c++){
-      var t=tasks[r+c];
-      if(t){
-        h+='<td style="width:50%;vertical-align:top;padding:0 2mm 4mm 2mm">'
-          +'<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;border:1pt solid #e5e7eb;border-radius:6pt;padding:3mm;min-height:18mm;box-sizing:border-box">'
-          +'<div style="font-size:7pt;color:#0369a1;font-weight:800;margin-bottom:1.5mm">'+(r+c+1)+'. '+t.type+'</div>'
-          +'<div style="font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;line-height:1.5;color:#1e1b4b">'+t.q+'</div>'
-          +'</div></td>';
-      } else h+='<td style="width:50%"></td>';
+  function renderTaskTable(slice,startIdx){
+    var tt='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+    for(var r=0;r<slice.length;r+=2){
+      tt+='<tr style="break-inside:avoid;page-break-inside:avoid">';
+      for(var c=0;c<2;c++){
+        var t=slice[r+c];
+        if(t){
+          tt+='<td style="width:50%;vertical-align:top;padding:0 2mm 4mm 2mm">'
+            +'<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;border:1pt solid #e5e7eb;border-radius:6pt;padding:3mm;min-height:18mm;box-sizing:border-box">'
+            +'<div style="font-size:7pt;color:#0369a1;font-weight:800;margin-bottom:1.5mm">'+(startIdx+r+c+1)+'. '+t.type+'</div>'
+            +'<div style="font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;line-height:1.5;color:#1e1b4b">'+t.q+'</div>'
+            +'</div></td>';
+        } else tt+='<td style="width:50%"></td>';
+      }
+      tt+='</tr>';
     }
-    h+='</tr>';
+    return tt+'</table>';
   }
-  h+='</table>';
+  var h=wsHead('&#x1F4B6;','Mit Geld rechnen','Berechne und löse die Aufgaben');
+  var splits=pageSplits();
+  var start=0;
+  for(var pg=0;pg<splits.length;pg++){
+    var slice=tasks.slice(start,start+splits[pg]);
+    if(!slice.length)break;
+    if(pg>0){ h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>'; }
+    h+=renderTaskTable(slice,start);
+    start+=splits[pg];
+  }
+  if(start<tasks.length){
+    h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>';
+    h+=renderTaskTable(tasks.slice(start),start);
+  }
   h+=wsFoot(sols);
   return h;
 }
@@ -326,7 +340,7 @@ document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click'
 document.getElementById('btnGoPre').onclick=function(){showTab('pre');};
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 document.addEventListener('selectstart',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;e.preventDefault();});
-applyAutoCount(); // initial passend zur Default-Typauswahl (wechsel dabei -> 12)
+initPageChips();
 
 </script>
 </body>
