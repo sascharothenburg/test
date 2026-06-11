@@ -211,7 +211,7 @@ var tasks=[];
    p1 = Seite 1 (mit Header), p2 = GESAMTzahl bei 2 Seiten.
    p2-Werte sind Startwerte und werden am iPad nachjustiert. */
 var numPages=1;
-var PER_PAGE={p1:12,p2:24};
+var PER_PAGE={p1:12,p2:26};
 function totalCount(){ var c=PER_PAGE; return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
 function pageSplits(){ var c=PER_PAGE; if(numPages<=1)return [c.p1]; var t=(c.p2!=null?c.p2:c.p1*2); return [c.p1,t-c.p1]; }
 function initPageChips(){
