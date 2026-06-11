@@ -117,12 +117,9 @@ input{-webkit-user-select:text;user-select:text}
     <h2>&#x26A1; Automatisch generieren</h2>
     <div class="chips" id="genChips"></div>
     <div style="margin-top:14px">
-      <label class="blk" style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;margin-bottom:6px;display:block">Anzahl Aufgaben</label>
-      <div style="display:flex;align-items:center;gap:10px">
-        <input type="range" id="countSlider" min="4" max="64" step="2" value="32" style="flex:1;accent-color:#0369a1" oninput="document.getElementById('countVal').textContent=this.value">
-        <strong id="countVal" style="color:#0369a1;min-width:28px">32</strong>
-      </div>
-      <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Tipp: Mit 2 Spalten passen rund 32 Aufgaben auf eine A4-Seite. Mehr Aufgaben verteilen sich auf weitere Seiten.</p>
+      <label class="blk" style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;margin-bottom:6px;display:block">Seitenzahl</label>
+      <div class="chips" id="pageChips"></div>
+      <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Aufgabenzahl pro Seite ist passend zum Zahlenraum festgelegt.</p>
     </div>
     <div style="margin-top:12px">
       <label class="blk" style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;margin-bottom:6px;display:block">K&#228;stchen f&#252;r</label>
@@ -247,6 +244,25 @@ function buildMeta(){
   return '<table style="border-collapse:collapse;line-height:2.2">'+rows+'</table>';
 }
 
+function renderProbTable(slice,startIdx,twoCol,mL,mR,mRes,fontSize,gapH,colGap){
+  var h='';
+  if(twoCol){
+    h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+    for(var i=0;i<slice.length;i+=2){
+      h+='<tr style="break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid">';
+      h+='<td style="width:50%;vertical-align:top;padding:'+(gapH/2).toFixed(1)+'pt '+(colGap/2)+'pt '+(gapH/2).toFixed(1)+'pt 0">'+renderProblemHTML(slice[i],mL,mR,mRes,fontSize)+'</td>';
+      if(slice[i+1]) h+='<td style="width:50%;vertical-align:top;padding:'+(gapH/2).toFixed(1)+'pt 0 '+(gapH/2).toFixed(1)+'pt '+(colGap/2)+'pt;border-left:1px dashed #ddd">'+renderProblemHTML(slice[i+1],mL,mR,mRes,fontSize)+'</td>';
+      else h+='<td style="width:50%"></td>';
+      h+='</tr>';
+    }
+    h+='</table>';
+  }else{
+    h+='<table style="width:100%;border-collapse:collapse">';
+    slice.forEach(function(p){ h+='<tr style="break-inside:avoid;page-break-inside:avoid"><td style="padding:'+(gapH/2).toFixed(1)+'pt 0">'+renderProblemHTML(p,mL,mR,mRes,fontSize)+'</td></tr>'; });
+    h+='</table>';
+  }
+  return h;
+}
 function buildWS(){
   const probs=getProblems().map(parseProb).filter(Boolean);
   const twoCol=document.getElementById('twoCol').checked;
@@ -264,23 +280,25 @@ function buildWS(){
   const gapH=fontSize*0.8;
   const colGap=20;
   const meta=buildMeta();
-  let h='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #0369a1"><div><div class="ws-title">\ud83d\udd22 Mathe-Aufgaben</div><div class="ws-sub">L\u00f6se die Aufgaben</div></div>'+(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
-  if(twoCol){
-    h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
-    for(var i=0;i<probs.length;i+=2){
-      h+='<tr style="break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid">';
-      h+='<td style="width:50%;vertical-align:top;padding:'+(gapH/2).toFixed(1)+'pt '+(colGap/2)+'pt '+(gapH/2).toFixed(1)+'pt 0">'+renderProblemHTML(probs[i],mL,mR,mRes,fontSize)+'</td>';
-      if(probs[i+1]) h+='<td style="width:50%;vertical-align:top;padding:'+(gapH/2).toFixed(1)+'pt 0 '+(gapH/2).toFixed(1)+'pt '+(colGap/2)+'pt;border-left:1px dashed #ddd">'+renderProblemHTML(probs[i+1],mL,mR,mRes,fontSize)+'</td>';
-      else h+='<td style="width:50%"></td>';
-      h+='</tr>';
+  const header='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #0369a1"><div><div class="ws-title">\ud83d\udd22 Mathe-Aufgaben</div><div class="ws-sub">L\u00f6se die Aufgaben</div></div>'+(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
+  // Seiten-Chunks: Seite 1 = p1 Aufgaben (mit Header), Folgeseite = Rest (ohne Header).
+  var splits=pageSplits();
+  var h='', start=0;
+  for(var pg=0;pg<splits.length;pg++){
+    var slice=probs.slice(start,start+splits[pg]);
+    if(!slice.length)break;
+    if(pg>0){
+      h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div>';
     }
-    h+='</table>';
-  }else{
-    h+='<table style="width:100%;border-collapse:collapse">';
-    probs.forEach(p=>{ h+='<tr style="break-inside:avoid;page-break-inside:avoid"><td style="padding:'+(gapH/2).toFixed(1)+'pt 0">'+renderProblemHTML(p,mL,mR,mRes,fontSize)+'</td></tr>'; });
-    h+='</table>';
+    var pageHeader=(pg===0)?header:'<div style="height:2mm"></div>';
+    h+=pageHeader+renderProbTable(slice,start,twoCol,mL,mR,mRes,fontSize,gapH,colGap);
+    start+=splits[pg];
   }
-  h+='<div class="ws-foot">\u2605 \u2605 \u2605 &nbsp; Toll gemacht! &nbsp; \u2605 \u2605 \u2605<br>\u00a9 2026 Sascha Rothenburg \u00b7 Grundschrift von Christian Urff</div>';
+  // Falls mehr Aufgaben vorhanden als die Splits abdecken (z.B. manuell ergaenzt): Rest anhaengen.
+  if(start<probs.length){
+    h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div>';
+    h+='<div style="height:2mm"></div>'+renderProbTable(probs.slice(start),start,twoCol,mL,mR,mRes,fontSize,gapH,colGap);
+  }
   return h;
 }
 
@@ -307,6 +325,47 @@ function addEmptyProb(){
 function removeProb(i){ syncProbs(); customProbs.splice(i,1); renderProbList(); }
 
 // Generator
+/* ===== Seitenzahl-Steuerung (feste Aufgabenzahl pro Seite, druckgetestet) =====
+   p1 = Seite 1 (mit Header), p2 = GESAMTzahl bei 2 Seiten (NICHT Inkrement).
+   Lookup nach Zahlenraum (max) x Layout (2 Spalten an/aus).
+   p2-Werte sind Startwerte (~2,3x p1) und werden am iPad nachjustiert. */
+var numPages=1;
+var PER_PAGE={
+  '10':  {two:{p1:32,p2:74}, one:{p1:20,p2:46}},
+  '20':  {two:{p1:32,p2:74}, one:{p1:20,p2:46}},
+  '100': {two:{p1:28,p2:64}, one:{p1:18,p2:42}}
+};
+function pageCfg(){
+  var mx=String(selectedGenType.max);
+  var f=PER_PAGE[mx]||PER_PAGE['20'];
+  var two=document.getElementById('twoCol').checked;
+  return two?f.two:f.one;
+}
+function totalCount(){
+  var c=pageCfg();
+  if(numPages<=1)return c.p1;
+  return (c.p2!=null)?c.p2:(c.p1*2);
+}
+function pageSplits(){
+  var c=pageCfg();
+  if(numPages<=1)return [c.p1];
+  var total=(c.p2!=null)?c.p2:(c.p1*2);
+  return [c.p1, total-c.p1];
+}
+function initPageChips(){
+  var pc=document.getElementById('pageChips'); if(!pc)return; pc.innerHTML='';
+  [{n:1,l:'1 Seite'},{n:2,l:'2 Seiten'}].forEach(function(o){
+    var el=document.createElement('div');
+    el.className='chip'+(o.n===numPages?' sel':'');
+    el.textContent=o.l;
+    el.onclick=function(){
+      numPages=o.n;
+      document.querySelectorAll('#pageChips .chip').forEach(function(x){x.classList.remove('sel');});
+      el.classList.add('sel');
+    };
+    pc.appendChild(el);
+  });
+}
 const GEN_TYPES=[
   {label:'+ bis 10',id:'add10',op:'+',max:10},
   {label:'- bis 10',id:'sub10',op:'-',max:10},
@@ -330,7 +389,7 @@ function initGenChips(){
 }
 function generateProblems(){
   const gt=selectedGenType;
-  const count=parseInt(document.getElementById('countSlider').value);
+  const count=totalCount();
   const boxPos=document.querySelector('input[name=boxPos]:checked').value;
   const max=gt.max;
   const problems=[]; const seen=new Set(); let attempts=0;
@@ -412,6 +471,7 @@ document.addEventListener('selectstart',function(e){if(e.target.tagName==='INPUT
 
 // Init
 initGenChips();
+initPageChips();
 renderProbList();
 
 // PWA manifest
