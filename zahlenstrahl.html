@@ -260,7 +260,7 @@ function pickValue(r,type){
    über die Seiten (break-inside:avoid je Aufgabe). Der Umschalter steuert nur die Gesamtzahl.
    p1 = ca. 1 Seite, p2 = ca. 2 Seiten. Startwerte, am iPad nachjustieren. */
 var numPages=1;
-var PER_PAGE={p1:8,p2:18};
+var PER_PAGE={p1:8,p2:17};
 function totalCount(){ var c=PER_PAGE; return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
 function initPageChips(){
   var pc=document.getElementById('pageChips'); if(!pc)return; pc.innerHTML='';
