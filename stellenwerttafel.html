@@ -129,14 +129,6 @@ input{-webkit-user-select:text;user-select:text}
         <button class="opt-btn sel" data-v="tab2num">Tafel &rarr; Zahl<br><span style="font-weight:600;font-size:.66rem">ablesen</span></button>
       </div>
     </div>
-    <div style="margin-bottom:12px">
-      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Darstellung in der Tafel</label>
-      <div class="opt-row" id="reprOpts">
-        <button class="opt-btn sel" data-v="digit">Ziffern</button>
-        <button class="opt-btn" data-v="dots">Punkte/Pl&auml;ttchen</button>
-      </div>
-      <div class="ss" style="margin-top:6px">Bei "Tafel &rarr; Zahl" wird die Tafel so dargestellt. Beide w&auml;hlbar = gemischt.</div>
-    </div>
     <button class="btn bp" style="margin-top:8px" id="btnGen">&#x26A1; Aufgaben generieren</button>
   </div>
 </div>
@@ -202,26 +194,7 @@ function setupSingle(id){
 }
 function getMultiStr(id){return Array.from(document.querySelectorAll('#'+id+' .opt-btn.sel')).map(function(b){return b.dataset.v;});}
 function getSingle(id){var b=document.querySelector('#'+id+' .opt-btn.sel');return b?parseInt(b.dataset.v):null;}
-setupSingle('placeOpts');setupMulti('typeOpts');setupMulti('reprOpts');
-
-/* Plättchen-Option ab Tausender (4+ Stellen) deaktivieren */
-function updateReprAvailability(){
-  var places=getSingle('placeOpts')||3;
-  var dotsBtn=document.querySelector('#reprOpts .opt-btn[data-v="dots"]');
-  var digitBtn=document.querySelector('#reprOpts .opt-btn[data-v="digit"]');
-  if(!dotsBtn) return;
-  if(places>=4){
-    dotsBtn.classList.add('disabled');
-    dotsBtn.classList.remove('sel');
-    if(!digitBtn.classList.contains('sel')) digitBtn.classList.add('sel'); // immer mind. Ziffern
-  }else{
-    dotsBtn.classList.remove('disabled');
-  }
-}
-document.querySelectorAll('#placeOpts .opt-btn').forEach(function(b){
-  b.addEventListener('click', updateReprAvailability);
-});
-updateReprAvailability();
+setupSingle('placeOpts');setupMulti('typeOpts');
 
 /* ===== Automatische Aufgabenanzahl je Stellenzahl (seitenfüllend A4) =====
    places: 2=ZE, 3=HZE, 4=T, 5=ZT, 6=HT */
@@ -229,7 +202,7 @@ updateReprAvailability();
    p1 = Seite 1 (mit Header), p2 = GESAMTzahl bei 2 Seiten. Lookup nach Stellenzahl.
    p2-Werte sind Startwerte und werden am iPad nachjustiert. */
 var numPages=1;
-var PER_PAGE={2:{p1:20,p2:46},3:{p1:20,p2:46},4:{p1:15,p2:34},5:{p1:10,p2:23},6:{p1:10,p2:23}};
+var PER_PAGE={2:{p1:20,p2:44},3:{p1:20,p2:44},4:{p1:15,p2:33},5:{p1:10,p2:22},6:{p1:10,p2:22}};
 function pageCfg(){ var p=getSingle('placeOpts')||3; return PER_PAGE[p]||PER_PAGE[3]; }
 function totalCount(){ var c=pageCfg(); return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
 function pageSplits(){ var c=pageCfg(); if(numPages<=1)return [c.p1]; var t=(c.p2!=null?c.p2:c.p1*2); return [c.p1,t-c.p1]; }
@@ -265,9 +238,7 @@ function generate(){
   var cnt=totalCount();
   var places=getSingle('placeOpts')||3;
   var types=getMultiStr('typeOpts'); if(!types.length)types=['num2tab'];
-  var reprs=getMultiStr('reprOpts'); if(!reprs.length)reprs=['digit'];
-  // ab Tausender keine Plättchen
-  if(places>=4){ reprs=reprs.filter(function(r){return r!=='dots';}); if(!reprs.length)reprs=['digit']; }
+  var reprs=['digit']; // Darstellung immer als Ziffern (Punkte/Plättchen entfernt)
   tasks=[];
   for(var i=0;i<cnt;i++){
     var type=types[ri(0,types.length-1)];
@@ -296,7 +267,7 @@ function miniTable(t,showSolution){
   else { filled=true; showNum=showSolution; } // tab2num: Tafel immer gefüllt, Zahl nur in Lösung
   var h='';
   if(showNum) h+='<div class="tk-num">'+t.num.toLocaleString('de-DE')+'</div>';
-  else h+='<div class="tk-num" style="color:#d97706">Zahl: ____</div>';
+  else h+='<div class="tk-num" style="color:#d97706">____</div>';
   h+='<table class="tk-tbl"><tr>';
   labels.forEach(function(l){h+='<th>'+l+'</th>';});
   h+='</tr><tr>';
@@ -314,8 +285,7 @@ function renderList(){
   tasks.forEach(function(t,i){
     var d=document.createElement('div');d.className='tk-item';
     var typeLbl=t.type==='num2tab'?'Zahl &rarr; Tafel':'Tafel &rarr; Zahl';
-    var reprLbl=(t.type==='tab2num')?(t.repr==='dots'?' &middot; Punkte':' &middot; Ziffern'):'';
-    d.innerHTML='<div style="font-size:.7rem;font-weight:800;color:#0369a1;margin-bottom:4px">Aufgabe '+(i+1)+' &middot; '+typeLbl+reprLbl+'</div>'+miniTable(t,false);
+    d.innerHTML='<div style="font-size:.7rem;font-weight:800;color:#0369a1;margin-bottom:4px">Aufgabe '+(i+1)+' &middot; '+typeLbl+'</div>'+miniTable(t,false);
     var b=document.createElement('button');b.className='del';b.textContent='\u2715';
     b.addEventListener('click',(function(idx){return function(){tasks.splice(idx,1);renderList();};})(i));
     d.appendChild(b);el.appendChild(d);
@@ -345,7 +315,7 @@ function tablePrint(t,showSol,d){
   if(showNum){
     h+='<div style="font-family:Nunito,sans-serif;font-weight:900;font-size:'+(fs*1.15)+'pt;color:#1e1b4b;margin-bottom:3pt">'+t.num.toLocaleString('de-DE')+'</div>';
   }else{
-    h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:'+(fs*0.95)+'pt;color:#555;margin-bottom:3pt">Zahl: <span style="display:inline-block;border-bottom:1.2pt solid #888;min-width:'+(cellW*t.places*0.7)+'pt">&nbsp;</span></div>';
+    h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:'+(fs*0.95)+'pt;color:#555;margin-bottom:3pt"><span style="display:inline-block;border-bottom:1.2pt solid #888;min-width:'+(cellW*t.places*0.7)+'pt">&nbsp;</span></div>';
   }
   // Tabelle
   h+='<table style="border-collapse:collapse;margin:0 auto"><tr>';
