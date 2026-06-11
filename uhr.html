@@ -108,11 +108,9 @@ input{-webkit-user-select:text;user-select:text}
       <label class="tgl"><input type="checkbox" id="h24"><span class="tgl-s"></span></label>
     </div>
     <div class="sr" style="flex-direction:column;align-items:flex-start;border:none;padding-bottom:0">
-      <div class="sl">Anzahl Aufgaben: <strong id="countLbl" style="color:#0369a1">12</strong></div>
-      <div style="display:flex;align-items:center;gap:10px;width:100%;margin-top:8px">
-        <input type="range" id="countSlider" min="4" max="24" step="1" value="15" style="flex:1;accent-color:#0369a1" oninput="userTouchedSlider=true;document.getElementById('countLbl').textContent=this.value;this.parentNode.querySelector('strong').textContent=this.value">
-        <strong style="color:#0369a1;min-width:24px">15</strong>
-      </div>
+      <div class="sl">Seitenzahl</div>
+      <div class="chips" id="pageChips" style="margin-top:8px"></div>
+      <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Aufgabenzahl pro Seite ist passend zum Aufgabentyp festgelegt.</p>
     </div>
   </div>
 </div>
@@ -145,18 +143,24 @@ document.addEventListener('click',function(e){var w=document.getElementById('ppW
 
 var difficulty=1,taskType='lesen';
 function setDiff(d){difficulty=d;[1,2,3].forEach(function(x){document.getElementById('d'+x).classList.toggle('sel',x===d);});}
-function setType(t){taskType=t;['lesen','zeiger','beide'].forEach(function(x){document.getElementById('ty-'+x).classList.toggle('sel',x===t);});userTouchedSlider=false;applyAutoCount();}
-/* Automatische Aufgabenanzahl je Typ (seitenfüllend A4): Uhr ablesen->18, Zeiger/Beides->15 */
-var userTouchedSlider=false;
-function applyAutoCount(){
-  if(userTouchedSlider) return;
-  var n=(taskType==='lesen')?18:15;
-  var sl=document.getElementById('countSlider');
-  n=Math.max(parseInt(sl.min), Math.min(parseInt(sl.max), n));
-  sl.value=n;
-  document.getElementById('countLbl').textContent=n;
-  var s2=sl.parentNode.querySelector('strong');
-  if(s2) s2.textContent=n;
+function setType(t){taskType=t;['lesen','zeiger','beide'].forEach(function(x){document.getElementById('ty-'+x).classList.toggle('sel',x===t);});}
+/* ===== Seitenzahl-Steuerung (feste Aufgabenzahl pro Seite, druckgetestet) =====
+   p1 = Seite 1 (mit Header), p2 = GESAMTzahl bei 2 Seiten. Lookup nach Aufgabentyp.
+   p2-Werte sind Startwerte und werden am iPad nachjustiert. */
+var numPages=1;
+var PER_PAGE={ lesen:{p1:18,p2:42}, zeiger:{p1:15,p2:34}, beide:{p1:15,p2:34} };
+function pageCfg(){ return PER_PAGE[taskType]||PER_PAGE.lesen; }
+function totalCount(){ var c=pageCfg(); return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
+function pageSplits(){ var c=pageCfg(); if(numPages<=1)return [c.p1]; var t=(c.p2!=null?c.p2:c.p1*2); return [c.p1,t-c.p1]; }
+function initPageChips(){
+  var pc=document.getElementById('pageChips'); if(!pc)return; pc.innerHTML='';
+  [{n:1,l:'1 Seite'},{n:2,l:'2 Seiten'}].forEach(function(o){
+    var el=document.createElement('div');
+    el.className='chip'+(o.n===numPages?' sel':'');
+    el.textContent=o.l;
+    el.onclick=function(){ numPages=o.n; document.querySelectorAll('#pageChips .chip').forEach(function(x){x.classList.remove('sel');}); el.classList.add('sel'); };
+    pc.appendChild(el);
+  });
 }
 
 function rndTime(){
@@ -206,7 +210,7 @@ function buildMeta(){
   return '<table style="border-collapse:collapse;line-height:2.2">'+rows+'</table>';
 }
 function buildWS(){
-  var count=parseInt(document.getElementById('countSlider').value);
+  var count=totalCount();
   var showSol=document.getElementById('showSol').checked;
   var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   var sz=isIOS?70:88;
@@ -224,16 +228,32 @@ function buildWS(){
     inner+='</div>';
     cells.push(inner);
   }
-  h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
-  for(var r=0;r<cells.length;r+=3){
-    h+='<tr style="break-inside:avoid;page-break-inside:avoid">';
-    for(var c=0;c<3;c++){
-      if(cells[r+c]) h+='<td style="width:33.33%;vertical-align:top;padding:0 2.5mm 5mm 2.5mm">'+cells[r+c]+'</td>';
-      else h+='<td style="width:33.33%"></td>';
+  function renderCellTable(slice){
+    var tt='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+    for(var r=0;r<slice.length;r+=3){
+      tt+='<tr style="break-inside:avoid;page-break-inside:avoid">';
+      for(var c=0;c<3;c++){
+        if(slice[r+c]) tt+='<td style="width:33.33%;vertical-align:top;padding:0 2.5mm 5mm 2.5mm">'+slice[r+c]+'</td>';
+        else tt+='<td style="width:33.33%"></td>';
+      }
+      tt+='</tr>';
     }
-    h+='</tr>';
+    return tt+'</table>';
   }
-  h+='</table>';
+  // Zellen in Seiten-Chunks aufteilen (feste Anzahl pro Seite; WebKit-robuster Umbruch)
+  var splits=pageSplits();
+  var start=0;
+  for(var pg=0;pg<splits.length;pg++){
+    var slice=cells.slice(start,start+splits[pg]);
+    if(!slice.length)break;
+    if(pg>0){ h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>'; }
+    h+=renderCellTable(slice);
+    start+=splits[pg];
+  }
+  if(start<cells.length){
+    h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>';
+    h+=renderCellTable(cells.slice(start));
+  }
   if(showSol){h+='<div style="margin-top:5mm;padding-top:3mm;border-top:1px solid #e5e7eb"><div style="font-size:7pt;font-weight:800;color:#0369a1;margin-bottom:2mm;font-family:Nunito,sans-serif">LOESUNGEN</div><div style="display:flex;flex-wrap:wrap;gap:2mm 5mm;font-family:Nunito,sans-serif;font-size:7pt;color:#777">';sols.forEach(function(s,i){h+='<span>'+(i+1)+'. '+s+'</span>';});h+='</div></div>';}
   h+='<div style="margin-top:5mm;text-align:center;font-family:Nunito,sans-serif;font-size:7pt;color:#bbb;border-top:1px solid #eee;padding-top:2mm">\u2605 \u2605 \u2605 Toll gemacht! \u2605 \u2605 \u2605<br>\u00a9 2026 Sascha Rothenburg \u00b7 Grundschrift von Christian Urff</div>';
   return h;
@@ -279,7 +299,7 @@ document.getElementById('t-pre').onclick=function(){showTab('pre');};
 document.getElementById('btnGoPre').onclick=function(){showTab('pre');};
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 document.addEventListener('selectstart',function(e){if(e.target.tagName==='INPUT')return;e.preventDefault();});
-applyAutoCount(); // initial passend zum Default-Typ (lesen -> 18)
+initPageChips();
 
 </script>
 </body>

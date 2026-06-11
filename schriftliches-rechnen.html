@@ -101,11 +101,9 @@ input{-webkit-user-select:text;user-select:text}
   <div class="card">
     <h2>Einstellungen</h2>
     <div style="margin-bottom:12px">
-      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Anzahl Aufgaben</label>
-      <div style="display:flex;align-items:center;gap:10px">
-        <input type="range" id="cnt" min="2" max="36" step="1" value="12" style="flex:1;accent-color:#0369a1">
-        <strong id="cntVal" style="color:#0369a1;min-width:24px">12</strong>
-      </div>
+      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Seitenzahl</label>
+      <div class="chips" id="pageChips"></div>
+      <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Aufgabenzahl pro Seite ist passend zur Rechenart festgelegt.</p>
     </div>
     <div style="margin-bottom:12px">
       <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Rechenart</label>
@@ -190,18 +188,33 @@ function setupMulti(id){
   });
 }
 /* Automatische Aufgabenanzahl je Rechenart (seitenfüllend A4): Geteilt->6, sonst (+,-,x)->12 */
-var userTouchedSlider=false; // sobald true, übersteuert der manuelle Slider die Automatik
-function applyAutoCount(){
-  if(userTouchedSlider) return;
+/* ===== Seitenzahl-Steuerung (feste Aufgabenzahl pro Seite, druckgetestet) =====
+   p1 = Seite 1 (mit Header), p2 = GESAMTzahl bei 2 Seiten. Lookup nach Rechenart.
+   p2-Werte sind Startwerte und werden am iPad nachjustiert. */
+var numPages=1;
+function curMode(){
   var ops=getMultiStr('opOpts');
-  var n;
-  if(ops.indexOf('div')>=0) n=6;        // Geteilt: breite Gitter
-  else if(ops.indexOf('mul')>=0) n=12;  // Mal
-  else n=18;                            // Plus/Minus
-  var sl=document.getElementById('cnt');
-  n=Math.max(parseInt(sl.min), Math.min(parseInt(sl.max), n));
-  sl.value=n;
-  document.getElementById('cntVal').textContent=n;
+  if(ops.indexOf('div')>=0) return 'div';
+  if(ops.indexOf('mul')>=0) return 'mul';
+  return 'addsub';
+}
+var PER_PAGE={
+  addsub:{p1:18,p2:42},
+  mul:   {p1:12,p2:28},
+  div:   {p1:6, p2:14}
+};
+function pageCfg(){ return PER_PAGE[curMode()]||PER_PAGE.addsub; }
+function totalCount(){ var c=pageCfg(); return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
+function pageSplits(){ var c=pageCfg(); if(numPages<=1)return [c.p1]; var t=(c.p2!=null?c.p2:c.p1*2); return [c.p1,t-c.p1]; }
+function initPageChips(){
+  var pc=document.getElementById('pageChips'); if(!pc)return; pc.innerHTML='';
+  [{n:1,l:'1 Seite'},{n:2,l:'2 Seiten'}].forEach(function(o){
+    var el=document.createElement('div');
+    el.className='chip'+(o.n===numPages?' sel':'');
+    el.textContent=o.l;
+    el.onclick=function(){ numPages=o.n; document.querySelectorAll('#pageChips .chip').forEach(function(x){x.classList.remove('sel');}); el.classList.add('sel'); };
+    pc.appendChild(el);
+  });
 }
 /* Rechenart mit Sonderregeln: + und - kombinierbar, x und ÷ nur exklusiv allein */
 function setupOps(){
@@ -220,8 +233,6 @@ function setupOps(){
         // mindestens einer von +/- muss aktiv bleiben
         if(!document.querySelectorAll('#opOpts .opt-btn.sel').length) b.classList.add('sel');
       }
-      userTouchedSlider=false; // Rechenart-Wechsel -> Automatik wieder aktiv
-      applyAutoCount();
     });
   });
 }
@@ -245,7 +256,7 @@ function lenToDigits(code){
 /* ===== Generator ===== */
 var tasks=[];
 function generate(){
-  var cnt=parseInt(document.getElementById('cnt').value);
+  var cnt=totalCount();
   var ops=getMultiStr('opOpts'); if(!ops.length)ops=['add'];
   var lens=getMultiStr('lenOpts'); if(!lens.length)lens=['s'];
   var divs=getMultiStr('divOpts'); if(!divs.length)divs=['rest'];
@@ -430,13 +441,14 @@ function renderList(){
 
 /* ===== Druck (A4) ===== */
 // Baut eine Drucktabelle: schmale Aufgaben (tCols pro Zeile), Divisionen volle Breite (colspan).
-function stwBuildTable(tasks,tCols,onlyDiv,gap,showNr,withCells,sol){
+function stwBuildTable(tasks,tCols,onlyDiv,gap,showNr,withCells,sol,startIdx){
+  startIdx=startIdx||0;
   var cw=(100/tCols).toFixed(4)+'%';
   function cell(t,gi,colspan){
     var isDiv=(t.op==='div');
     var align=isDiv?'left':'center';
     var c='<td colspan="'+colspan+'" style="width:'+(colspan===tCols?'100%':cw)+';vertical-align:top;text-align:'+align+';padding:0 2mm '+gap+' 2mm">';
-    if(showNr) c+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:4pt;text-align:left">'+(gi+1)+'.</div>';
+    if(showNr) c+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:4pt;text-align:left">'+(startIdx+gi+1)+'.</div>';
     c+=taskRender(t,sol,true,withCells,true);
     return c+'</td>';
   }
@@ -477,7 +489,23 @@ function buildWS(){
   // Tabelle: gemischt 3 Spalten; Divisionen volle Breite (eigene Zeile, colspan).
   // Nur-Division: 2 Spalten.
   var tCols=onlyDiv?2:3;
-  h+=stwBuildTable(tasks,tCols,onlyDiv,gap,showNr,withCells,false);
+  // Aufgaben in Seiten-Chunks aufteilen (feste Anzahl pro Seite; WebKit-robuster Umbruch)
+  var splits=pageSplits();
+  var headerHTML=h; // Kopf der Seite 1
+  var body='', start=0;
+  for(var pg=0;pg<splits.length;pg++){
+    var slice=tasks.slice(start,start+splits[pg]);
+    if(!slice.length)break;
+    if(pg>0){ body+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>'; }
+    body+=stwBuildTable(slice,tCols,onlyDiv,gap,showNr,withCells,false,start);
+    start+=splits[pg];
+  }
+  // Rest (falls vorhanden) anhaengen
+  if(start<tasks.length){
+    body+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>';
+    body+=stwBuildTable(tasks.slice(start),tCols,onlyDiv,gap,showNr,withCells,false,start);
+  }
+  h=headerHTML+body;
   if(showSol){
     h+='<div style="page-break-before:always;break-before:page;padding-top:4mm"></div>';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #16a34a">'
@@ -548,8 +576,7 @@ document.getElementById('t-gen').addEventListener('click',function(){showTab('ge
 document.getElementById('t-list').addEventListener('click',function(){showTab('list');});
 document.getElementById('t-set').addEventListener('click',function(){showTab('set');});
 document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
-document.getElementById('cnt').addEventListener('input',function(){userTouchedSlider=true;document.getElementById('cntVal').textContent=this.value;});
-applyAutoCount(); // initial passend zur Default-Rechenart (+/- -> 12)
+initPageChips();
 document.getElementById('btnGen').addEventListener('click',generate);
 document.getElementById('btnGoPre').addEventListener('click',function(){showTab('pre');});
 

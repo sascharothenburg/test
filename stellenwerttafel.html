@@ -107,11 +107,9 @@ input{-webkit-user-select:text;user-select:text}
   <div class="card">
     <h2>Einstellungen</h2>
     <div style="margin-bottom:12px">
-      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Anzahl Aufgaben</label>
-      <div style="display:flex;align-items:center;gap:10px">
-        <input type="range" id="cnt" min="2" max="32" step="1" value="8" style="flex:1;accent-color:#0369a1">
-        <strong id="cntVal" style="color:#0369a1;min-width:24px">8</strong>
-      </div>
+      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Seitenzahl</label>
+      <div class="chips" id="pageChips"></div>
+      <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Aufgabenzahl pro Seite ist passend zur Stellenzahl festgelegt.</p>
     </div>
     <div style="margin-bottom:12px">
       <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Stellen (gr&ouml;&szlig;te Stelle)</label>
@@ -227,20 +225,24 @@ updateReprAvailability();
 
 /* ===== Automatische Aufgabenanzahl je Stellenzahl (seitenfüllend A4) =====
    places: 2=ZE, 3=HZE, 4=T, 5=ZT, 6=HT */
-var AUTO_COUNT_PLACES={2:20, 3:20, 4:15, 5:10, 6:10};
-var userTouchedSlider=false; // sobald true, übersteuert der manuelle Slider die Automatik
-function applyAutoCount(){
-  if(userTouchedSlider) return;
-  var places=getSingle('placeOpts')||3;
-  var n=AUTO_COUNT_PLACES[places]||16;
-  var sl=document.getElementById('cnt');
-  n=Math.max(parseInt(sl.min), Math.min(parseInt(sl.max), n));
-  sl.value=n;
-  document.getElementById('cntVal').textContent=n;
+/* ===== Seitenzahl-Steuerung (feste Aufgabenzahl pro Seite, druckgetestet) =====
+   p1 = Seite 1 (mit Header), p2 = GESAMTzahl bei 2 Seiten. Lookup nach Stellenzahl.
+   p2-Werte sind Startwerte und werden am iPad nachjustiert. */
+var numPages=1;
+var PER_PAGE={2:{p1:20,p2:46},3:{p1:20,p2:46},4:{p1:15,p2:34},5:{p1:10,p2:23},6:{p1:10,p2:23}};
+function pageCfg(){ var p=getSingle('placeOpts')||3; return PER_PAGE[p]||PER_PAGE[3]; }
+function totalCount(){ var c=pageCfg(); return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
+function pageSplits(){ var c=pageCfg(); if(numPages<=1)return [c.p1]; var t=(c.p2!=null?c.p2:c.p1*2); return [c.p1,t-c.p1]; }
+function initPageChips(){
+  var pc=document.getElementById('pageChips'); if(!pc)return; pc.innerHTML='';
+  [{n:1,l:'1 Seite'},{n:2,l:'2 Seiten'}].forEach(function(o){
+    var el=document.createElement('div');
+    el.className='chip'+(o.n===numPages?' sel':'');
+    el.textContent=o.l;
+    el.onclick=function(){ numPages=o.n; document.querySelectorAll('#pageChips .chip').forEach(function(x){x.classList.remove('sel');}); el.classList.add('sel'); };
+    pc.appendChild(el);
+  });
 }
-document.querySelectorAll('#placeOpts .opt-btn').forEach(function(b){
-  b.addEventListener('click', function(){userTouchedSlider=false;applyAutoCount();});
-});
 
 /* ===== Generator ===== */
 var tasks=[];
@@ -260,7 +262,7 @@ function digitsArray(num,places){
 }
 
 function generate(){
-  var cnt=parseInt(document.getElementById('cnt').value);
+  var cnt=totalCount();
   var places=getSingle('placeOpts')||3;
   var types=getMultiStr('typeOpts'); if(!types.length)types=['num2tab'];
   var reprs=getMultiStr('reprOpts'); if(!reprs.length)reprs=['digit'];
@@ -394,22 +396,40 @@ function buildWS(){
        +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#0369a1">\ud83d\udd22 Stellenwerttafel</div>'
        +'<div style="font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif">'+instr+'</div></div>'
        +(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
-  h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
   var cwS=(100/cols).toFixed(4)+'%';
-  for(var r=0;r<tasks.length;r+=cols){
-    h+='<tr style="break-inside:avoid;page-break-inside:avoid">';
-    for(var c=0;c<cols;c++){
-      var t=tasks[r+c];
-      if(t){
-        h+='<td style="width:'+cwS+';vertical-align:top;text-align:center;padding:0 3mm 9mm 3mm">';
-        if(showNr) h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:3pt">'+(r+c+1)+'.</div>';
-        h+=tablePrint(t,false,d);
-        h+='</td>';
-      } else h+='<td style="width:'+cwS+'"></td>';
+  function renderTaskTable(slice,startIdx){
+    var tt='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+    for(var r=0;r<slice.length;r+=cols){
+      tt+='<tr style="break-inside:avoid;page-break-inside:avoid">';
+      for(var c=0;c<cols;c++){
+        var t=slice[r+c];
+        if(t){
+          tt+='<td style="width:'+cwS+';vertical-align:top;text-align:center;padding:0 3mm 9mm 3mm">';
+          if(showNr) tt+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:3pt">'+(startIdx+r+c+1)+'.</div>';
+          tt+=tablePrint(t,false,d);
+          tt+='</td>';
+        } else tt+='<td style="width:'+cwS+'"></td>';
+      }
+      tt+='</tr>';
     }
-    h+='</tr>';
+    return tt+'</table>';
   }
-  h+='</table>';
+  // Aufgaben in Seiten-Chunks (feste Anzahl pro Seite; WebKit-robuster Umbruch)
+  var splits=pageSplits();
+  var headerHTML=h, start=0;
+  h='';
+  for(var pg=0;pg<splits.length;pg++){
+    var slice=tasks.slice(start,start+splits[pg]);
+    if(!slice.length)break;
+    if(pg>0){ h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>'; }
+    else { h+=headerHTML; }
+    h+=renderTaskTable(slice,start);
+    start+=splits[pg];
+  }
+  if(start<tasks.length){
+    h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>';
+    h+=renderTaskTable(tasks.slice(start),start);
+  }
   if(showSol){
     h+='<div style="page-break-before:always;break-before:page;padding-top:4mm"></div>';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #16a34a">'
@@ -497,8 +517,8 @@ document.getElementById('t-gen').addEventListener('click',function(){showTab('ge
 document.getElementById('t-list').addEventListener('click',function(){showTab('list');});
 document.getElementById('t-set').addEventListener('click',function(){showTab('set');});
 document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
-document.getElementById('cnt').addEventListener('input',function(){userTouchedSlider=true;document.getElementById('cntVal').textContent=this.value;});
-applyAutoCount(); // initial passend zur Default-Stellenzahl (HZE -> 16)
+
+initPageChips();
 document.getElementById('btnGen').addEventListener('click',generate);
 document.getElementById('btnGoPre').addEventListener('click',function(){showTab('pre');});
 

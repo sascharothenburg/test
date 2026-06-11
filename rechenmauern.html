@@ -104,12 +104,9 @@ input{-webkit-user-select:text;user-select:text}
   <div class="card">
     <h2>Einstellungen</h2>
     <div style="margin-bottom:12px">
-      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Anzahl Mauern</label>
-      <div style="display:flex;align-items:center;gap:10px">
-        <input type="range" id="cnt" min="2" max="20" step="1" value="8" style="flex:1;accent-color:#0369a1">
-        <strong id="cntVal" style="color:#0369a1;min-width:24px">8</strong>
-      </div>
-      <div class="ss" style="margin-top:6px">Wird automatisch passend zur Seite gewählt. Du kannst den Regler jederzeit selbst verstellen.</div>
+      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Seitenzahl</label>
+      <div class="chips" id="pageChips"></div>
+      <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Anzahl der Mauern pro Seite ist passend zu Steinzahl und Zahlenraum festgelegt.</p>
     </div>
     <div style="margin-bottom:12px">
       <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Gr&ouml;&szlig;e (Steine unten)</label>
@@ -207,34 +204,36 @@ setupMulti('sizeOpts');setupSingle('rangeOpts');setupMulti('typeOpts');
    Indexiert nach [größte gewählte Steinanzahl][Zahlenraum].
    Werte = ideale Mauer-Anzahl, damit eine A4-Seite gut gefüllt ist.
    Diese Werte sind durch Drucktest ermittelt und können hier justiert werden. */
-var AUTO_COUNT={
-  3:{ 20:20, 100:20, 1000:12 },
-  4:{ 20:12, 100:12, 1000:12 },
-  5:{ 20:12, 100:12, 1000:6 }
+/* ===== Seitenzahl-Steuerung (feste Anzahl Mauern pro Seite, druckgetestet) =====
+   Indexiert nach [groesste Steinanzahl][Zahlenraum].
+   p1 = Seite 1 (mit Header), p2 = GESAMTzahl bei 2 Seiten.
+   p2-Werte sind Startwerte und werden am iPad nachjustiert. */
+var PER_PAGE={
+  3:{ 20:{p1:20,p2:46}, 100:{p1:20,p2:46}, 1000:{p1:12,p2:28} },
+  4:{ 20:{p1:12,p2:28}, 100:{p1:12,p2:28}, 1000:{p1:12,p2:28} },
+  5:{ 20:{p1:12,p2:28}, 100:{p1:12,p2:28}, 1000:{p1:6, p2:14} }
 };
-var userTouchedSlider=false; // sobald true, übersteuert der manuelle Slider die Automatik
-function autoCount(){
+var numPages=1;
+function pageCfg(){
   var sizes=getMulti('sizeOpts'); if(!sizes.length)sizes=[3];
-  var maxSize=Math.max.apply(null,sizes);       // größte Mauer bestimmt den Platzbedarf
+  var maxSize=Math.max.apply(null,sizes);
   var range=getSingle('rangeOpts')||100;
-  var row=AUTO_COUNT[maxSize]||AUTO_COUNT[3];
-  return row[range]||row[100]||8;
+  var row=PER_PAGE[maxSize]||PER_PAGE[3];
+  return row[range]||row[100]||{p1:8,p2:18};
 }
-function applyAutoCount(){
-  if(userTouchedSlider) return; // Nutzer hat selbst geregelt -> nicht überschreiben
-  var n=autoCount();
-  var sl=document.getElementById('cnt');
-  n=Math.max(parseInt(sl.min), Math.min(parseInt(sl.max), n));
-  sl.value=n;
-  document.getElementById('cntVal').textContent=n;
-}
-// Bei jeder Options-Änderung: manuelle Übersteuerung zurücksetzen und Anzahl neu vorbelegen
-['sizeOpts','rangeOpts','typeOpts'].forEach(function(id){
-  document.querySelectorAll('#'+id+' .opt-btn').forEach(function(b){
-    b.addEventListener('click',function(){userTouchedSlider=false;applyAutoCount();});
+function totalCount(){ var c=pageCfg(); return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
+function pageSplits(){ var c=pageCfg(); if(numPages<=1)return [c.p1]; var t=(c.p2!=null?c.p2:c.p1*2); return [c.p1,t-c.p1]; }
+function initPageChips(){
+  var pc=document.getElementById('pageChips'); if(!pc)return; pc.innerHTML='';
+  [{n:1,l:'1 Seite'},{n:2,l:'2 Seiten'}].forEach(function(o){
+    var el=document.createElement('div');
+    el.className='chip'+(o.n===numPages?' sel':'');
+    el.textContent=o.l;
+    el.onclick=function(){ numPages=o.n; document.querySelectorAll('#pageChips .chip').forEach(function(x){x.classList.remove('sel');}); el.classList.add('sel'); };
+    pc.appendChild(el);
   });
-});
-applyAutoCount(); // initial passend zur Default-Kombination setzen
+}
+initPageChips();
 
 /* ===== Generator-Logik ===== */
 var walls=[];
@@ -286,7 +285,7 @@ function makeGaps(rows,type){
 }
 
 function generate(){
-  var cnt=parseInt(document.getElementById('cnt').value);
+  var cnt=totalCount();
   var sizes=getMulti('sizeOpts'); if(!sizes.length)sizes=[3];
   var maxTop=getSingle('rangeOpts')||100;
   var types=getMultiStr('typeOpts'); if(!types.length)types=['add'];
@@ -408,22 +407,39 @@ function buildWS(){
        +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#0369a1">\ud83e\uddf1 Rechenmauern</div>'
        +'<div style="font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif">Rechne die fehlenden Steine aus. Jeder Stein = Summe der beiden darunter.</div></div>'
        +(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
-  h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
   var cwM=(100/cols).toFixed(4)+'%';
-  for(var r=0;r<walls.length;r+=cols){
-    h+='<tr style="break-inside:avoid;page-break-inside:avoid">';
-    for(var c=0;c<cols;c++){
-      var w=walls[r+c];
-      if(w){
-        h+='<td style="width:'+cwM+';vertical-align:top;text-align:center;padding:0 3mm 8mm 3mm">';
-        if(showNr) h+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:3pt">'+(r+c+1)+'.</div>';
-        h+=pyramidPrint(w,false,d);
-        h+='</td>';
-      } else h+='<td style="width:'+cwM+'"></td>';
+  function renderWallTable(slice,startIdx){
+    var tt='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+    for(var r=0;r<slice.length;r+=cols){
+      tt+='<tr style="break-inside:avoid;page-break-inside:avoid">';
+      for(var c=0;c<cols;c++){
+        var w=slice[r+c];
+        if(w){
+          tt+='<td style="width:'+cwM+';vertical-align:top;text-align:center;padding:0 3mm 8mm 3mm">';
+          if(showNr) tt+='<div style="font-family:Nunito,sans-serif;font-weight:800;font-size:9pt;color:#94a3b8;margin-bottom:3pt">'+(startIdx+r+c+1)+'.</div>';
+          tt+=pyramidPrint(w,false,d);
+          tt+='</td>';
+        } else tt+='<td style="width:'+cwM+'"></td>';
+      }
+      tt+='</tr>';
     }
-    h+='</tr>';
+    return tt+'</table>';
   }
-  h+='</table>';
+  var splits=pageSplits();
+  var headerHTML=h, start=0;
+  h='';
+  for(var pg=0;pg<splits.length;pg++){
+    var slice=walls.slice(start,start+splits[pg]);
+    if(!slice.length)break;
+    if(pg>0){ h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>'; }
+    else { h+=headerHTML; }
+    h+=renderWallTable(slice,start);
+    start+=splits[pg];
+  }
+  if(start<walls.length){
+    h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>';
+    h+=renderWallTable(walls.slice(start),start);
+  }
   if(showSol){
     h+='<div style="page-break-before:always;break-before:page;padding-top:4mm"></div>';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #16a34a">'
@@ -514,7 +530,7 @@ document.getElementById('t-set').addEventListener('click',function(){showTab('se
 document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
 
 /* ===== Sliders / Buttons ===== */
-document.getElementById('cnt').addEventListener('input',function(){userTouchedSlider=true;document.getElementById('cntVal').textContent=this.value;});
+
 document.getElementById('btnGen').addEventListener('click',generate);
 document.getElementById('btnGoPre').addEventListener('click',function(){showTab('pre');});
 
