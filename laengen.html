@@ -154,7 +154,7 @@ function setAT(t){
    p1 = Seite 1 (mit Header), p2 = GESAMTzahl bei 2 Seiten.
    p2-Werte sind Startwerte und werden am iPad nachjustiert. */
 var numPages=1;
-var PER_PAGE={p1:34,p2:74};
+var PER_PAGE={p1:30,p2:68};
 function totalCount(){ var c=PER_PAGE; return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
 function pageSplits(){ var c=PER_PAGE; if(numPages<=1)return [c.p1]; var t=(c.p2!=null?c.p2:c.p1*2); return [c.p1,t-c.p1]; }
 function initPageChips(){
@@ -177,44 +177,62 @@ function toggleUnit(u,el){
   if(idx===-1){activeUnits.push(u);el.classList.add('sel');}
   else if(activeUnits.length>1){activeUnits.splice(idx,1);el.classList.remove('sel');}
 }
-var BL='<span style="display:inline-block;min-width:28pt;border-bottom:2pt solid #555;margin:0 1pt;vertical-align:bottom">&nbsp;</span>';
+var BL='<span style="display:inline-block;min-width:38pt;border-bottom:2pt solid #555;margin:0 1pt;vertical-align:bottom">&nbsp;</span>';
+
+// dezimal: Zahl mit deutschem Komma, ohne unnoetige Nullen
+function dz(n){var s=(Math.round(n*1e6)/1e6).toString();return s.replace('.',',');}
+
 
 var UNITS={
   'cm-m':{label:'cm / m',gen:function(){
-    if(Math.random()<0.5){var m=Math.floor(Math.random()*9)+1,cm=Math.floor(Math.random()*99)+1;return{q:m+' m '+cm+' cm = '+BL+' cm',s:String(m*100+cm)+' cm'};}
-    else{var cm=(Math.floor(Math.random()*9)+1)*100+Math.floor(Math.random()*99)+1;return{q:cm+' cm = '+BL+' m '+BL+' cm',s:Math.floor(cm/100)+' m '+cm%100+' cm'};}
+    var cm=(Math.floor(Math.random()*9)+1)*100+[0,5,10,25,50,75][Math.floor(Math.random()*6)];
+    if(Math.random()<0.5){return{q:cm+' cm = '+BL+' m',s:dz(cm/100)+' m'};}
+    else{return{q:dz(cm/100)+' m = '+BL+' cm',s:cm+' cm'};}
   }},
   'mm-cm':{label:'mm / cm',gen:function(){
-    if(Math.random()<0.5){var c=Math.floor(Math.random()*19)+1,mm=Math.floor(Math.random()*9)+1;return{q:c+' cm '+mm+' mm = '+BL+' mm',s:String(c*10+mm)+' mm'};}
-    else{var mm=(Math.floor(Math.random()*19)+1)*10+Math.floor(Math.random()*9)+1;return{q:mm+' mm = '+BL+' cm '+BL+' mm',s:Math.floor(mm/10)+' cm '+mm%10+' mm'};}
+    var mm=(Math.floor(Math.random()*19)+1)*10+[0,1,2,5][Math.floor(Math.random()*4)];
+    if(Math.random()<0.5){return{q:mm+' mm = '+BL+' cm',s:dz(mm/10)+' cm'};}
+    else{return{q:dz(mm/10)+' cm = '+BL+' mm',s:mm+' mm'};}
   }},
   'm-km':{label:'m / km',gen:function(){
-    if(Math.random()<0.5){var k=Math.floor(Math.random()*9)+1,m=[0,100,200,500,750][Math.floor(Math.random()*5)];return{q:k+' km '+m+' m = '+BL+' m',s:String(k*1000+m)+' m'};}
-    else{var m=(Math.floor(Math.random()*9)+1)*1000+[0,100,250,500,750][Math.floor(Math.random()*5)];return{q:m+' m = '+BL+' km '+BL+' m',s:Math.floor(m/1000)+' km '+m%1000+' m'};}
+    var m=(Math.floor(Math.random()*9)+1)*1000+[0,100,200,250,500,750][Math.floor(Math.random()*6)];
+    if(Math.random()<0.5){return{q:m+' m = '+BL+' km',s:dz(m/1000)+' km'};}
+    else{return{q:dz(m/1000)+' km = '+BL+' m',s:m+' m'};}
   }},
   'dm':{label:'dm / cm',gen:function(){
-    if(Math.random()<0.5){var d=Math.floor(Math.random()*19)+1;return{q:d+' dm = '+BL+' cm',s:String(d*10)+' cm'};}
-    else{var c=(Math.floor(Math.random()*19)+1)*10;return{q:c+' cm = '+BL+' dm',s:String(c/10)+' dm'};}
+    var cm=(Math.floor(Math.random()*19)+1)*10+[0,1,2,5][Math.floor(Math.random()*4)];
+    if(Math.random()<0.5){return{q:cm+' cm = '+BL+' dm',s:dz(cm/10)+' dm'};}
+    else{return{q:dz(cm/10)+' dm = '+BL+' cm',s:cm+' cm'};}
   }},
   'g-kg':{label:'g / kg',gen:function(){
-    if(Math.random()<0.5){var k=Math.floor(Math.random()*9)+1,g=[0,100,250,500,750][Math.floor(Math.random()*5)];return{q:k+' kg '+g+' g = '+BL+' g',s:String(k*1000+g)+' g'};}
-    else{var g=(Math.floor(Math.random()*9)+1)*1000+[0,100,250,500,750][Math.floor(Math.random()*5)];return{q:g+' g = '+BL+' kg '+BL+' g',s:Math.floor(g/1000)+' kg '+g%1000+' g'};}
+    var g=(Math.floor(Math.random()*9)+1)*1000+[0,100,200,250,400,500,750][Math.floor(Math.random()*7)];
+    if(Math.random()<0.5){return{q:g+' g = '+BL+' kg',s:dz(g/1000)+' kg'};}
+    else{return{q:dz(g/1000)+' kg = '+BL+' g',s:g+' g'};}
   }},
   'kg-t':{label:'kg / t',gen:function(){
-    if(Math.random()<0.5){var t=Math.floor(Math.random()*9)+1,k=[0,100,250,500,750][Math.floor(Math.random()*5)];return{q:t+' t '+k+' kg = '+BL+' kg',s:String(t*1000+k)+' kg'};}
-    else{var k=(Math.floor(Math.random()*9)+1)*1000;return{q:k+' kg = '+BL+' t',s:String(k/1000)+' t'};}
+    var k=(Math.floor(Math.random()*9)+1)*1000+[0,100,250,500,750][Math.floor(Math.random()*5)];
+    if(Math.random()<0.5){return{q:k+' kg = '+BL+' t',s:dz(k/1000)+' t'};}
+    else{return{q:dz(k/1000)+' t = '+BL+' kg',s:k+' kg'};}
   }},
   'mg':{label:'mg / g',gen:function(){
-    var g=Math.floor(Math.random()*9)+1,mg=[0,100,250,500][Math.floor(Math.random()*4)];
-    return{q:g+' g '+mg+' mg = '+BL+' mg',s:String(g*1000+mg)+' mg'};
+    var mg=(Math.floor(Math.random()*9)+1)*100+[0,50,250,500][Math.floor(Math.random()*4)];
+    if(Math.random()<0.5){return{q:mg+' mg = '+BL+' g',s:dz(mg/1000)+' g'};}
+    else{return{q:dz(mg/1000)+' g = '+BL+' mg',s:mg+' mg'};}
   }},
 };
 
+// wandelt eine Loesung wie "3,4 km" / "250 mg" in einen Basiswert um (kleinste Einheit)
+var UNIT_FACTOR={mm:1,cm:10,dm:100,m:1000,km:1000000,mg:1,g:1000,kg:1000000,t:1000000000};
+function toBase(str){
+  var m=str.match(/([0-9]+(?:,[0-9]+)?)\s*([a-zA-Z]+)/);
+  if(!m)return 0;
+  var val=parseFloat(m[1].replace(',','.'));
+  return val*(UNIT_FACTOR[m[2]]||1);
+}
 function genCompare(){
   var u=activeUnits[Math.floor(Math.random()*activeUnits.length)];
   var r1=UNITS[u].gen(), r2=UNITS[u].gen();
-  var a=parseFloat(r1.s.replace(/[^0-9.]/g,'')||0);
-  var b=parseFloat(r2.s.replace(/[^0-9.]/g,'')||0);
+  var a=toBase(r1.s), b=toBase(r2.s);
   var sym=a<b?'<':a>b?'>':'=';
   return{q:r1.s+' '+BL+' '+r2.s, s:sym};
 }
@@ -269,7 +287,6 @@ function buildWS(){
     return tt+'</table>';
   }
   var h=wsHead('&#x1F4CF;','Längen &amp; Gewichte','Rechne um und vergleiche');
-  // Aufgaben in Seiten-Chunks (feste Anzahl pro Seite; WebKit-robuster Umbruch)
   var splits=pageSplits();
   var start=0;
   for(var pg=0;pg<splits.length;pg++){
