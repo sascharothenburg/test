@@ -103,11 +103,9 @@ input{-webkit-user-select:text;user-select:text}
   <div class="card">
     <h2>Einstellungen</h2>
     <div style="margin-bottom:12px">
-      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Anzahl Aufgaben</label>
-      <div style="display:flex;align-items:center;gap:10px">
-        <input type="range" id="cnt" min="2" max="16" step="1" value="8" style="flex:1;accent-color:#0369a1">
-        <strong id="cntVal" style="color:#0369a1;min-width:24px">8</strong>
-      </div>
+      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Seitenzahl</label>
+      <div class="opt-row" id="pageChips"></div>
+      <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Aufgabenzahl ist passend zur Seite festgelegt.</p>
     </div>
     <div style="margin-bottom:12px">
       <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Zahlenraum</label>
@@ -257,8 +255,25 @@ function pickValue(r,type){
   return cands[ri(0,cands.length-1)];
 }
 
+/* ===== Seitenzahl-Steuerung (Aufgabenzahl pro Seite) =====
+   Eine Aufgabe pro Zeile (Strahl braucht Breite); Aufgaben fließen natürlich
+   über die Seiten (break-inside:avoid je Aufgabe). Der Umschalter steuert nur die Gesamtzahl.
+   p1 = ca. 1 Seite, p2 = ca. 2 Seiten. Startwerte, am iPad nachjustieren. */
+var numPages=1;
+var PER_PAGE={p1:8,p2:18};
+function totalCount(){ var c=PER_PAGE; return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
+function initPageChips(){
+  var pc=document.getElementById('pageChips'); if(!pc)return; pc.innerHTML='';
+  [{n:1,l:'1 Seite'},{n:2,l:'2 Seiten'}].forEach(function(o){
+    var el=document.createElement('div');
+    el.className='opt-btn'+(o.n===numPages?' sel':'');
+    el.textContent=o.l;
+    el.onclick=function(){ numPages=o.n; document.querySelectorAll('#pageChips .opt-btn').forEach(function(x){x.classList.remove('sel');}); el.classList.add('sel'); };
+    pc.appendChild(el);
+  });
+}
 function generate(){
-  var cnt=parseInt(document.getElementById('cnt').value);
+  var cnt=totalCount();
   var ranges=getMulti('rangeOpts'); if(!ranges.length)ranges=[100];
   var types=getMultiStr('typeOpts'); if(!types.length)types=['read'];
   var section=getSingleStr('sectionOpts')||'zero';
@@ -467,7 +482,7 @@ document.getElementById('t-gen').addEventListener('click',function(){showTab('ge
 document.getElementById('t-list').addEventListener('click',function(){showTab('list');});
 document.getElementById('t-set').addEventListener('click',function(){showTab('set');});
 document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
-document.getElementById('cnt').addEventListener('input',function(){document.getElementById('cntVal').textContent=this.value;});
+initPageChips();
 document.getElementById('btnGen').addEventListener('click',generate);
 document.getElementById('btnGoPre').addEventListener('click',function(){showTab('pre');});
 
