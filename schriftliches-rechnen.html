@@ -199,9 +199,9 @@ function curMode(){
   return 'addsub';
 }
 var PER_PAGE={
-  addsub:{p1:18,p2:42},
-  mul:   {p1:12,p2:28},
-  div:   {p1:6, p2:14}
+  addsub:{p1:18,p2:39},
+  mul:   {p1:12,p2:27},
+  div:   {p1:6, p2:12}
 };
 function pageCfg(){ return PER_PAGE[curMode()]||PER_PAGE.addsub; }
 function totalCount(){ var c=pageCfg(); return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
