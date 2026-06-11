@@ -103,8 +103,7 @@ input[type=range]{accent-color:#0369a1}
   </div>
 </div>
 <div class="tabs">
-<button class="tab active" id="t-reihen"><span class="ti">&#x1F522;</span>Reihen</button>
-  <button class="tab" id="t-opt"><span class="ti">&#x2699;</span>Optionen</button>
+<button class="tab active" id="t-reihen"><span class="ti">&#x1F522;</span>Generator</button>
   <button class="tab" id="t-set"><span class="ti">&#x1F464;</span>Einst.</button>
   <button class="tab" id="t-pre"><span class="ti">&#x1F441;</span>Vorschau</button>
 </div>
@@ -120,9 +119,7 @@ input[type=range]{accent-color:#0369a1}
     <div class="reihen-grid" id="reihenGrid"></div>
     <p id="selInfo" style="font-size:.78rem;color:#6b7280;margin-top:4px"></p>
   </div>
-</div>
-<div class="screen" id="s-opt">
-<div class="card">
+  <div class="card">
     <h2>&#x2699; Aufgaben-Optionen</h2>
     <div class="sr">
       <div><div class="sl">&#xD7; 0 weglassen</div><div class="ss">Multiplikation mit Null ausschlie&#223;en</div></div>
@@ -146,19 +143,10 @@ input[type=range]{accent-color:#0369a1}
     </div>
   </div>
   <div class="card">
-    <h2>&#x1F4CB; Layout</h2>
-    <div class="sr">
-      <div class="sl">Spalten</div>
-      <div style="display:flex;gap:6px">
-        <button class="reihe-btn" id="col1" style="padding:6px 14px;font-size:.85rem">1</button>
-        <button class="reihe-btn sel" id="col2" style="padding:6px 14px;font-size:.85rem">2</button>
-        <button class="reihe-btn" id="col3" style="padding:6px 14px;font-size:.85rem">3</button>
-      </div>
-    </div>
+    <h2>&#x1F4C4; Seitenzahl</h2>
     <div class="sr" style="flex-direction:column;align-items:flex-start;gap:6px;border-bottom:none">
-      <div class="sl">Seitenzahl</div>
       <div class="chips" id="pageChips" style="margin-top:4px"></div>
-      <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Aufgabenzahl pro Seite ist passend zur Spaltenzahl festgelegt.</p>
+      <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Aufgabenzahl pro Seite ist festgelegt (3 Spalten).</p>
     </div>
   </div>
 </div>
@@ -189,7 +177,7 @@ function ppCustomAmt(v){var n=parseFloat(v);if(n>0){document.getElementById('ppG
 document.addEventListener('click',function(e){var w=document.getElementById('ppWrap');if(w&&!w.contains(e.target))document.getElementById('ppBubble').classList.remove('open');});
 
 var selReihen=[2,3,4,5,6,7,8,9];
-var cols=2;
+var cols=3;
 
 function renderReihen(){
   var grid=document.getElementById('reihenGrid');
@@ -218,7 +206,7 @@ document.getElementById('btnRnd') && document.getElementById('btnRnd').addEventL
    p1 = Seite 1 (mit Header), p2 = GESAMTzahl bei 2 Seiten. Lookup nach Spaltenzahl.
    p2-Werte sind Startwerte und werden am iPad nachjustiert. */
 var numPages=1;
-var PER_PAGE={1:{p1:24,p2:55},2:{p1:48,p2:110},3:{p1:72,p2:165}};
+var PER_PAGE={1:{p1:24,p2:55},2:{p1:48,p2:110},3:{p1:72,p2:156}};
 function pageCfg(){ return PER_PAGE[cols]||PER_PAGE[2]; }
 function totalCount(){ var c=pageCfg(); return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
 function pageSplits(){ var c=pageCfg(); if(numPages<=1)return [c.p1]; var t=(c.p2!=null?c.p2:c.p1*2); return [c.p1,t-c.p1]; }
@@ -232,13 +220,7 @@ function initPageChips(){
     pc.appendChild(el);
   });
 }
-[1,2,3].forEach(function(c){
-  var el=document.getElementById('col'+c);
-  if(el) el.addEventListener('click',function(){
-    cols=c;
-    [1,2,3].forEach(function(x){var el2=document.getElementById('col'+x);if(el2)el2.classList.toggle('sel',x===c);});
-  });
-});
+
 
 function updateInfo(){
   var n=selReihen.length;
@@ -350,7 +332,6 @@ function buildWS(){
 
 
 document.getElementById('t-reihen').addEventListener('click',function(){showTab('reihen');});
-document.getElementById('t-opt').addEventListener('click',function(){showTab('opt');});
 document.getElementById('t-set').addEventListener('click',function(){showTab('set');});
 document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
 
