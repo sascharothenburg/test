@@ -105,6 +105,14 @@ input[type=range]{accent-color:#0369a1}
       <div class="chip" id="u-kg-t" onclick="toggleUnit('kg-t',this)">kg &#8596; t</div>
       <div class="chip" id="u-mg" onclick="toggleUnit('mg',this)">mg &#8596; g</div>
     </div>
+    <div style="font-size:.78rem;font-weight:700;color:#b45309;margin-bottom:6px;margin-top:8px">SCHWER &#8226; weite Spr&#252;nge</div>
+    <div class="chips">
+      <div class="chip" id="u-mm-km" onclick="toggleUnit('mm-km',this)">mm &#8596; km</div>
+      <div class="chip" id="u-cm-km" onclick="toggleUnit('cm-km',this)">cm &#8596; km</div>
+      <div class="chip" id="u-mg-kg" onclick="toggleUnit('mg-kg',this)">mg &#8596; kg</div>
+      <div class="chip" id="u-g-t" onclick="toggleUnit('g-t',this)">g &#8596; t</div>
+      <div class="chip" id="u-mg-t" onclick="toggleUnit('mg-t',this)">mg &#8596; t</div>
+    </div>
     <div class="sr" style="margin-top:4px">
       <div><div class="sl">Aufgabentyp</div></div>
       <div class="chips" style="margin:0">
@@ -179,7 +187,7 @@ function toggleUnit(u,el){
 var BL='<span style="display:inline-block;min-width:38pt;border-bottom:2pt solid #555;margin:0 1pt;vertical-align:bottom">&nbsp;</span>';
 
 // dezimal: Zahl mit deutschem Komma, ohne unnoetige Nullen
-function dz(n){var s=(Math.round(n*1e6)/1e6).toString();return s.replace('.',',');}
+function dz(n){var s=(Math.round(n*1e9)/1e9).toString();return s.replace('.',',');}
 
 
 var UNITS={
@@ -218,6 +226,32 @@ var UNITS={
     if(Math.random()<0.5){return{q:mg+' mg = '+BL+' g',s:dz(mg/1000)+' g'};}
     else{return{q:dz(mg/1000)+' g = '+BL+' mg',s:mg+' mg'};}
   }},
+  /* ===== SCHWER: weit entfernte Einheiten (bis zu mehrere Nachkommastellen) ===== */
+  'mm-km':{label:'mm / km',gen:function(){
+    var mm=(Math.floor(Math.random()*900)+10)*100+[0,500,250,750][Math.floor(Math.random()*4)]; // 1000..90750 mm
+    if(Math.random()<0.5){return{q:mm+' mm = '+BL+' km',s:dz(mm/1000000)+' km'};}
+    else{return{q:dz(mm/1000000)+' km = '+BL+' mm',s:mm+' mm'};}
+  }},
+  'cm-km':{label:'cm / km',gen:function(){
+    var cm=(Math.floor(Math.random()*900)+10)*100+[0,25,50,75][Math.floor(Math.random()*4)]; // 1000..90075 cm
+    if(Math.random()<0.5){return{q:cm+' cm = '+BL+' km',s:dz(cm/100000)+' km'};}
+    else{return{q:dz(cm/100000)+' km = '+BL+' cm',s:cm+' cm'};}
+  }},
+  'mg-kg':{label:'mg / kg',gen:function(){
+    var mg=(Math.floor(Math.random()*900)+10)*100+[0,500,250,750][Math.floor(Math.random()*4)]; // mg
+    if(Math.random()<0.5){return{q:mg+' mg = '+BL+' kg',s:dz(mg/1000000)+' kg'};}
+    else{return{q:dz(mg/1000000)+' kg = '+BL+' mg',s:mg+' mg'};}
+  }},
+  'g-t':{label:'g / t',gen:function(){
+    var g=(Math.floor(Math.random()*900)+10)*100+[0,500,250,750][Math.floor(Math.random()*4)]; // g
+    if(Math.random()<0.5){return{q:g+' g = '+BL+' t',s:dz(g/1000000)+' t'};}
+    else{return{q:dz(g/1000000)+' t = '+BL+' g',s:g+' g'};}
+  }},
+  'mg-t':{label:'mg / t',gen:function(){
+    var mg=(Math.floor(Math.random()*900)+100)*1000+[0,500000,250000,750000][Math.floor(Math.random()*4)]; // grosse mg-Werte
+    if(Math.random()<0.5){return{q:mg+' mg = '+BL+' t',s:dz(mg/1000000000)+' t'};}
+    else{return{q:dz(mg/1000000000)+' t = '+BL+' mg',s:mg+' mg'};}
+  }},
 };
 
 // wandelt eine Loesung wie "3,4 km" / "250 mg" in einen Basiswert um (kleinste Einheit)
@@ -239,7 +273,12 @@ var COMPARE_PAIRS={
   'dm':   {klein:'cm', gross:'dm', faktor:10,   baseMax:19,rests:[0,1,2,5]},
   'g-kg': {klein:'g',  gross:'kg', faktor:1000, baseMax:9, rests:[0,100,200,250,500,750]},
   'kg-t': {klein:'kg', gross:'t',  faktor:1000, baseMax:9, rests:[0,100,250,500,750]},
-  'mg':   {klein:'mg', gross:'g',  faktor:1000, baseMax:9, rests:[0,100,250,500,750]}
+  'mg':   {klein:'mg', gross:'g',  faktor:1000, baseMax:9, rests:[0,100,250,500,750]},
+  'mm-km':{klein:'mm', gross:'km', faktor:1000000,   baseMax:9, rests:[0,250000,500000,750000]},
+  'cm-km':{klein:'cm', gross:'km', faktor:100000,    baseMax:9, rests:[0,25000,50000,75000]},
+  'mg-kg':{klein:'mg', gross:'kg', faktor:1000000,   baseMax:9, rests:[0,250000,500000,750000]},
+  'g-t':  {klein:'g',  gross:'t',  faktor:1000000,   baseMax:9, rests:[0,250000,500000,750000]},
+  'mg-t': {klein:'mg', gross:'t',  faktor:1000000000,baseMax:9, rests:[0,250000000,500000000,750000000]}
 };
 function fmtUnit(valKlein, unit, faktor){
   return null;
