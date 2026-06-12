@@ -125,11 +125,12 @@ input{-webkit-user-select:text;user-select:text}
   </div>
   <div class="card">
     <h2>Umfang</h2>
-    <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Anzahl Aufgaben</label>
-    <div style="display:flex;align-items:center;gap:10px">
-      <input type="range" id="count" min="4" max="16" step="1" value="8" style="flex:1;accent-color:#dc2626">
-      <strong id="countVal" style="color:#dc2626;min-width:24px">8</strong>
+    <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Seitenzahl</label>
+    <div class="seg" id="pageSeg">
+      <button class="seg-b active" data-pg="1">1 Seite</button>
+      <button class="seg-b" data-pg="2">2 Seiten</button>
     </div>
+    <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Aufgabenzahl ist passend zur Seite festgelegt.</p>
   </div>
   <button class="btn bp" id="btnGen">&#x26A1; Aufgaben generieren</button>
 </div>
@@ -290,13 +291,30 @@ function derivePool(){
   return wordPool().filter(function(it){ return it.verl && it.verl!=='---'; });
 }
 
+/* ===== Seitenzahl-Steuerung (Aufgabenzahl pro Seite) =====
+   Aufgaben fließen natürlich über die Seiten (break-inside:avoid je Aufgabe);
+   der Umschalter steuert nur die Gesamtzahl.
+   p1 = ca. 1 Seite, p2 = ca. 2 Seiten. Startwerte, am iPad nachjustieren. */
+var numPages=1;
+var PER_PAGE={p1:8,p2:18};
+function totalCount(){ var c=PER_PAGE; return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
+function initPageSeg(){
+  var seg=document.getElementById('pageSeg'); if(!seg)return;
+  seg.querySelectorAll('.seg-b').forEach(function(b){
+    b.addEventListener('click',function(){
+      numPages=parseInt(b.getAttribute('data-pg'))||1;
+      seg.querySelectorAll('.seg-b').forEach(function(x){x.classList.remove('active');});
+      b.classList.add('active');
+    });
+  });
+}
 function generate(){
   diff=diffVal();
   var phen=activePhen();
   if(!phen.length){alert('Bitte mindestens einen Laut ausw\u00e4hlen.');return;}
   modes=activeModes();
   if(!modes.length){alert('Bitte mindestens einen Aufgabentyp ausw\u00e4hlen.');return;}
-  var n=parseInt(document.getElementById('count').value);
+  var n=totalCount();
   tasks=[];
   var poolGap=wordPool();
   var poolDer=derivePool();
@@ -694,7 +712,7 @@ document.querySelectorAll('#lineSeg .seg-b').forEach(function(b){
     b.classList.add('active');
   });
 });
-document.getElementById('count').addEventListener('input',function(){document.getElementById('countVal').textContent=this.value;});
+initPageSeg();
 document.getElementById('btnGen').addEventListener('click',generate);
 document.getElementById('btnGoPre').addEventListener('click',function(){showTab('pre');});
 
