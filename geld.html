@@ -159,8 +159,7 @@ function toggleType(t,el){
    p2-Werte sind Startwerte und werden am iPad nachjustiert. */
 var numPages=1;
 function pageCfg(){
-  var heavy=(activeTypes.indexOf('wechsel')>=0)||(activeTypes.indexOf('einkauf')>=0);
-  return heavy?{p1:12,p2:28}:{p1:20,p2:46};
+  return {p1:12,p2:26};
 }
 function totalCount(){ var c=pageCfg(); return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
 function pageSplits(){ var c=pageCfg(); if(numPages<=1)return [c.p1]; var t=(c.p2!=null?c.p2:c.p1*2); return [c.p1,t-c.p1]; }
@@ -202,12 +201,12 @@ function genTask(){
     var sym=a<b?'<':a>b?'>':'=';
     return{q:fmt(a)+' '+BL+' '+fmt(b),s:sym,type:'Vergleichen'};
   } else if(t==='umrechnen'){
+    // dezimale Umrechnung in beide Richtungen: ct -> Euro (mit Komma) und Euro -> ct
+    var ct=(Math.floor(Math.random()*maxE)+1)*100+Math.floor(Math.random()*99)+1; // immer mit Cent-Anteil
     if(Math.random()<0.5){
-      var e=Math.floor(Math.random()*maxE)+1, c=Math.floor(Math.random()*99)+1;
-      return{q:e+' \u20ac '+c+' ct = '+BL+' ct',s:String(e*100+c)+' ct',type:'Umrechnen'};
-    } else {
-      var ct=(Math.floor(Math.random()*maxE)+1)*100+Math.floor(Math.random()*99)+1;
       return{q:ct+' ct = '+BL+' \u20ac',s:fmt(ct),type:'Umrechnen'};
+    } else {
+      return{q:fmt(ct)+' = '+BL+' ct',s:String(ct)+' ct',type:'Umrechnen'};
     }
   } else {
     var items=[

@@ -98,7 +98,6 @@ input{-webkit-user-select:text;user-select:text}
     <div class="chips">
       <div class="chip sel" id="ty-lesen" onclick="setType('lesen')">Uhr ablesen</div>
       <div class="chip" id="ty-zeiger" onclick="setType('zeiger')">Zeiger einzeichnen</div>
-      <div class="chip" id="ty-beide" onclick="setType('beide')">Beides gemischt</div>
     </div>
   </div>
   <div class="card">
@@ -143,12 +142,12 @@ document.addEventListener('click',function(e){var w=document.getElementById('ppW
 
 var difficulty=1,taskType='lesen';
 function setDiff(d){difficulty=d;[1,2,3].forEach(function(x){document.getElementById('d'+x).classList.toggle('sel',x===d);});}
-function setType(t){taskType=t;['lesen','zeiger','beide'].forEach(function(x){document.getElementById('ty-'+x).classList.toggle('sel',x===t);});}
+function setType(t){taskType=t;['lesen','zeiger'].forEach(function(x){document.getElementById('ty-'+x).classList.toggle('sel',x===t);});}
 /* ===== Seitenzahl-Steuerung (feste Aufgabenzahl pro Seite, druckgetestet) =====
    p1 = Seite 1 (mit Header), p2 = GESAMTzahl bei 2 Seiten. Lookup nach Aufgabentyp.
    p2-Werte sind Startwerte und werden am iPad nachjustiert. */
 var numPages=1;
-var PER_PAGE={ lesen:{p1:18,p2:42}, zeiger:{p1:15,p2:34}, beide:{p1:15,p2:34} };
+var PER_PAGE={ lesen:{p1:18,p2:36}, zeiger:{p1:15,p2:30} };
 function pageCfg(){ return PER_PAGE[taskType]||PER_PAGE.lesen; }
 function totalCount(){ var c=pageCfg(); return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
 function pageSplits(){ var c=pageCfg(); if(numPages<=1)return [c.p1]; var t=(c.p2!=null?c.p2:c.p1*2); return [c.p1,t-c.p1]; }
@@ -220,7 +219,7 @@ function buildWS(){
   var cells=[];
   for(var i=0;i<count;i++){
     var tm=rndTime(),hr=tm[0],mn=tm[1];
-    var isLesen=(taskType==='lesen')||(taskType==='beide'&&Math.random()<0.5);
+    var isLesen=(taskType==='lesen');
     var ts=fmtTime(hr,mn);
     var inner='<div style="break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;text-align:center;border:1px solid #e5e7eb;border-radius:8pt;padding:3mm"><div style="font-size:8pt;color:#0369a1;font-weight:800;margin-bottom:2mm">'+(i+1)+'.</div>';
     if(isLesen){inner+=clockSVG(hr%12||12,mn,sz);inner+='<div style="margin-top:2mm;border-bottom:1.5px solid #0369a1;min-width:50pt;display:inline-block;padding:0 8pt">&nbsp;</div>';sols.push(ts);}

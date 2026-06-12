@@ -110,7 +110,6 @@ input[type=range]{accent-color:#0369a1}
       <div class="chips" style="margin:0">
         <div class="chip sel" id="at-umrechnen" onclick="setAT('umrechnen')">Umrechnen</div>
         <div class="chip" id="at-vergleich" onclick="setAT('vergleich')">Vergleichen</div>
-        <div class="chip" id="at-beide" onclick="setAT('beide')">Beides</div>
       </div>
     </div>
     <div class="sr" style="flex-direction:column;align-items:flex-start;gap:6px;border:none">
@@ -148,13 +147,13 @@ document.addEventListener('click',function(e){var w=document.getElementById('ppW
 
 function setAT(t){
   aufgabenTyp=t;
-  ['umrechnen','vergleich','beide'].forEach(function(x){document.getElementById('at-'+x).classList.toggle('sel',x===t);});
+  ['umrechnen','vergleich'].forEach(function(x){document.getElementById('at-'+x).classList.toggle('sel',x===t);});
 }
 /* ===== Seitenzahl-Steuerung (feste Aufgabenzahl pro Seite, druckgetestet) =====
    p1 = Seite 1 (mit Header), p2 = GESAMTzahl bei 2 Seiten.
    p2-Werte sind Startwerte und werden am iPad nachjustiert. */
 var numPages=1;
-var PER_PAGE={p1:30,p2:68};
+var PER_PAGE={p1:38,p2:78};
 function totalCount(){ var c=PER_PAGE; return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
 function pageSplits(){ var c=PER_PAGE; if(numPages<=1)return [c.p1]; var t=(c.p2!=null?c.p2:c.p1*2); return [c.p1,t-c.p1]; }
 function initPageChips(){
@@ -229,12 +228,48 @@ function toBase(str){
   var val=parseFloat(m[1].replace(',','.'));
   return val*(UNIT_FACTOR[m[2]]||1);
 }
+/* Vergleichen mit GEMISCHTEN Einheiten, z.B. "3,4 m ___ 340 cm".
+   Pro Einheitenpaar: kleine Einheit (klein) und grosse Einheit (gross) mit Faktor.
+   Es wird ein Basiswert gewuerfelt und je Seite in einer der beiden Einheiten dargestellt;
+   mal sind die Werte gleich (=), mal leicht verschieden (< / >). */
+var COMPARE_PAIRS={
+  'cm-m': {klein:'cm', gross:'m',  faktor:100,  baseMax:9, rests:[0,10,20,25,50,75]},
+  'mm-cm':{klein:'mm', gross:'cm', faktor:10,   baseMax:19,rests:[0,1,2,5]},
+  'm-km': {klein:'m',  gross:'km', faktor:1000, baseMax:9, rests:[0,100,200,250,500,750]},
+  'dm':   {klein:'cm', gross:'dm', faktor:10,   baseMax:19,rests:[0,1,2,5]},
+  'g-kg': {klein:'g',  gross:'kg', faktor:1000, baseMax:9, rests:[0,100,200,250,500,750]},
+  'kg-t': {klein:'kg', gross:'t',  faktor:1000, baseMax:9, rests:[0,100,250,500,750]},
+  'mg':   {klein:'mg', gross:'g',  faktor:1000, baseMax:9, rests:[0,100,250,500,750]}
+};
+function fmtUnit(valKlein, unit, faktor){
+  return null;
+}
 function genCompare(){
   var u=activeUnits[Math.floor(Math.random()*activeUnits.length)];
-  var r1=UNITS[u].gen(), r2=UNITS[u].gen();
-  var a=toBase(r1.s), b=toBase(r2.s);
-  var sym=a<b?'<':a>b?'>':'=';
-  return{q:r1.s+' '+BL+' '+r2.s, s:sym};
+  var P=COMPARE_PAIRS[u]||COMPARE_PAIRS['cm-m'];
+  function wuerfle(){
+    var ganze=(Math.floor(Math.random()*P.baseMax)+1)*P.faktor;     // volle grosse Einheiten
+    var rest=P.rests[Math.floor(Math.random()*P.rests.length)];      // runder Rest (kindgerecht)
+    return ganze+rest;
+  }
+  var aKlein=wuerfle();
+  // zweiter Wert: ~40% gleich, sonst leicht abweichend (um runde Schritte)
+  var bKlein;
+  if(Math.random()<0.4){ bKlein=aKlein; }
+  else {
+    var deltas=[Math.round(P.faktor/4), Math.round(P.faktor/2), P.faktor, P.faktor*2];
+    var delta=deltas[Math.floor(Math.random()*deltas.length)];
+    bKlein = aKlein + (Math.random()<0.5?-delta:delta);
+    if(bKlein<=0) bKlein=aKlein+delta;
+  }
+  // Darstellung: eine Seite in grosser Einheit, andere in kleiner (Seite zufaellig)
+  function asGross(klein){ return dz(klein/P.faktor)+' '+P.gross; }
+  function asKlein(klein){ return klein+' '+P.klein; }
+  var leftGross = Math.random()<0.5;
+  var left  = leftGross ? asGross(aKlein) : asKlein(aKlein);
+  var right = leftGross ? asKlein(bKlein) : asGross(bKlein);
+  var sym = aKlein<bKlein?'<':aKlein>bKlein?'>':'=';
+  return{q:left+' '+BL+' '+right, s:sym};
 }
 
 function wsHead(emoji, title, sub){
@@ -263,7 +298,7 @@ function buildWS(){
   var tasks=[],sols=[];
   for(var i=0;i<count;i++){
     var u=activeUnits[Math.floor(Math.random()*activeUnits.length)];
-    var isComp=(aufgabenTyp==='vergleich')||(aufgabenTyp==='beide'&&Math.random()<0.4);
+    var isComp=(aufgabenTyp==='vergleich');
     var t=isComp?genCompare():UNITS[u].gen();
     tasks.push(t);sols.push(t.s);
   }
