@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Übio · Schulmaterial-Empfehlungen</title>
+<link rel="manifest" href='data:application/manifest+json,{"name":"Schulmaterial","short_name":"Schulmaterial","start_url":".","display":"standalone","background_color":"%23fdf6ec","theme_color":"%23c2410c","icons":[]}'>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap');
+
+:root{
+  --accent:#ea580c;
+  --accent-d:#c2410c;
+  --accent-l:#fb923c;
+  --bg:#fafafa;
+  --card:#ffffff;
+  --line:#e5e5e5;
+  --ink:#2b2b2b;
+  --muted:#6b6b6b;
+  --soft:#fff7ed;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+body{background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+
+header{
+  position:sticky;top:0;z-index:50;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent-d) 100%);
+  color:#fff;padding:14px 20px;padding-top:calc(14px + var(--ad-top,0px));
+  box-shadow:0 2px 12px rgba(0,0,0,.12);
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+header .h-title{font-weight:800;font-size:1.2rem;display:flex;align-items:center;gap:10px}
+.h-spacer{flex:1 1 auto}
+.h-back{color:#fff;text-decoration:none;font-weight:700;font-size:.95rem;padding:7px 14px;border-radius:9px;background:rgba(255,255,255,.16);white-space:nowrap}
+.h-back:hover{background:rgba(255,255,255,.28)}
+
+.wrap{max-width:860px;margin:0 auto;padding:26px 20px 70px}
+
+/* Werbekennzeichnung – prominent, oben */
+.ad-banner{
+  background:var(--soft);border:1px solid #fed7aa;border-radius:14px;
+  padding:16px 20px;margin-bottom:22px;font-size:.92rem;color:var(--ink);
+}
+.ad-banner b{color:var(--accent-d)}
+.ad-badge{
+  display:inline-block;background:var(--accent-d);color:#fff;font-size:.68rem;
+  font-weight:800;letter-spacing:.4px;text-transform:uppercase;
+  padding:3px 9px;border-radius:6px;margin-right:8px;vertical-align:middle;
+}
+
+.intro{margin-bottom:22px}
+.intro h1{font-size:1.5rem;font-weight:800;color:var(--accent-d);margin-bottom:6px}
+.intro p{color:var(--muted);font-size:.98rem}
+
+/* Accordion */
+.acc{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.acc-head{
+  width:100%;border:none;background:none;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;gap:12px;padding:18px 20px;text-align:left;
+}
+.acc-head .ic{font-size:1.4rem;flex:none}
+.acc-head .nm{font-size:1.05rem;font-weight:800;color:var(--ink);flex:1}
+.acc-head .chev{font-size:1rem;color:var(--muted);transition:transform .18s}
+.acc.open .acc-head .chev{transform:rotate(180deg)}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .22s ease}
+.acc.open .acc-body{max-height:3000px}
+.acc-inner{padding:0 20px 18px}
+
+/* Produkt-Karten */
+.pgrid{display:grid;grid-template-columns:1fr;gap:12px}
+.pcard{
+  display:flex;gap:14px;align-items:center;border:1px solid var(--line);
+  border-radius:14px;padding:12px;background:#fff;
+}
+.pcard .pimg{
+  width:64px;height:64px;border-radius:10px;flex:none;object-fit:contain;
+  background:#f5f5f5;border:1px solid var(--line);
+}
+.pcard .pimg.ph{display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:#cbd5e1}
+.pcard .ptxt{flex:1;min-width:0}
+.pcard .ptitle{font-weight:800;font-size:.96rem;color:var(--ink)}
+.pcard .pdesc{font-size:.84rem;color:var(--muted);margin-top:2px}
+.pcard .pbtn-wrap{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.pcard .pbtn{
+  display:inline-block;background:var(--accent);color:#fff;font-weight:800;
+  font-size:.82rem;padding:8px 14px;border-radius:10px;text-decoration:none;
+  white-space:nowrap;
+}
+.pcard .pbtn:active{filter:brightness(.93)}
+.pcard .ptag{font-size:.62rem;font-weight:800;color:var(--accent-d);letter-spacing:.3px;text-transform:uppercase}
+
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:24px 20px 40px}
+footer a{color:var(--accent-d);font-weight:700}
+
+@media(max-width:480px){
+  .pcard{flex-wrap:wrap}
+  .pcard .pbtn-wrap{width:100%;align-items:stretch}
+  .pcard .pbtn{text-align:center}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-title">🛍️ Schulmaterial</div>
+  <div class="h-spacer"></div>
+  <a class="h-back" href="index.html">&larr; Zur Startseite</a>
+</header>
+
+<div class="wrap">
+
+  <div class="ad-banner">
+    <span class="ad-badge">Werbung</span>
+    <b>Affiliate-Hinweis:</b> Diese Seite enthält Amazon-Partnerlinks. Als Amazon-Partner verdiene ich an qualifizierten Verkäufen, ohne dass für dich ein Aufpreis entsteht.
+  </div>
+
+  <div class="intro">
+    <h1>Empfehlungen für den Schulstart</h1>
+    <p>Eine kleine, handverlesene Auswahl an Materialien, die gut zu den Übio-Übungen passen – nach Kategorie sortiert.</p>
+  </div>
+
+  <div id="accWrap"></div>
+
+  <footer>
+    Übio &middot; © 2026 Sascha Rothenburg &middot;
+    <a href="index.html">Startseite</a>
+  </footer>
+
+</div>
+
+<script>
+/* =====================================================================
+   Kategorien: einmal definieren, Reihenfolge bestimmt die Anzeige.
+   ===================================================================== */
+var CATEGORIES = [
+  { id:'schreiben',  name:'Schreiblernhefte & Stifte', icon:'✏️' },
+  { id:'rechnen',    name:'Rechnen & Geometrie',       icon:'📐' },
+  { id:'nachschlagen', name:'Nachschlagewerke',        icon:'📚' },
+  { id:'zubehoer',   name:'Lernmaterialien',           icon:'🎒' }
+];
+
+/* =====================================================================
+   PRODUKTE: Pro Eintrag nur diese eine Zeile ergänzen/ändern.
+   - cat:   ID aus CATEGORIES oben
+   - title: Produktname
+   - desc:  kurze Beschreibung (1 Satz)
+   - img:   Bild-URL (per SiteStripe -> "Bild+Text" -> Bild-URL kopieren,
+            oder auf der Amazon-Produktseite Rechtsklick -> Grafikadresse
+            kopieren). Leer lassen ("") für Platzhalter-Icon.
+   - url:   Affiliate-Link mit deinem Tag ?tag=uebiorg-21 am Ende
+   Die untenstehenden Einträge sind BEISPIELE zur Orientierung -
+   bitte durch echte Produkte/Links ersetzen.
+   ===================================================================== */
+var PRODUCTS = [
+  { cat:'schreiben', title:'BEISPIEL: Schreiblernheft Lineatur 1', desc:'Passend zur Grundschrift, 16 Blatt', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
+  { cat:'schreiben', title:'BEISPIEL: Dreikant-Bleistifte 2B (12er-Set)', desc:'Ergonomisch für Schreibanfänger', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
+
+  { cat:'rechnen', title:'BEISPIEL: Rechenschieber bis 100', desc:'Anschauliches Rechnen im Zahlenraum bis 100', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
+  { cat:'rechnen', title:'BEISPIEL: Geometrie-Set (Zirkel, Geodreieck, Lineal)', desc:'Grundausstattung für die 3./4. Klasse', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
+
+  { cat:'nachschlagen', title:'BEISPIEL: Grundschulwörterbuch', desc:'Rechtschreibung einfach nachschlagen', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
+
+  { cat:'zubehoer', title:'LÜK-Kontrollgerät', desc:'Inkl. 24 Aufgabenplättchen – selbstständiges Üben mit Selbstkontrolle', img:'https://m.media-amazon.com/images/I/61Tui262KBL._SL1500_.jpg', url:'https://amzn.to/4v3S3vb' }
+];
+
+/* =====================================================================
+   Rendering + Accordion (Standard: eingeklappt, Hash-Restore wie auf
+   den anderen Übio-Seiten)
+   ===================================================================== */
+function closeAllAcc(){
+  document.querySelectorAll('.acc.open').forEach(function(a){ a.classList.remove('open'); });
+}
+
+function renderProductCard(p){
+  var imgHtml = p.img
+    ? '<img class="pimg" src="'+p.img+'" alt="" loading="lazy">'
+    : '<div class="pimg ph">🛒</div>';
+  return (
+    '<div class="pcard">'+
+      imgHtml+
+      '<div class="ptxt">'+
+        '<div class="ptitle">'+p.title+'</div>'+
+        '<div class="pdesc">'+p.desc+'</div>'+
+      '</div>'+
+      '<div class="pbtn-wrap">'+
+        '<span class="ptag">Anzeige</span>'+
+        '<a class="pbtn" href="'+p.url+'" target="_blank" rel="nofollow sponsored noopener">Bei Amazon ansehen</a>'+
+      '</div>'+
+    '</div>'
+  );
+}
+
+(function render(){
+  var wrap = document.getElementById('accWrap');
+  CATEGORIES.forEach(function(cat){
+    var items = PRODUCTS.filter(function(p){ return p.cat === cat.id; });
+    if(!items.length) return;
+
+    var acc = document.createElement('div');
+    acc.className = 'acc';
+    acc.id = 'acc-' + cat.id;
+
+    var head = document.createElement('button');
+    head.type = 'button';
+    head.className = 'acc-head';
+    head.innerHTML =
+      '<span class="ic">'+cat.icon+'</span>'+
+      '<span class="nm">'+cat.name+'</span>'+
+      '<span class="chev">▾</span>';
+    head.addEventListener('click', function(){
+      var wasOpen = acc.classList.contains('open');
+      closeAllAcc();
+      if(!wasOpen){
+        acc.classList.add('open');
+        history.replaceState(null, '', '#' + acc.id);
+      } else {
+        history.replaceState(null, '', location.pathname);
+      }
+    });
+
+    var body = document.createElement('div');
+    body.className = 'acc-body';
+    var inner = document.createElement('div');
+    inner.className = 'acc-inner';
+    var grid = document.createElement('div');
+    grid.className = 'pgrid';
+    grid.innerHTML = items.map(renderProductCard).join('');
+    inner.appendChild(grid);
+    body.appendChild(inner);
+
+    acc.appendChild(head);
+    acc.appendChild(body);
+    wrap.appendChild(acc);
+  });
+
+  restoreFromHash();
+})();
+
+function restoreFromHash(){
+  var hash = location.hash.replace('#', '');
+  if(!hash) return;
+  var target = document.getElementById(hash);
+  if(target && target.classList.contains('acc')){
+    closeAllAcc();
+    target.classList.add('open');
+  }
+}
+window.addEventListener('hashchange', restoreFromHash);
+</script>
+
+</body>
+</html>

@@ -16,7 +16,7 @@ html,body{height:100%}
 body{font-family:Nunito,sans-serif;background:#f0f9ff;color:#1e1b4b;-webkit-user-select:none;user-select:none;overscroll-behavior:none}
 input{-webkit-user-select:text;user-select:text}
 .app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;background:#fff;box-shadow:0 0 40px rgba(0,0,0,.1)}
-.hdr{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top,0px));flex-shrink:0}
+.hdr{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top,0px) + var(--ad-top,0px));flex-shrink:0}
 .hdr h1{font-size:1.15rem;font-weight:900}
 .hdr p{font-size:.68rem;opacity:.85;margin-top:1px}
 .hdr-btns{display:flex;gap:8px;margin-top:6px;align-items:center}
@@ -44,18 +44,13 @@ input{-webkit-user-select:text;user-select:text}
 .ss{font-size:.73rem;color:#6b7280;margin-top:1px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{padding:6px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:#f0f9ff;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:700;color:#6b7280;cursor:pointer}
+#pageChips{width:100%}
+#pageChips .chip{flex:1;min-width:60px;padding:9px 4px;border-radius:10px;border:2px solid #e2e8f0;background:#f8fafc;font-weight:800;color:#1e1b4b;white-space:nowrap}
+#pageChips .chip.sel{background:#0369a1;color:#fff;border-color:#0369a1}
 .chip.sel{background:#0369a1;border-color:#0369a1;color:#fff}
 .ni{width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:9px;font-family:Nunito,sans-serif;font-size:.9rem;font-weight:600;color:#1e1b4b;background:#f0f9ff;outline:none}
 .ni:focus{border-color:#0369a1}
 .sbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(255,255,255,.97);border-top:1px solid #e2e8f0;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;z-index:100}
-.pp-wrap{position:relative;display:inline-block}
-.pp-bubble{display:none;position:absolute;top:calc(100% + 8px);left:0;background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 28px rgba(0,0,0,.18);width:210px;z-index:9999}
-.pp-bubble.open{display:block}
-.pp-amts{display:flex;gap:5px;margin:8px 0}
-.pp-a{flex:1;padding:6px 2px;border-radius:9px;border:2px solid #e2e8f0;background:#f8fafc;font-family:Nunito,sans-serif;font-size:.78rem;font-weight:800;color:#1e1b4b;cursor:pointer}
-.pp-a.sel{background:#0070ba;color:#fff;border-color:#0070ba}
-.pp-inp{width:100%;padding:6px 9px;border:2px solid #e2e8f0;border-radius:9px;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:600;color:#1e1b4b;outline:none;margin-bottom:8px}
-.pp-go{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:10px;background:#0070ba;color:#fff;font-weight:800;font-size:.85rem;text-decoration:none}
 .srow{display:flex;align-items:center;gap:10px}
 .srow input[type=range]{flex:1;accent-color:#0369a1}
 input[type=range]{accent-color:#0369a1}
@@ -63,6 +58,13 @@ input[type=range]{accent-color:#0369a1}
 .printarea{display:none}
 
 </style>
+<script src="pdf-lib.min.js"></script>
+<script src="fontkit.umd.min.js"></script>
+<script src="pdf.min.js"></script>
+<script>if(window.pdfjsLib){window.pdfjsLib.GlobalWorkerOptions.workerSrc='pdf.worker.min.js';}</script>
+<script src="laengen-pdf.js"></script>
+<script src="print-bridge.js"></script>
+<script src="back-button.js"></script>
 </head>
 <body>
 <div class="app">
@@ -70,17 +72,8 @@ input[type=range]{accent-color:#0369a1}
   <h1>&#x1F4CF; Längen &amp; Gewichte</h1>
   <p>&#169; 2026 Sascha Rothenburg &#183; Grundschrift von Christian Urff</p>
   <div class="hdr-btns">
-    <a href="index.html#acc-sachrechnen" class="hdr-btn">&#x2190; Startseite</a>
-    <div class="pp-wrap" id="ppWrap">
-      <button class="hdr-btn" onclick="ppToggle(event)">&#x2615; Coffee</button>
-      <div class="pp-bubble" id="ppBubble">
-        <div style="font-weight:900;font-size:.88rem;color:#1e1b4b;text-align:center;margin-bottom:4px">&#x2615; Buy me a Coffee</div>
-        <div class="pp-amts"><button class="pp-a" onclick="ppAmt(1)">1&euro;</button><button class="pp-a sel" onclick="ppAmt(2)">2&euro;</button><button class="pp-a" onclick="ppAmt(5)">5&euro;</button><button class="pp-a" onclick="ppAmt(10)">10&euro;</button></div>
-        <input class="pp-inp" id="ppCustom" type="number" min="1" placeholder="Eigener Betrag" oninput="ppCustomAmt(this.value)">
-        <a class="pp-go" id="ppGo" href="https://paypal.me/SaschaRothenburg/2EUR" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c1.379 8.741-5.832 9.76-8.084 9.76H9.942L8.684 23h3.603c.458 0 .848-.333.92-.786l.038-.199.733-4.64.047-.256a.932.932 0 0 1 .92-.786h.579c3.754 0 6.694-1.525 7.552-5.933.36-1.847.174-3.389-.854-4.483z"/></svg> Jetzt <span id="ppLbl">2&euro;</span> spenden</a>
-        <div style="font-size:.62rem;color:#94a3b8;text-align:center;margin-top:6px">via PayPal &middot; 0% Geb&uuml;hren</div>
-      </div>
-    </div>
+    <a href="mathe.html#acc-sachrechnen" class="hdr-btn">&#x2190; Zur&uuml;ck</a>
+    <a href="index.html" class="hdr-btn">&#x1F3E0; Hauptmen&uuml;</a>
   </div>
 </div>
 <div class="tabs">
@@ -97,7 +90,9 @@ input[type=range]{accent-color:#0369a1}
       <div class="chip sel" id="u-cm-m" onclick="toggleUnit('cm-m',this)">cm &#8596; m</div>
       <div class="chip sel" id="u-mm-cm" onclick="toggleUnit('mm-cm',this)">mm &#8596; cm</div>
       <div class="chip" id="u-m-km" onclick="toggleUnit('m-km',this)">m &#8596; km</div>
-      <div class="chip" id="u-dm" onclick="toggleUnit('dm',this)">dm</div>
+      <div class="chip" id="u-dm" onclick="toggleUnit('dm',this)">dm gemischt</div>
+      <div class="chip" id="u-mm-m" onclick="toggleUnit('mm-m',this)">mm &#8596; m</div>
+      <div class="chip" id="u-cm-km" onclick="toggleUnit('cm-km',this)">cm &#8596; km</div>
     </div>
     <div style="font-size:.78rem;font-weight:700;color:#6b7280;margin-bottom:6px;margin-top:8px">GEWICHTE</div>
     <div class="chips">
@@ -108,7 +103,6 @@ input[type=range]{accent-color:#0369a1}
     <div style="font-size:.78rem;font-weight:700;color:#b45309;margin-bottom:6px;margin-top:8px">SCHWER &#8226; L&#196;NGEN</div>
     <div class="chips">
       <div class="chip" id="u-mm-km" onclick="toggleUnit('mm-km',this)">mm &#8596; km</div>
-      <div class="chip" id="u-cm-km" onclick="toggleUnit('cm-km',this)">cm &#8596; km</div>
     </div>
     <div style="font-size:.78rem;font-weight:700;color:#b45309;margin-bottom:6px;margin-top:8px">SCHWER &#8226; GEWICHTE</div>
     <div class="chips">
@@ -132,10 +126,6 @@ input[type=range]{accent-color:#0369a1}
 </div>
 <div class="screen" id="s-set">
   <div class="card">
-    <h2>&#x1F464; Schüler</h2>
-    <input class="ni" type="text" id="nameF" placeholder="Name des Schülers">
-  </div>
-  <div class="card">
     <h2>&#x1F4D0; Kopfzeile</h2>
     <div class="sr"><div class="sl">Name-Feld</div><label class="tgl"><input type="checkbox" id="showName"><span class="tgl-s"></span></label></div>
     <div class="sr"><div class="sl">Datum-Feld</div><label class="tgl"><input type="checkbox" id="showDate"><span class="tgl-s"></span></label></div>
@@ -151,10 +141,6 @@ input[type=range]{accent-color:#0369a1}
   <button class="btn bp" id="btnGoPre">&#x1F441; Vorschau &amp; Drucken</button>
 </div>
 <script>
-function ppToggle(e){e.preventDefault();document.getElementById('ppBubble').classList.toggle('open');}
-function ppAmt(n){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20ac';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');if(b.textContent.trim()===n+'\u20ac')b.classList.add('sel');});document.getElementById('ppCustom').value='';}
-function ppCustomAmt(v){var n=parseFloat(v);if(n>0){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20ac';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');});}}
-document.addEventListener('click',function(e){var w=document.getElementById('ppWrap');if(w&&!w.contains(e.target))document.getElementById('ppBubble').classList.remove('open');});
 
 function setAT(t){
   aufgabenTyp=t;
@@ -187,7 +173,7 @@ function toggleUnit(u,el){
   if(idx===-1){activeUnits.push(u);el.classList.add('sel');}
   else if(activeUnits.length>1){activeUnits.splice(idx,1);el.classList.remove('sel');}
 }
-var BL='<span style="display:inline-block;min-width:38pt;border-bottom:2pt solid #555;margin:0 1pt;vertical-align:bottom">&nbsp;</span>';
+var BL='___';
 
 // dezimal: Zahl mit deutschem Komma, ohne unnoetige Nullen
 function dz(n){var s=(Math.round(n*1e9)/1e9).toString();return s.replace('.',',');}
@@ -209,10 +195,31 @@ var UNITS={
     if(Math.random()<0.5){return{q:m+' m = '+BL+' km',s:dz(m/1000)+' km'};}
     else{return{q:dz(m/1000)+' km = '+BL+' m',s:m+' m'};}
   }},
-  'dm':{label:'dm / cm',gen:function(){
-    var cm=(Math.floor(Math.random()*19)+1)*10+[0,1,2,5][Math.floor(Math.random()*4)];
-    if(Math.random()<0.5){return{q:cm+' cm = '+BL+' dm',s:dz(cm/10)+' dm'};}
-    else{return{q:dz(cm/10)+' dm = '+BL+' cm',s:cm+' cm'};}
+  'dm':{label:'dm gemischt',gen:function(){
+    // mischt pro Aufgabe: dm<->cm, m<->dm, dm<->mm
+    var variant=Math.floor(Math.random()*3);
+    if(variant===0){
+      // dm <-> cm  (1 dm = 10 cm)
+      var cm=(Math.floor(Math.random()*19)+1)*10+[0,1,2,5][Math.floor(Math.random()*4)];
+      if(Math.random()<0.5){return{q:cm+' cm = '+BL+' dm',s:dz(cm/10)+' dm'};}
+      else{return{q:dz(cm/10)+' dm = '+BL+' cm',s:cm+' cm'};}
+    } else if(variant===1){
+      // m <-> dm  (1 m = 10 dm)
+      var dm=(Math.floor(Math.random()*9)+1)*10+[0,1,2,5][Math.floor(Math.random()*4)];
+      if(Math.random()<0.5){return{q:dm+' dm = '+BL+' m',s:dz(dm/10)+' m'};}
+      else{return{q:dz(dm/10)+' m = '+BL+' dm',s:dm+' dm'};}
+    } else {
+      // dm <-> mm  (1 dm = 100 mm)
+      var mm=(Math.floor(Math.random()*9)+1)*100+[0,10,25,50,75][Math.floor(Math.random()*5)];
+      if(Math.random()<0.5){return{q:mm+' mm = '+BL+' dm',s:dz(mm/100)+' dm'};}
+      else{return{q:dz(mm/100)+' dm = '+BL+' mm',s:mm+' mm'};}
+    }
+  }},
+  'mm-m':{label:'mm / m',gen:function(){
+    // 1 m = 1000 mm
+    var mm=(Math.floor(Math.random()*9)+1)*1000+[0,100,250,500,750][Math.floor(Math.random()*5)];
+    if(Math.random()<0.5){return{q:mm+' mm = '+BL+' m',s:dz(mm/1000)+' m'};}
+    else{return{q:dz(mm/1000)+' m = '+BL+' mm',s:mm+' mm'};}
   }},
   'g-kg':{label:'g / kg',gen:function(){
     var g=(Math.floor(Math.random()*9)+1)*1000+[0,100,200,250,400,500,750][Math.floor(Math.random()*7)];
@@ -236,7 +243,9 @@ var UNITS={
     else{return{q:dz(mm/1000000)+' km = '+BL+' mm',s:mm+' mm'};}
   }},
   'cm-km':{label:'cm / km',gen:function(){
-    var cm=(Math.floor(Math.random()*900)+10)*100+[0,25,50,75][Math.floor(Math.random()*4)]; // 1000..90075 cm
+    // 1 km = 100000 cm; runde Hunderter-km-Anteile fuer kindgerechte Ergebnisse
+    var km10=(Math.floor(Math.random()*9)+1)*10+[0,1,2,5][Math.floor(Math.random()*4)]; // Zehntel-km in 0,1-Schritten grob
+    var cm=km10*10000; // 10000 cm = 0,1 km
     if(Math.random()<0.5){return{q:cm+' cm = '+BL+' km',s:dz(cm/100000)+' km'};}
     else{return{q:dz(cm/100000)+' km = '+BL+' cm',s:cm+' cm'};}
   }},
@@ -273,7 +282,8 @@ var COMPARE_PAIRS={
   'cm-m': {klein:'cm', gross:'m',  faktor:100,  baseMax:9, rests:[0,10,20,25,50,75]},
   'mm-cm':{klein:'mm', gross:'cm', faktor:10,   baseMax:19,rests:[0,1,2,5]},
   'm-km': {klein:'m',  gross:'km', faktor:1000, baseMax:9, rests:[0,100,200,250,500,750]},
-  'dm':   {klein:'cm', gross:'dm', faktor:10,   baseMax:19,rests:[0,1,2,5]},
+  'dm':   {klein:'dm', gross:'m',  faktor:10,   baseMax:9, rests:[0,1,2,5]},
+  'mm-m': {klein:'mm', gross:'m',  faktor:1000, baseMax:9, rests:[0,100,250,500,750]},
   'g-kg': {klein:'g',  gross:'kg', faktor:1000, baseMax:9, rests:[0,100,200,250,500,750]},
   'kg-t': {klein:'kg', gross:'t',  faktor:1000, baseMax:9, rests:[0,100,250,500,750]},
   'mg':   {klein:'mg', gross:'g',  faktor:1000, baseMax:9, rests:[0,100,250,500,750]},
@@ -314,104 +324,88 @@ function genCompare(){
   return{q:left+' '+BL+' '+right, s:sym};
 }
 
-function wsHead(emoji, title, sub){
-  var meta=buildMeta();
-  return '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #0369a1">'
-    +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#0369a1">'+emoji+' '+title+'</div>'
-    +'<div style="font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif">'+sub+'</div></div>'
-    +(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
+
+
+
+
+
+
+
+/* ===== Aufgaben generieren (liefert [{q,s}] mit '___' als Lücke) ===== */
+function makeTaskGen(){
+  if(activeUnits.length===0) return null;
+  var isComp=(aufgabenTyp==='vergleich');
+  // gen(i): erzeugt Aufgabe i. Einheit rotiert deterministisch über die Auswahl.
+  return function(i){
+    var u=activeUnits[i%activeUnits.length];
+    return isComp?genCompare():UNITS[u].gen();
+  };
 }
-function wsFoot(sols){
-  var showSol=document.getElementById('showSol').checked;
-  var h='';
-  if(showSol && sols && sols.length){
-    h+='<div style="margin-top:6mm;padding-top:3mm;border-top:1px solid #e5e7eb">'
-      +'<div style="font-size:7pt;font-weight:800;color:#0369a1;margin-bottom:2mm">L\u00d6SUNGEN</div>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:2mm 6mm;font-family:Nunito,sans-serif;font-size:7pt;color:#777">';
-    sols.forEach(function(s,i){h+='<span>'+(i+1)+'. '+s+'</span>';});
-    h+='</div></div>';
-  }
-  h+='<div class="ws-foot">\u2605 \u2605 \u2605 &nbsp; Super gemacht! &nbsp; \u2605 \u2605 \u2605<br>\u00a9 2026 Sascha Rothenburg \u00b7 Grundschrift von Christian Urff</div>';
-  return h;
+function pdfSpec(){
+  return {
+    gen: makeTaskGen(),
+    numPages: numPages,
+    showSol: document.getElementById('showSol').checked,
+    title: 'L\u00e4ngen & Gewichte',
+    sub: (aufgabenTyp==='vergleich' ? 'Vergleiche: setze <, > oder =' : 'Rechne in die andere Einheit um')
+  };
 }
-
-function buildWS(){
-  var count=totalCount();
-  var tasks=[],sols=[];
-  for(var i=0;i<count;i++){
-    var u=activeUnits[Math.floor(Math.random()*activeUnits.length)];
-    var isComp=(aufgabenTyp==='vergleich');
-    var t=isComp?genCompare():UNITS[u].gen();
-    tasks.push(t);sols.push(t.s);
-  }
-  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  var fs=isIOS?12:14;
-  function renderTaskTable(slice,startIdx){
-    var tt='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
-    for(var r=0;r<slice.length;r+=2){
-      tt+='<tr style="break-inside:avoid;page-break-inside:avoid">';
-      for(var c=0;c<2;c++){
-        var t=slice[r+c];
-        if(t){
-          tt+='<td style="width:50%;vertical-align:baseline;border-bottom:1px solid #e5e7eb;padding:2.5mm 5mm 2.5mm 0">'
-            +'<span style="font-size:8pt;color:#0369a1;font-weight:800;min-width:16pt;display:inline-block">'+(startIdx+r+c+1)+'.</span>'
-            +'<span style="font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;color:#1e1b4b">'+t.q+'</span>'
-            +'</td>';
-        } else tt+='<td style="width:50%"></td>';
-      }
-      tt+='</tr>';
-    }
-    return tt+'</table>';
-  }
-  var h=wsHead('&#x1F4CF;','Längen &amp; Gewichte','Rechne um und vergleiche');
-  var splits=pageSplits();
-  var start=0;
-  for(var pg=0;pg<splits.length;pg++){
-    var slice=tasks.slice(start,start+splits[pg]);
-    if(!slice.length)break;
-    if(pg>0){ h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>'; }
-    h+=renderTaskTable(slice,start);
-    start+=splits[pg];
-  }
-  if(start<tasks.length){
-    h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>';
-    h+=renderTaskTable(tasks.slice(start),start);
-  }
-  h+=wsFoot(sols);
-  return h;
+function pdfHeaderOpts(){
+  return {
+    showName:document.getElementById('showName').checked,
+    showDate:document.getElementById('showDate').checked,
+    showKl:document.getElementById('showKl').checked
+  };
 }
-
-
-
-
-
-
-function buildMeta(){
-  var sN=document.getElementById('showName').checked;
-  var sD=document.getElementById('showDate').checked;
-  var sK=document.getElementById('showKl').checked;
-  var name=document.getElementById('nameF').value.trim();
-  if(!sN&&!sD&&!sK) return '';
-  var tdL='style="font-family:Nunito,sans-serif;font-size:8pt;color:#555;white-space:nowrap;padding-right:4pt"';
-  var tdR='style="border-bottom:1px solid #888;min-width:90pt;width:100%;font-size:8pt"';
-  var rows='';
-  if(sN) rows+='<tr><td '+tdL+'>Name:</td><td '+tdR+'>&nbsp;'+name+'</td></tr>';
-  if(sD) rows+='<tr><td '+tdL+'>Datum:</td><td '+tdR+'>&nbsp;</td></tr>';
-  if(sK) rows+='<tr><td '+tdL+'>Klasse:</td><td '+tdR+'>&nbsp;</td></tr>';
-  return '<table style="border-collapse:collapse;line-height:2.2">'+rows+'</table>';
+async function makePDFBytes(){
+  if(!window.fontkit && window.PDFLib && window.PDFLib.fontkit){window.fontkit=window.PDFLib.fontkit;}
+  return await LaengenPDF.buildWorksheetPDF(pdfSpec(), pdfHeaderOpts(), null);
 }
 function buildPreview(){
-  try{
-    var c=buildWS(),sw=Math.min(window.innerWidth,480)-28,sc=sw/595;
-    var wrap=document.getElementById('previewContent');wrap.innerHTML='';
-    var outer=document.createElement('div'),inner=document.createElement('div');
-    outer.style.cssText='width:'+sw+'px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;background:#fff;margin-bottom:8px';
-    inner.style.cssText='width:595px;transform-origin:top left;transform:scale('+sc.toFixed(4)+');padding:42px 50px;background:#fff;box-sizing:border-box';
-    inner.innerHTML=c;outer.appendChild(inner);wrap.appendChild(outer);
-    requestAnimationFrame(function(){outer.style.height=Math.round(inner.scrollHeight*sc)+'px';});
-  }catch(e){document.getElementById('previewContent').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
+  var wrap=document.getElementById('previewContent');
+  wrap.innerHTML='<p style="color:#6b7280;padding:16px;font-size:.8rem">Vorschau wird erstellt &hellip;</p>';
+  (async function(){
+    try{
+      if(activeUnits.length===0){
+        wrap.innerHTML='<p style="color:#b91c1c;padding:20px;font-family:Nunito,sans-serif">Bitte mindestens eine Einheit ausw\u00e4hlen.</p>';
+        return;
+      }
+      var bytes=await makePDFBytes();
+      if(window.pdfjsLib){
+        var pdf=await window.pdfjsLib.getDocument({data:bytes}).promise;
+        wrap.innerHTML='';
+        var sw=Math.min(window.innerWidth,480)-28;
+        for(var p=1;p<=pdf.numPages;p++){
+          var page=await pdf.getPage(p);
+          var vp1=page.getViewport({scale:1});
+          var scale=sw/vp1.width;
+          var vp=page.getViewport({scale:scale*2});
+          var canvas=document.createElement('canvas');
+          canvas.style.cssText='display:block;width:'+sw+'px;border:1px solid #e2e8f0;border-radius:6px;margin-bottom:10px;background:#fff';
+          canvas.width=vp.width;canvas.height=vp.height;
+          await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+          wrap.appendChild(canvas);
+        }
+      }else{
+        var blob=new Blob([bytes],{type:'application/pdf'});
+        wrap.innerHTML='<embed src="'+URL.createObjectURL(blob)+'" type="application/pdf" style="width:100%;height:70vh;border:1px solid #e2e8f0;border-radius:6px">';
+      }
+    }catch(e){
+      wrap.innerHTML='<p style="color:red;padding:20px">'+(e.message||String(e))+'</p>';
+      console.error(e);
+    }
+  })();
 }
-async function doPrint(){await document.fonts.ready;document.getElementById('printArea').innerHTML=buildWS();setTimeout(function(){window.print();},150);}
+async function doPrint(){
+  try{
+    if(activeUnits.length===0){alert('Bitte mindestens eine Einheit ausw\u00e4hlen.');return;}
+    var bytes=await makePDFBytes();
+    await PrintBridge.printPDF(bytes,'Laengen.pdf');
+  }catch(e){
+    alert('Druck fehlgeschlagen: '+(e.message||e));
+    console.error(e);
+  }
+}
 var sbar=document.getElementById('sbar');
 function showTab(n){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
@@ -439,5 +433,6 @@ document.addEventListener('contextmenu',function(e){e.preventDefault();});
 document.addEventListener('selectstart',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;e.preventDefault();});
 
 </script>
+<script src="ads.js"></script>
 </body>
 </html>

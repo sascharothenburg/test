@@ -15,7 +15,7 @@ html,body{height:100%}
 body{font-family:Nunito,sans-serif;background:#fef2f2;color:#1e1b4b;-webkit-user-select:none;user-select:none;overscroll-behavior:none}
 input{-webkit-user-select:text;user-select:text}
 .app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;background:#fff;box-shadow:0 0 40px rgba(0,0,0,.1)}
-.hdr{background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top,0px));flex-shrink:0}
+.hdr{background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top,0px) + var(--ad-top,0px));flex-shrink:0}
 .hdr h1{font-size:1.15rem;font-weight:900}
 .hdr p{font-size:.68rem;opacity:.85;margin-top:1px}
 .hdr-btns{display:flex;gap:8px;margin-top:6px;align-items:center}
@@ -45,21 +45,28 @@ input{-webkit-user-select:text;user-select:text}
 .ni{width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:9px;font-family:Nunito,sans-serif;font-size:.9rem;font-weight:600;color:#1e1b4b;background:#fef2f2;outline:none}
 .ni:focus{border-color:#b91c1c}
 .sbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(255,255,255,.97);border-top:1px solid #e2e8f0;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;z-index:100}
-.pp-wrap{position:relative;display:inline-block}
-.pp-bubble{display:none;position:absolute;top:calc(100% + 8px);left:0;background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 28px rgba(0,0,0,.18);width:210px;z-index:9999}
-.pp-bubble.open{display:block}
-.pp-amts{display:flex;gap:5px;margin:8px 0}
-.pp-a{flex:1;padding:6px 2px;border-radius:9px;border:2px solid #e2e8f0;background:#f8fafc;font-family:Nunito,sans-serif;font-size:.78rem;font-weight:800;color:#1e1b4b;cursor:pointer}
-.pp-a.sel{background:#0070ba;color:#fff;border-color:#0070ba}
-.pp-inp{width:100%;padding:6px 9px;border:2px solid #e2e8f0;border-radius:9px;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:600;color:#1e1b4b;outline:none;margin-bottom:8px}
-.pp-go{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:10px;background:#0070ba;color:#fff;font-weight:800;font-size:.85rem;text-decoration:none}
 @media print{.app,.sbar{display:none!important}.ws-foot{display:none!important}.printarea{display:block!important}body{background:#fff}html,body{height:auto;overflow:visible}@page{size:A4 portrait;margin:12mm 14mm}}
 .printarea{display:none}
 /* Lesen-spezifisch */
 .sl-list{display:flex;flex-direction:column;gap:8px}
 .sl-item{background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:10px 13px;font-family:Grundschrift,sans-serif;font-weight:bold;font-size:1.05rem;color:#1e1b4b;line-height:1.4;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .sl-item button{background:none;border:none;color:#f87171;font-size:1rem;cursor:pointer;padding:0;flex-shrink:0}
+.pgbtn{flex:1;padding:11px 0;border:2px solid #e2e8f0;border-radius:11px;background:#f0f4f8;color:#6b7280;font-family:Nunito,sans-serif;font-size:.88rem;font-weight:800;cursor:pointer}
+.pgbtn.active{background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;border-color:#b91c1c}
+.lvlbtn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:9px 13px;border:2px solid #e2e8f0;border-radius:11px;background:#f0f4f8;color:#6b7280;font-family:Nunito,sans-serif;cursor:pointer;gap:1px}
+.lvlbtn strong{font-size:.86rem;font-weight:800;color:#1e1b4b}
+.lvlbtn span{font-size:.7rem;font-weight:600;color:#94a3b8}
+.lvlbtn.active{background:#fef2f2;border-color:#b91c1c}
+.lvlbtn.active strong{color:#b91c1c}
+.lvlbtn.active span{color:#dc2626}
 </style>
+<script src="pdf-lib.min.js"></script>
+<script src="fontkit.umd.min.js"></script>
+<script src="pdf.min.js"></script>
+<script>if(window.pdfjsLib){window.pdfjsLib.GlobalWorkerOptions.workerSrc='pdf.worker.min.js';}</script>
+<script src="lesen-pdf.js"></script>
+<script src="print-bridge.js"></script>
+<script src="back-button.js"></script>
 </head>
 <body>
 <div class="app">
@@ -67,22 +74,12 @@ input{-webkit-user-select:text;user-select:text}
   <h1>&#x1F4D6; Lesen &uuml;ben</h1>
   <p>&#169; 2026 Sascha Rothenburg &#183; Grundschrift von Christian Urff</p>
   <div class="hdr-btns">
-    <a href="index.html#acc-lesen-schreiben" class="hdr-btn">&#x2190; Startseite</a>
-    <div class="pp-wrap" id="ppWrap">
-      <button class="hdr-btn" onclick="ppToggle(event)">&#x2615; Coffee</button>
-      <div class="pp-bubble" id="ppBubble">
-        <div style="font-weight:900;font-size:.88rem;color:#1e1b4b;text-align:center;margin-bottom:4px">&#x2615; Buy me a Coffee</div>
-        <div class="pp-amts"><button class="pp-a" onclick="ppAmt(1)">1&euro;</button><button class="pp-a sel" onclick="ppAmt(2)">2&euro;</button><button class="pp-a" onclick="ppAmt(5)">5&euro;</button><button class="pp-a" onclick="ppAmt(10)">10&euro;</button></div>
-        <input class="pp-inp" id="ppCustom" type="number" min="1" placeholder="Eigener Betrag" oninput="ppCustomAmt(this.value)">
-        <a class="pp-go" id="ppGo" href="https://paypal.me/SaschaRothenburg/2EUR" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c1.379 8.741-5.832 9.76-8.084 9.76H9.942L8.684 23h3.603c.458 0 .848-.333.92-.786l.038-.199.733-4.64.047-.256a.932.932 0 0 1 .92-.786h.579c3.754 0 6.694-1.525 7.552-5.933.36-1.847.174-3.389-.854-4.483z"/></svg> Jetzt <span id="ppLbl">2&euro;</span> spenden</a>
-        <div style="font-size:.62rem;color:#94a3b8;text-align:center;margin-top:6px">via PayPal &middot; 0% Geb&uuml;hren</div>
-      </div>
-    </div>
+    <a href="deutsch.html#acc-schreiben-und-lesen" class="hdr-btn">&#x2190; Zur&uuml;ck</a>
+    <a href="index.html" class="hdr-btn">&#x1F3E0; Hauptmen&uuml;</a>
   </div>
 </div>
 <div class="tabs">
   <button class="tab active" id="t-gen"><span class="ti">&#x26A1;</span>Generator</button>
-  <button class="tab" id="t-list"><span class="ti">&#x1F4DD;</span>S&auml;tze</button>
   <button class="tab" id="t-set"><span class="ti">&#x2699;</span>Einst.</button>
   <button class="tab" id="t-pre"><span class="ti">&#x1F441;</span>Vorschau</button>
 </div>
@@ -90,35 +87,25 @@ input{-webkit-user-select:text;user-select:text}
 <div class="screen active" id="s-gen">
   <div class="card">
     <h2>Einstellungen</h2>
-    <div style="margin-bottom:12px">
-      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Anzahl S&auml;tze</label>
-      <div style="display:flex;align-items:center;gap:10px">
-        <input type="range" id="sentCount" min="4" max="20" step="1" value="8" style="flex:1;accent-color:#b91c1c">
-        <strong id="sentCountVal" style="color:#b91c1c;min-width:24px">8</strong>
+    <div style="margin-bottom:14px">
+      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Schwierigkeit</label>
+      <div style="display:flex;flex-direction:column;gap:8px" id="lvlSel">
+        <button type="button" class="lvlbtn active" data-lvl="1"><strong>Klasse 1 &middot; 1. Halbjahr</strong><span>Kurze W&ouml;rter, einfache Laute</span></button>
+        <button type="button" class="lvlbtn" data-lvl="2"><strong>Klasse 1 &middot; 2. Halbjahr</strong><span>Erste Konsonanten&shy;verbindungen, au/ei/ie</span></button>
+        <button type="button" class="lvlbtn" data-lvl="3"><strong>Klasse 2 &middot; 1. Halbjahr</strong><span>sch/st/sp, Umlaute, l&auml;ngere S&auml;tze</span></button>
+        <button type="button" class="lvlbtn" data-lvl="4"><strong>Klasse 2 &middot; 2. Halbjahr</strong><span>Anspruchsvoller Wortschatz, Nebens&auml;tze</span></button>
       </div>
     </div>
-    <div style="margin-bottom:12px">
-      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Max. W&ouml;rter pro Satz</label>
-      <div style="display:flex;align-items:center;gap:10px">
-        <input type="range" id="maxWords" min="3" max="7" step="1" value="5" style="flex:1;accent-color:#b91c1c">
-        <strong id="maxWordsVal" style="color:#b91c1c;min-width:24px">5</strong>
+    <div style="margin-bottom:4px">
+      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Seitenanzahl</label>
+      <div style="display:flex;gap:8px" id="pageSel">
+        <button type="button" class="pgbtn active" data-pages="1">1 Seite</button>
+        <button type="button" class="pgbtn" data-pages="2">2 Seiten</button>
       </div>
     </div>
-    <div class="sr"><div class="sl">Zeichenlinie nach jedem Satz</div><label class="tgl"><input type="checkbox" id="showDraw"><span class="tgl-s"></span></label></div>
-    <button class="btn bp" style="margin-top:14px" id="btnGen">&#x26A1; S&auml;tze generieren</button>
-  </div>
-</div>
-<div class="screen" id="s-list">
-  <div class="card">
-    <h2>Generierte S&auml;tze</h2>
-    <div class="sl-list" id="sentList"><p style="color:#6b7280;font-size:.85rem">Noch keine S&auml;tze &ndash; zuerst generieren!</p></div>
   </div>
 </div>
 <div class="screen" id="s-set">
-  <div class="card">
-    <h2>Kind</h2>
-    <input class="ni" type="text" id="nameF" placeholder="Name des Kindes">
-  </div>
   <div class="card">
     <h2>Layout</h2>
     <div class="sr"><div class="sl">Zeilennummer</div><label class="tgl"><input type="checkbox" id="showNr" checked><span class="tgl-s"></span></label></div>
@@ -135,263 +122,206 @@ input{-webkit-user-select:text;user-select:text}
 </div>
 <div class="printarea" id="printArea"></div>
 <div class="sbar" id="sbar">
-  <button class="btn bp" id="btnGoPre">&#x1F441; Vorschau &amp; Drucken</button>
+  <button class="btn bp" id="btnGoPre" onclick="showTab('pre')">&#x1F441; Vorschau &amp; Drucken</button>
 </div>
 <script>
 
-/* ===== PayPal Bubble ===== */
-function ppToggle(e){e.preventDefault();document.getElementById('ppBubble').classList.toggle('open');}
-function ppAmt(n){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20ac';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');if(b.textContent.trim()===n+'\u20ac')b.classList.add('sel');});document.getElementById('ppCustom').value='';}
-function ppCustomAmt(v){var n=parseFloat(v);if(n>0){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20ac';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');});}}
-document.addEventListener('click',function(e){var w=document.getElementById('ppWrap');if(w&&!w.contains(e.target))document.getElementById('ppBubble').classList.remove('open');});
 
 var SAETZE = {
-  j1_3: [
-    "Der Hund bellt.","Die Katze schläft.","Das Kind lacht.",
-    "Mama kommt heim.","Papa liest vor.","Die Sonne scheint.",
-    "Der Ball rollt.","Das Buch liegt.","Oma backt Kuchen.",
-    "Der Vogel singt.","Die Maus rennt.","Das Baby weint.",
-    "Der Fisch schwimmt.","Die Blume blüht.","Opa schläft ein.",
-    "Das Kind malt.","Der Hund frisst.","Die Katze trinkt.",
-    "Mama singt laut.","Papa fährt weg.","Der Baum wächst.",
-    "Die Sonne wärmt.","Das Heft liegt.","Der Stift rollt."
+  // Stufe 1 — Klasse 1, 1. Halbjahr
+  // Lautgetreu, kurze offene Silben, einfache Wörter, max. ~4 kurze Wörter,
+  // keine Konsonantenhäufungen, keine sch/sp/st/pf, keine Umlaute am Wortanfang.
+  s1: [
+    "Mama ruft Lina.",
+    "Oma malt ein Bild.",
+    "Lili liest ein Buch.",
+    "Papa holt ein Eis.",
+    "Tom rennt zu Oma.",
+    "Der Hase hat lange Ohren.",
+    "Die Sonne ist da.",
+    "Ich male einen Igel.",
+    "Mimi sucht die Maus.",
+    "Der Hund liegt da.",
+    "Lena malt eine Rose.",
+    "Opa liest die Post.",
+    "Das Kind lacht laut.",
+    "Die Ente ruft laut.",
+    "Lina holt die Nase.",
+    "Tina hat einen Ball.",
+    "Der Esel ist da.",
+    "Mama liest mir vor.",
+    "Ein Apfel liegt da.",
+    "Die Katze ist lieb.",
+    "Lulu hat eine Tasse.",
+    "Opa malt einen Mond.",
+    "Der Igel ist da.",
+    "Ich rufe die Oma.",
+    "Tom hat eine Hose.",
+    "Die Nase ist rot.",
+    "Lena hat ein Tor.",
+    "Der Affe isst eine Banane.",
+    "Mama holt das Salz.",
+    "Ich lese das Wort.",
+    "Die Maus rennt los.",
+    "Papa malt ein Auto."
   ],
-  j1_4: [
-    "Der Hund spielt Ball.","Die Katze trinkt Milch.","Das Kind liest vor.",
-    "Mama kocht das Essen.","Papa liest ein Buch.","Die Sonne scheint warm.",
-    "Der Vogel baut ein Nest.","Die Maus sucht Käse.","Das Kind geht heim.",
-    "Oma kauft frisches Brot.","Der Ball liegt dort.","Das Kind trinkt Wasser.",
-    "Die Blume braucht Wasser.","Papa fährt das Auto.","Der Hund rennt schnell.",
-    "Die Katze schläft warm.","Das Baby trinkt Milch.","Opa liest die Zeitung.",
-    "Der Fisch schwimmt tief.","Die Kinder lachen laut.","Mama trägt den Einkauf.",
-    "Das Kind malt bunt.","Der Vogel singt schön.","Die Sonne geht auf."
+  // Stufe 2 — Klasse 1, 2. Halbjahr
+  // Erste Konsonantenverbindungen (Bl-, Br-, Gr-, Tr-, Fl-), au/ei/ie, ck, ng,
+  // etwas längere Sätze (4–6 Wörter), noch lautnah.
+  s2: [
+    "Der Baum steht im Garten.",
+    "Eine Blume blüht am Weg.",
+    "Der Stern leuchtet hell am Himmel.",
+    "Die Maus läuft schnell ins Loch.",
+    "Mein Bruder spielt mit dem Ball.",
+    "Der Frosch springt in den Teich.",
+    "Die Biene fliegt von Blume zu Blume.",
+    "Das Brot liegt auf dem Tisch.",
+    "Der Regen fällt auf die Wiese.",
+    "Ein Vogel singt im grünen Baum.",
+    "Die Kinder bauen einen Turm.",
+    "Der Zug fährt schnell durch den Wald.",
+    "Mein Freund hat ein blaues Rad.",
+    "Die Blätter fallen von dem Baum.",
+    "Der Drache fliegt hoch in die Luft.",
+    "Die Sonne scheint warm und hell.",
+    "Ein Boot fährt über den See.",
+    "Der Wind weht durch die Bäume.",
+    "Die Katze klettert auf das Dach.",
+    "Mein Ball rollt unter den Tisch.",
+    "Der Hund gräbt ein tiefes Loch.",
+    "Die Blume riecht sehr gut.",
+    "Ein Stern fällt vom Himmel.",
+    "Der Frosch sitzt auf dem Blatt.",
+    "Die Kinder springen über die Pfütze.",
+    "Mein Bruder baut eine Brücke.",
+    "Der Apfel hängt am grünen Baum.",
+    "Die Wolke zieht über den See.",
+    "Ein Reh läuft schnell in den Wald.",
+    "Der Bauer fährt mit dem Traktor.",
+    "Die Maus frisst ein Stück Brot.",
+    "Mein Drachen fliegt über die Wiese."
   ],
-  j1_5: [
-    "Der Hund spielt gern mit Kindern.","Die Katze liegt in der Sonne.",
-    "Das Kind geht in die Schule.","Mama backt einen leckeren Kuchen.",
-    "Papa liest dem Kind vor.","Der Vogel sitzt auf dem Baum.",
-    "Die Maus läuft durch das Haus.","Das Kind trinkt ein Glas Milch.",
-    "Oma kauft Brot beim Bäcker.","Die Sonne scheint den ganzen Tag.",
-    "Der Ball liegt auf dem Boden.","Das Kind malt ein buntes Bild.",
-    "Die Blume wächst im Garten.","Papa repariert das alte Fahrrad.",
-    "Der Hund bellt den ganzen Tag.","Die Katze fängt eine kleine Maus.",
-    "Das Baby schläft in seinem Bett.","Opa geht jeden Tag spazieren.",
-    "Die Kinder spielen im Hof.","Mama singt ein schönes Lied."
+  // Stufe 3 — Klasse 2, 1. Halbjahr
+  // sch/st/sp/pf/ch, Umlaute, Doppelkonsonanten, mehrgliedrige Sätze (6–9 Wörter).
+  s3: [
+    "Die Schnecke kriecht langsam über den nassen Weg.",
+    "Mein Bruder spielt am Nachmittag mit seinen Freunden.",
+    "Die Schwester liest ihrer Puppe eine Geschichte vor.",
+    "Der Specht klopft laut an den dicken Baumstamm.",
+    "Die Sonne scheint hell durch das offene Fenster.",
+    "Im Herbst pflücken wir reife Äpfel im Garten.",
+    "Der Storch steht ruhig am Rand des Teiches.",
+    "Die Kinder rutschen fröhlich den steilen Hügel hinunter.",
+    "Mein Pferd springt mutig über den hohen Zaun.",
+    "Die Köchin rührt die heiße Suppe im großen Topf.",
+    "Der Schmetterling sitzt auf der gelben Blüte.",
+    "Wir spielen im Schnee und bauen einen Schneemann.",
+    "Die Mäuse verstecken sich schnell hinter dem Schrank.",
+    "Der Förster geht früh am Morgen durch den Wald.",
+    "Meine Schwester schreibt einen Brief an die Oma.",
+    "Der starke Wind pfeift laut um das alte Haus.",
+    "Die Schüler packen ihre Bücher in den Ranzen.",
+    "Das Eichhörnchen springt flink von Ast zu Ast.",
+    "Die Möwe fliegt kreischend über das blaue Meer.",
+    "Mein Vater pflanzt einen jungen Baum im Garten.",
+    "Die Glocke läutet hell vom hohen Kirchturm.",
+    "Der Hund schüttelt sein nasses Fell im Garten.",
+    "Wir backen am Sonntag einen süßen Apfelkuchen.",
+    "Die Spinne webt ein feines Netz am Fenster.",
+    "Der Bäcker schiebt die Brötchen in den heißen Ofen.",
+    "Die Sterne funkeln am dunklen Nachthimmel.",
+    "Mein Freund schwimmt schnell durch das kühle Wasser.",
+    "Der Schäfer hütet seine Herde auf der Wiese.",
+    "Die Kinder schmücken den Tisch mit bunten Blumen.",
+    "Das Schiff fährt langsam in den großen Hafen.",
+    "Die Katze schleicht leise durch das hohe Gras.",
+    "Der Pilz wächst versteckt unter den alten Blättern."
   ],
-  j1_6: [
-    "Der Hund läuft schnell durch den Garten.",
-    "Die Katze schläft den ganzen Tag im Bett.",
-    "Das Kind geht heute in die Schule.",
-    "Mama backt einen großen leckeren Kuchen.",
-    "Papa liest dem kleinen Kind ein Buch vor.",
-    "Der Vogel singt ein schönes Lied im Baum.",
-    "Die Maus sucht jeden Tag nach etwas Essen.",
-    "Das Kind malt ein buntes Bild für Mama.",
-    "Oma kauft frisches Brot und süße Äpfel.",
-    "Die Sonne scheint warm und der Wind weht.",
-    "Der Ball rollt schnell die Straße hinunter.",
-    "Das Kind trinkt jeden Morgen ein Glas Milch.",
-    "Die Blume braucht täglich Wasser und Sonne.",
-    "Papa fährt das Auto in die Werkstatt.",
-    "Der Hund schläft müde neben dem warmen Ofen."
-  ],
-  j1_7: [
-    "Der Hund spielt den ganzen Tag gern mit dem Ball.",
-    "Die Katze liegt faul und warm in der Sonne.",
-    "Das kleine Kind geht heute mit Mama in die Schule.",
-    "Oma backt jeden Sonntag einen großen leckeren Kuchen.",
-    "Papa liest dem müden Kind jeden Abend ein Buch vor.",
-    "Der bunte Vogel singt jeden Morgen im alten Baum.",
-    "Die kleine Maus sucht im Haus nach etwas zu essen.",
-    "Das Kind malt ein schönes buntes Bild für seine Mama.",
-    "Die Kinder spielen nach der Schule gern im Garten.",
-    "Mama singt dem kleinen Baby ein schönes Lied vor.",
-    "Der Hund rennt bellend durch den großen grünen Garten.",
-    "Das Kind trinkt jeden Morgen ein großes Glas Milch.",
-    "Die Sonne scheint warm und die Blumen im Garten blühen.",
-    "Papa kauft heute beim Bäcker frisches Brot und Kuchen.",
-    "Der kleine Igel schläft den ganzen Winter tief und fest."
-  ],
-  j2_3: [
-    "Der Igel schläft.","Die Wolke zieht.","Der Fuchs rennt.",
-    "Der Frosch quakt.","Die Freundin lacht.","Der Zug fährt.",
-    "Die Schnecke kriecht.","Der Berg leuchtet.","Der See glänzt.",
-    "Das Meer rauscht.","Der Stern funkelt.","Die Freunde spielen.",
-    "Der Bruder hilft.","Die Schwester liest.","Der Mond scheint.",
-    "Die Wiese grünt.","Der Wald rauscht.","Der Regen fällt.",
-    "Der Schnee glitzert.","Die Suppe dampft.","Der Kuchen duftet.",
-    "Das Fahrrad klingelt.","Der Wind pfeift.","Der Fluss fließt."
-  ],
-  j2_4: [
-    "Der Igel sucht Würmer.","Die Wolke bringt Regen.","Der Fuchs ist schlau.",
-    "Der Frosch springt weit.","Das Fahrrad ist kaputt.","Die Freundin kommt heute.",
-    "Der Zug kommt pünktlich.","Die Schnecke trägt Haus.","Der Berg ist hoch.",
-    "Der See ist tief.","Das Meer ist groß.","Der Stern leuchtet hell.",
-    "Die Freunde spielen Fußball.","Der Bruder lernt fleißig.","Die Schwester liest gern.",
-    "Der Mond scheint hell.","Die Wiese ist grün.","Der Wald riecht gut.",
-    "Der Regen macht nass.","Der Schnee liegt tief.","Die Suppe ist heiß.",
-    "Der Kuchen schmeckt gut.","Das Fahrrad fährt schnell.","Der Zug ist voll."
-  ],
-  j2_5: [
-    "Der Igel rollt sich ganz zusammen.","Die Wolke regnet auf uns.",
-    "Der Fuchs rennt durch den Wald.","Der Frosch sitzt am See.",
-    "Das Fahrrad lehnt am Zaun.","Die Freundin kommt zum Spielen.",
-    "Der Zug hält am Bahnhof.","Die Schnecke kriecht über den Weg.",
-    "Der Berg hat viel Schnee.","Der See liegt im Wald.",
-    "Das Meer ist weit entfernt.","Der Stern leuchtet in der Nacht.",
-    "Die Freunde spielen im Garten.","Der Bruder hilft beim Kochen.",
-    "Die Schwester liest ein Buch.","Der Mond scheint durch das Fenster.",
-    "Die Wiese ist voller Blumen.","Der Wald ist dunkel und groß.",
-    "Der Regen fällt auf die Wiese.","Der Schnee bedeckt die Straße.",
-    "Die Suppe kocht auf dem Herd.","Der Kuchen liegt auf dem Tisch.",
-    "Das Fahrrad steht vor der Tür.","Die Freunde lachen sehr laut."
-  ],
-  j2_6: [
-    "Der kleine Igel schläft unter dem Laub.",
-    "Die graue Wolke zieht über den Himmel.",
-    "Der schlaue Fuchs läuft durch den dichten Wald.",
-    "Der grüne Frosch sitzt am Rand des Sees.",
-    "Das rote Fahrrad steht vor der Schule.",
-    "Die beste Freundin kommt heute zum Spielen.",
-    "Der laute Zug hält am kleinen Bahnhof.",
-    "Die langsame Schnecke kriecht durch den Garten.",
-    "Der hohe Berg ist mit Schnee bedeckt.",
-    "Der tiefe See liegt mitten im Wald.",
-    "Das große Meer rauscht laut an den Strand.",
-    "Der helle Stern leuchtet in der dunklen Nacht.",
-    "Die guten Freunde spielen täglich im Park.",
-    "Der fleißige Bruder lernt jeden Tag Lesen.",
-    "Die kleine Schwester liest gern ihr Lieblingsbuch."
-  ],
-  j2_7: [
-    "Der kleine Igel schläft den ganzen Winter im Laub.",
-    "Die dunkle Wolke zieht schnell über den blauen Himmel.",
-    "Der schlaue Fuchs stiehlt nachts die Hühner vom Bauernhof.",
-    "Der grüne Frosch springt hoch vom Rand des Teiches.",
-    "Das rote Fahrrad steht jeden Tag vor der Schule.",
-    "Die beste Freundin kommt heute Nachmittag zum Spielen.",
-    "Der schnelle Zug hält nur kurz am kleinen Bahnhof.",
-    "Die langsame Schnecke trägt ihr Haus auf dem Rücken.",
-    "Der hohe Berg ist im Winter mit Schnee bedeckt.",
-    "Der tiefe dunkle See liegt mitten im alten Wald.",
-    "Das weite Meer rauscht laut und schön an den Strand.",
-    "Der helle Stern leuchtet in der klaren dunklen Nacht.",
-    "Die besten Freunde spielen jeden Tag zusammen im Park.",
-    "Der fleißige Bruder macht jeden Abend seine Hausaufgaben.",
-    "Die kleine Schwester liest jeden Abend ihr liebstes Buch."
+  // Stufe 4 — Klasse 2, 2. Halbjahr
+  // Anspruchsvoller Wortschatz, Nebensätze/Konjunktionen, längere Sätze (9–13 Wörter).
+  s4: [
+    "Als die Sonne unterging, kehrten die Wanderer müde nach Hause zurück.",
+    "Der neugierige Junge fragte, warum der Mond nachts so hell leuchtet.",
+    "Obwohl es stark regnete, spielten die Kinder fröhlich im Garten weiter.",
+    "Die Forscherin untersuchte das geheimnisvolle Tier mit einer großen Lupe.",
+    "Bevor wir essen durften, mussten wir uns gründlich die Hände waschen.",
+    "Der mutige Ritter beschützte das Dorf vor dem gefährlichen Drachen.",
+    "Weil der Bus Verspätung hatte, kamen wir zu spät zur Schule.",
+    "Die Kinder freuten sich, weil bald die langen Sommerferien begannen.",
+    "Der alte Leuchtturm warnt die Schiffe vor den gefährlichen Klippen.",
+    "Während die Mutter kochte, deckte das Mädchen schnell den Tisch.",
+    "Der Wissenschaftler erklärte, wie aus einer Raupe ein Schmetterling wird.",
+    "Nachdem es geschneit hatte, glitzerte die ganze Landschaft im Sonnenlicht.",
+    "Die Feuerwehr rückte aus, um die hilflose Katze vom Baum zu retten.",
+    "Der Gärtner pflanzte viele bunte Blumen, damit der Garten schöner wurde.",
+    "Wenn der Frühling kommt, kehren die Vögel aus dem warmen Süden zurück.",
+    "Das aufmerksame Mädchen bemerkte sofort, dass etwas Wichtiges fehlte.",
+    "Der erfahrene Kapitän steuerte das Schiff sicher durch den heftigen Sturm.",
+    "Obwohl die Aufgabe schwierig war, gaben die Schüler nicht so schnell auf.",
+    "Die Biene sammelt fleißig Nektar, den sie später zu Honig verarbeitet.",
+    "Der freundliche Briefträger bringt jeden Morgen die Post ins ganze Dorf.",
+    "Weil der Hund so laut bellte, wachte die ganze Familie sofort auf.",
+    "Die Kinder bauten gemeinsam eine Hütte, die sie als Versteck benutzten.",
+    "Der Astronaut berichtete, wie es sich anfühlt, im Weltall zu schweben.",
+    "Bevor der Winter beginnt, sammeln die Eichhörnchen viele Nüsse als Vorrat.",
+    "Die Pflanzen brauchen Sonne und Wasser, damit sie kräftig wachsen können.",
+    "Der kluge Fuchs schlich sich heimlich an den schlafenden Hasen heran.",
+    "Als der Wecker klingelte, sprang das Mädchen sofort aus dem Bett.",
+    "Die Schülerin las das spannende Buch, bis es draußen ganz dunkel wurde.",
+    "Der Tierpfleger füttert die hungrigen Affen jeden Morgen mit frischem Obst.",
+    "Während der Pause spielten die Freunde begeistert auf dem großen Schulhof.",
+    "Der Maler mischte die Farben sorgfältig, um den perfekten Ton zu treffen.",
+    "Im tiefen Ozean leben viele Tiere, die noch niemand genau erforscht hat."
   ]
 };
 
 var sentences = [];
+var numPages = 1;
+var level = 1;
 
 function rnd(a){return a[Math.floor(Math.random()*a.length)];}
 
-function getPools(maxW) {
-  var result = [];
-  ['j1','j2'].forEach(function(k){
-    for(var w=3;w<=maxW;w++){
-      var key=k+'_'+w;
-      if(SAETZE[key]) result=result.concat(SAETZE[key]);
-    }
-  });
-  return result;
+// Shuffle (Fisher-Yates) – liefert eine zufällige Reihenfolge des Pools.
+function shuffle(a){
+  a=a.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
 }
 
 function generate() {
-  var cnt = parseInt(document.getElementById('sentCount').value);
-  var maxW= parseInt(document.getElementById('maxWords').value);
-  var pool= getPools(maxW);
-  if(!pool.length){alert('Keine Sätze für diese Auswahl.');return;}
-  // Pick cnt random sentences, no immediate repeats
-  sentences=[];
-  var used={};
-  var tries=0;
-  while(sentences.length<cnt && tries<cnt*10){
-    tries++;
-    var s=rnd(pool);
-    if(!used[s]){used[s]=true;sentences.push(s);}
-  }
-  // if not enough unique, allow repeats
-  while(sentences.length<cnt) sentences.push(rnd(pool));
-  renderList();
-  showTab('list');
+  var pool = SAETZE['s'+level] || [];
+  if(!pool.length){alert('Keine Sätze für diese Stufe.');return;}
+  // Pro Seite werden so viele Sätze gestellt, wie auf eine A4-Seite passen.
+  // Das PDF-Modul füllt jede Seite greedy bis zur Unterkante; daher liefern
+  // wir großzügig viele Kandidaten (max. 24 pro Seite) in zufälliger Reihen-
+  // folge. Bei 2 Seiten gleicht Seite 2 der Seite 1, nur mit anderen Sätzen.
+  var perPageMax = 24;
+  var need = perPageMax * numPages;
+  var out = shuffle(pool);
+  // Pool ggf. auffüllen (erneut gemischt anhängen), falls zu klein.
+  while(out.length < need) out = out.concat(shuffle(pool));
+  sentences = out.slice(0, need);
 }
-
-function renderList() {
-  var el=document.getElementById('sentList');
-  el.innerHTML='';
-  if(!sentences.length){
-    el.innerHTML='<p style="color:var(--muted);font-size:.85rem">Noch keine Sätze.</p>';
-    return;
-  }
-  sentences.forEach(function(s,i){
-    var d=document.createElement('div'); d.className='sl-item';
-    var sp=document.createElement('span'); sp.style.flex='1'; sp.textContent=s;
-    var b=document.createElement('button'); b.textContent='\u2715';
-    b.addEventListener('click',(function(idx){
-      return function(){sentences.splice(idx,1);renderList();};
-    })(i));
-    d.appendChild(sp); d.appendChild(b); el.appendChild(d);
-  });
-}
-
-function buildWS() {
-  if(!sentences.length) return '<p style="padding:20px;color:#999">Keine Sätze generiert.</p>';
-  var showNr=document.getElementById('showNr').checked;
-  var showDraw=document.getElementById('showDraw').checked;
-  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  var fs=isIOS?13:18;
-  var meta=buildMeta();
-  var h='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:6mm;padding-bottom:3mm;border-bottom:2.5px solid #b91c1c">'
-       +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#b91c1c">\ud83d\udcd6 Lesen \u00fcben</div>'
-       +'<div style="font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif">Lies die S\u00e4tze laut vor</div></div>'
-       +(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
-  sentences.forEach(function(sent,i){
-    h+='<div style="break-inside:avoid;page-break-inside:avoid">';
-    h+='<div style="margin-bottom:'+(showDraw?'2mm':'6mm')+';display:flex;align-items:flex-start;gap:6pt">';
-    if(showNr) h+='<span style="font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;color:#94a3b8;min-width:20pt;flex-shrink:0">'+(i+1)+'.</span>';
-    h+='<span style="font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;line-height:1.6;color:#1e1b4b">'+sent+'</span>';
-    h+='</div>';
-    if(showDraw) h+='<div style="border-bottom:1px solid #94a3b8;margin-bottom:5mm;height:8mm"></div>';
-    h+='</div>';
-  });
-  h+='<div class="ws-foot">\u2605 \u2605 \u2605 &nbsp; Super gelesen! &nbsp; \u2605 \u2605 \u2605<br>'
-    +'\u00a9 2026 Sascha Rothenburg &middot; Grundschrift von Christian Urff</div>';
-  return h;
-}
-
 /* ===== Kopfzeile (Uhr-Stil) ===== */
-function buildMeta(){
-  var sN=document.getElementById('showName').checked;
-  var sD=document.getElementById('showDate').checked;
-  var sK=document.getElementById('showKl').checked;
-  var name=document.getElementById('nameF').value.trim();
-  if(!sN&&!sD&&!sK)return '';
-  var tdL='style="font-family:Nunito,sans-serif;font-size:8pt;color:#555;white-space:nowrap;padding-right:4pt"';
-  var tdR='style="border-bottom:1px solid #888;min-width:90pt;width:100%;font-size:8pt"';
-  var rows='';
-  if(sN)rows+='<tr><td '+tdL+'>Name:</td><td '+tdR+'>&nbsp;'+name.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</td></tr>';
-  if(sD)rows+='<tr><td '+tdL+'>Datum:</td><td '+tdR+'>&nbsp;</td></tr>';
-  if(sK)rows+='<tr><td '+tdL+'>Klasse:</td><td '+tdR+'>&nbsp;</td></tr>';
-  return '<table style="border-collapse:collapse;line-height:2.2">'+rows+'</table>';
-}
 
 /* ===== Tabs + Sbar (Uhr-Stil) ===== */
 var sbar=document.getElementById('sbar');
 function showTab(name){
-  var map={gen:'s-gen',list:'s-list',set:'s-set',pre:'s-pre'};
-  var tmap={gen:'t-gen',list:'t-list',set:'t-set',pre:'t-pre'};
+  var map={gen:'s-gen',set:'s-set',pre:'s-pre'};
+  var tmap={gen:'t-gen',set:'t-set',pre:'t-pre'};
   document.querySelectorAll('.screen').forEach(function(el){el.classList.remove('active');});
   document.querySelectorAll('.tab').forEach(function(el){el.classList.remove('active');});
   document.getElementById(map[name]).classList.add('active');
   document.getElementById(tmap[name]).classList.add('active');
   if(name==='pre'){
+    generate();
     sbar.innerHTML='';
     var b1=document.createElement('button'),b2=document.createElement('button');
     b1.style.cssText='flex:1;padding:13px 0;border-radius:12px;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;background:#f0f4f8;color:#6b7280;border:2px solid #e2e8f0';
     b2.style.cssText='flex:1;padding:13px 0;border-radius:12px;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;border:none';
     b1.textContent='\u2190 Zur\u00fcck';b2.textContent='Drucken / PDF';
-    b1.onclick=function(){showTab('list');};b2.onclick=doPrint;
+    b1.onclick=function(){showTab('gen');};b2.onclick=doPrint;
     sbar.appendChild(b1);sbar.appendChild(b2);
     setTimeout(buildPreview,50);
   }else{
@@ -403,30 +333,92 @@ function showTab(name){
   }
 }
 
-function buildPreview(){
-  try{
-    var c=buildWS(),sw=Math.min(window.innerWidth,480)-28,sc=sw/595;
-    var wrap=document.getElementById('previewContent');wrap.innerHTML='';
-    var outer=document.createElement('div'),inner=document.createElement('div');
-    outer.style.cssText='width:'+sw+'px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;background:#fff;margin-bottom:8px';
-    inner.style.cssText='width:595px;transform-origin:top left;transform:scale('+sc.toFixed(4)+');padding:42px 50px;background:#fff;box-sizing:border-box';
-    inner.innerHTML=c;outer.appendChild(inner);wrap.appendChild(outer);
-    requestAnimationFrame(function(){outer.style.height=Math.round(inner.scrollHeight*sc)+'px';});
-  }catch(e){document.getElementById('previewContent').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
+function pdfSpec(){
+  return {
+    sentences: sentences,
+    showNr: document.getElementById('showNr').checked,
+    numPages: numPages
+  };
 }
-async function doPrint(){await document.fonts.ready;document.getElementById('printArea').innerHTML=buildWS();setTimeout(function(){window.print();},150);}
+function pdfHeaderOpts(){
+  return {
+    showName:document.getElementById('showName').checked,
+    showDate:document.getElementById('showDate').checked,
+    showKl:document.getElementById('showKl').checked
+  };
+}
+async function makePDFBytes(){
+  if(!window.fontkit && window.PDFLib && window.PDFLib.fontkit){window.fontkit=window.PDFLib.fontkit;}
+  return await LesenPDF.buildWorksheetPDF(pdfSpec(), pdfHeaderOpts(), null);
+}
+function buildPreview(){
+  var wrap=document.getElementById('previewContent');
+  wrap.innerHTML='<p style="color:#6b7280;padding:16px;font-size:.8rem">Vorschau wird erstellt &hellip;</p>';
+  (async function(){
+    try{
+      if(!sentences.length){
+        wrap.innerHTML='<p style="color:#b91c1c;padding:20px;font-family:Nunito,sans-serif">Bitte zuerst S\u00e4tze generieren.</p>';
+        return;
+      }
+      var bytes=await makePDFBytes();
+      if(window.pdfjsLib){
+        var pdf=await window.pdfjsLib.getDocument({data:bytes}).promise;
+        wrap.innerHTML='';
+        var sw=Math.min(window.innerWidth,480)-28;
+        for(var p=1;p<=pdf.numPages;p++){
+          var page=await pdf.getPage(p);
+          var vp1=page.getViewport({scale:1});
+          var scale=sw/vp1.width;
+          var vp=page.getViewport({scale:scale*2});
+          var canvas=document.createElement('canvas');
+          canvas.style.cssText='display:block;width:'+sw+'px;border:1px solid #e2e8f0;border-radius:6px;margin-bottom:10px;background:#fff';
+          canvas.width=vp.width;canvas.height=vp.height;
+          await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+          wrap.appendChild(canvas);
+        }
+      }else{
+        var blob=new Blob([bytes],{type:'application/pdf'});
+        wrap.innerHTML='<embed src="'+URL.createObjectURL(blob)+'" type="application/pdf" style="width:100%;height:70vh;border:1px solid #e2e8f0;border-radius:6px">';
+      }
+    }catch(e){
+      wrap.innerHTML='<p style="color:red;padding:20px">'+(e.message||String(e))+'</p>';
+      console.error(e);
+    }
+  })();
+}
+async function doPrint(){
+  try{
+    if(!sentences.length){alert('Bitte zuerst S\u00e4tze generieren.');return;}
+    var bytes=await makePDFBytes();
+    await PrintBridge.printPDF(bytes,'Lesen.pdf');
+  }catch(e){
+    alert('Druck fehlgeschlagen: '+(e.message||e));
+    console.error(e);
+  }
+}
 
 /* ===== Tab buttons ===== */
 document.getElementById('t-gen').addEventListener('click',function(){showTab('gen');});
-document.getElementById('t-list').addEventListener('click',function(){showTab('list');});
 document.getElementById('t-set').addEventListener('click',function(){showTab('set');});
 document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
 
-/* ===== Sliders ===== */
-document.getElementById('sentCount').addEventListener('input',function(){document.getElementById('sentCountVal').textContent=this.value;});
-document.getElementById('maxWords').addEventListener('input',function(){document.getElementById('maxWordsVal').textContent=this.value;});
-document.getElementById('btnGen').addEventListener('click',generate);
-document.getElementById('btnGoPre').addEventListener('click',function(){showTab('pre');});
+/* ===== Schwierigkeitsstufe ===== */
+document.querySelectorAll('#lvlSel .lvlbtn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('#lvlSel .lvlbtn').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    level=parseInt(btn.getAttribute('data-lvl'));
+  });
+});
+
+/* ===== Seitenanzahl ===== */
+document.querySelectorAll('#pageSel .pgbtn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('#pageSel .pgbtn').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    numPages=parseInt(btn.getAttribute('data-pages'));
+  });
+});
 
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 document.addEventListener('selectstart',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;e.preventDefault();});
@@ -437,5 +429,6 @@ var mblob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
 var mlink=document.createElement('link');mlink.rel='manifest';mlink.href=URL.createObjectURL(mblob);document.head.appendChild(mlink);
 
 </script>
+<script src="ads.js"></script>
 </body>
 </html>

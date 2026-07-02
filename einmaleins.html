@@ -16,7 +16,7 @@ html,body{height:100%}
 body{font-family:Nunito,sans-serif;background:#f0f9ff;color:#1e1b4b;-webkit-user-select:none;user-select:none;overscroll-behavior:none}
 input{-webkit-user-select:text;user-select:text}
 .app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;background:#fff;box-shadow:0 0 40px rgba(0,0,0,.1)}
-.hdr{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top,0px));flex-shrink:0}
+.hdr{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top,0px) + var(--ad-top,0px));flex-shrink:0}
 .hdr h1{font-size:1.15rem;font-weight:900}
 .hdr p{font-size:.68rem;opacity:.85;margin-top:1px}
 .hdr-btns{display:flex;gap:8px;margin-top:6px;align-items:center}
@@ -42,20 +42,12 @@ input{-webkit-user-select:text;user-select:text}
 .sr:last-child{border-bottom:none}
 .sl{font-size:.88rem;font-weight:600}
 .ss{font-size:.73rem;color:#6b7280;margin-top:1px}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{padding:6px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:#f0f9ff;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:700;color:#6b7280;cursor:pointer}
-.chip.sel{background:#0369a1;border-color:#0369a1;color:#fff}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{flex:1;min-width:60px;padding:9px 4px;border-radius:10px;border:2px solid #e2e8f0;background:#f8fafc;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:800;color:#1e1b4b;cursor:pointer}
+.chip.sel{background:#0369a1;color:#fff;border-color:#0369a1}
 .ni{width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:9px;font-family:Nunito,sans-serif;font-size:.9rem;font-weight:600;color:#1e1b4b;background:#f0f9ff;outline:none}
 .ni:focus{border-color:#0369a1}
 .sbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(255,255,255,.97);border-top:1px solid #e2e8f0;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;z-index:100}
-.pp-wrap{position:relative;display:inline-block}
-.pp-bubble{display:none;position:absolute;top:calc(100% + 8px);left:0;background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 28px rgba(0,0,0,.18);width:210px;z-index:9999}
-.pp-bubble.open{display:block}
-.pp-amts{display:flex;gap:5px;margin:8px 0}
-.pp-a{flex:1;padding:6px 2px;border-radius:9px;border:2px solid #e2e8f0;background:#f8fafc;font-family:Nunito,sans-serif;font-size:.78rem;font-weight:800;color:#1e1b4b;cursor:pointer}
-.pp-a.sel{background:#0070ba;color:#fff;border-color:#0070ba}
-.pp-inp{width:100%;padding:6px 9px;border:2px solid #e2e8f0;border-radius:9px;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:600;color:#1e1b4b;outline:none;margin-bottom:8px}
-.pp-go{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:10px;background:#0070ba;color:#fff;font-weight:800;font-size:.85rem;text-decoration:none}
 .bs{background:#f0f9ff;color:#6b7280;border:2px solid #e2e8f0}
 /* Reihen-Auswahl */
 .sel-btns{display:flex;gap:6px;margin-bottom:12px}
@@ -82,6 +74,13 @@ input[type=range]{accent-color:#0369a1}
 .printarea{display:none}
 
 </style>
+<script src="pdf-lib.min.js"></script>
+<script src="fontkit.umd.min.js"></script>
+<script src="pdf.min.js"></script>
+<script>if(window.pdfjsLib){window.pdfjsLib.GlobalWorkerOptions.workerSrc='pdf.worker.min.js';}</script>
+<script src="einmaleins-pdf.js"></script>
+<script src="print-bridge.js"></script>
+<script src="back-button.js"></script>
 </head>
 <body>
 <div class="app">
@@ -89,17 +88,8 @@ input[type=range]{accent-color:#0369a1}
   <h1>× 1×1 Trainer</h1>
   <p>&#169; 2026 Sascha Rothenburg &#183; Grundschrift von Christian Urff</p>
   <div class="hdr-btns">
-    <a href="index.html#acc-grundrechnen" class="hdr-btn">&#x2190; Startseite</a>
-    <div class="pp-wrap" id="ppWrap">
-      <button class="hdr-btn" onclick="ppToggle(event)">&#x2615; Coffee</button>
-      <div class="pp-bubble" id="ppBubble">
-        <div style="font-weight:900;font-size:.88rem;color:#1e1b4b;text-align:center;margin-bottom:4px">&#x2615; Buy me a Coffee</div>
-        <div class="pp-amts"><button class="pp-a" onclick="ppAmt(1)">1&euro;</button><button class="pp-a sel" onclick="ppAmt(2)">2&euro;</button><button class="pp-a" onclick="ppAmt(5)">5&euro;</button><button class="pp-a" onclick="ppAmt(10)">10&euro;</button></div>
-        <input class="pp-inp" id="ppCustom" type="number" min="1" placeholder="Eigener Betrag" oninput="ppCustomAmt(this.value)">
-        <a class="pp-go" id="ppGo" href="https://paypal.me/SaschaRothenburg/2EUR" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c1.379 8.741-5.832 9.76-8.084 9.76H9.942L8.684 23h3.603c.458 0 .848-.333.92-.786l.038-.199.733-4.64.047-.256a.932.932 0 0 1 .92-.786h.579c3.754 0 6.694-1.525 7.552-5.933.36-1.847.174-3.389-.854-4.483z"/></svg> Jetzt <span id="ppLbl">2&euro;</span> spenden</a>
-        <div style="font-size:.62rem;color:#94a3b8;text-align:center;margin-top:6px">via PayPal &middot; 0% Geb&uuml;hren</div>
-      </div>
-    </div>
+    <a href="mathe.html#acc-grundrechnen" class="hdr-btn">&#x2190; Zur&uuml;ck</a>
+    <a href="index.html" class="hdr-btn">&#x1F3E0; Hauptmen&uuml;</a>
   </div>
 </div>
 <div class="tabs">
@@ -130,31 +120,17 @@ input[type=range]{accent-color:#0369a1}
       <label class="tgl"><input type="checkbox" id="no1"><span class="tgl-s"></span></label>
     </div>
     <div class="sr">
-      <div><div class="sl">Gemischt / durcheinander</div><div class="ss">Aufgaben zuf&#228;llig mischen</div></div>
-      <label class="tgl"><input type="checkbox" id="doShuffle" checked><span class="tgl-s"></span></label>
-    </div>
-    <div class="sr">
-      <div><div class="sl">Tauschaufgaben</div><div class="ss">z.B. 3&#xD7;4 und 4&#xD7;3 beide</div></div>
-      <label class="tgl"><input type="checkbox" id="tausch"><span class="tgl-s"></span></label>
-    </div>
-    <div class="sr">
       <div><div class="sl">Ergebnis vorgeben</div><div class="ss">? &#xD7; ? = 12 statt 3 &#xD7; 4 = ?</div></div>
       <label class="tgl"><input type="checkbox" id="inverted"><span class="tgl-s"></span></label>
     </div>
-  </div>
-  <div class="card">
-    <h2>&#x1F4C4; Seitenzahl</h2>
-    <div class="sr" style="flex-direction:column;align-items:flex-start;gap:6px;border-bottom:none">
-      <div class="chips" id="pageChips" style="margin-top:4px"></div>
+    <div style="margin-top:14px">
+      <label class="blk" style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;margin-bottom:6px;display:block">Seitenzahl</label>
+      <div class="chips" id="pageChips"></div>
       <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Aufgabenzahl pro Seite ist festgelegt (3 Spalten).</p>
     </div>
   </div>
 </div>
 <div class="screen" id="s-set">
-  <div class="card">
-    <h2>&#x1F464; Schüler</h2>
-    <input class="ni" type="text" id="nameF" placeholder="Name des Schülers">
-  </div>
   <div class="card">
     <h2>&#x1F4D0; Kopfzeile</h2>
     <div class="sr"><div class="sl">Name-Feld</div><label class="tgl"><input type="checkbox" id="showName"><span class="tgl-s"></span></label></div>
@@ -171,10 +147,6 @@ input[type=range]{accent-color:#0369a1}
   <button class="btn bp" id="btnGoPre">&#x1F441; Vorschau &amp; Drucken</button>
 </div>
 <script>
-function ppToggle(e){e.preventDefault();document.getElementById('ppBubble').classList.toggle('open');}
-function ppAmt(n){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20ac';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');if(b.textContent.trim()===n+'\u20ac')b.classList.add('sel');});document.getElementById('ppCustom').value='';}
-function ppCustomAmt(v){var n=parseFloat(v);if(n>0){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20ac';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');});}}
-document.addEventListener('click',function(e){var w=document.getElementById('ppWrap');if(w&&!w.contains(e.target))document.getElementById('ppBubble').classList.remove('open');});
 
 var selReihen=[2,3,4,5,6,7,8,9];
 var cols=3;
@@ -231,102 +203,42 @@ function updateInfo(){
 
 initPageChips();
 
-function generateTasks(){
+/* Baut einen Aufgaben-Pool und gibt eine Generator-Funktion gen(i) zurück.
+   Das PDF-Modul ruft gen(i) so oft auf, wie Aufgaben auf die Seite(n) passen. */
+function makeTaskGen(){
   var no0=document.getElementById('no0').checked;
   var no1=document.getElementById('no1').checked;
-  var doShuf=document.getElementById('doShuffle').checked;
-  var doTausch=document.getElementById('tausch').checked;
   var inv=document.getElementById('inverted').checked;
-  var count=totalCount();
-  if(selReihen.length===0) return [];
+  if(selReihen.length===0) return null;
   var pool=[];
   selReihen.forEach(function(r){
     for(var f=0;f<=10;f++){
       if(no0&&(r===0||f===0)) continue;
       if(no1&&(r===1||f===1)) continue;
-      if(!doTausch&&f<r) continue;
+      if(f<r) continue;   // keine Tauschaufgaben (4×3 nicht zusätzlich zu 3×4)
       pool.push([r,f]);
     }
   });
-  if(pool.length===0) return [];
-  if(doShuf){
-    for(var i=pool.length-1;i>0;i--){
-      var j=Math.floor(Math.random()*(i+1));
-      var tmp=pool[i];pool[i]=pool[j];pool[j]=tmp;
-    }
+  if(pool.length===0) return null;
+  // immer mischen
+  for(var i=pool.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=pool[i];pool[i]=pool[j];pool[j]=tmp;
   }
-  var tasks=[];
-  for(var i=0;i<count;i++){
+  // deterministische Variante-Wahl pro Index (Vorschau == Druck)
+  return function(i){
     var pair=pool[i%pool.length];
     var a=pair[0],b=pair[1],res=a*b;
     if(inv){
-      if(Math.random()<0.5) tasks.push({a:'?',b:b,res:res,sol:String(a)});
-      else tasks.push({a:a,b:'?',res:res,sol:String(b)});
-    } else {
-      tasks.push({a:a,b:b,res:'?',sol:String(res)});
+      // abwechselnd erste/zweite Position als Lücke (stabil pro Index)
+      if(i%2===0) return {a:'?',b:b,res:res,sol:String(a)};
+      return {a:a,b:'?',res:res,sol:String(b)};
     }
-  }
-  return tasks;
+    return {a:a,b:b,res:'?',sol:String(res)};
+  };
 }
 
-function buildWS(){
-  var tasks=generateTasks();
-  if(!tasks.length) return '<p style="padding:20px;color:#999">Keine Aufgaben – bitte Reihen auswählen!</p>';
-  var name=document.getElementById('nameF').value.trim();
-  var showSol=document.getElementById('showSol').checked;
-  var inv=document.getElementById('inverted').checked;
-  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  var fs=isIOS?12:15;
-  var meta=buildMeta();
-  var rLabel=selReihen.slice().sort(function(a,b){return a-b;}).map(function(r){return r+'×';}).join('  ');
-  var h='<div class="ws-hdr"><div>'
-    +'<div class="ws-title">× Das kleine 1×1</div>'
-    +'<div class="ws-sub">Reihen: '+rLabel+(inv?' · Ergebnis vorgegeben':' · Ergebnis eintragen')+'</div>'
-    +'</div>'+(meta?'<div class="ws-meta">'+meta+'</div>':'')+'</div>';
-  var colW=(100/cols).toFixed(4)+'%';
-  function renderTaskTable(slice,startIdx){
-    var tt='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
-    for(var r=0;r<slice.length;r+=cols){
-      tt+='<tr style="break-inside:avoid;page-break-inside:avoid">';
-      for(var c=0;c<cols;c++){
-        var t=slice[r+c];
-        if(t){
-          var idx=startIdx+r+c;
-          var aStr=t.a==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.a);
-          var bStr=t.b==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.b);
-          var rStr=t.res==='?'?'<span class="ws-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>':String(t.res);
-          tt+='<td style="width:'+colW+';vertical-align:baseline;padding:1mm 3mm 1mm 0"><span class="ws-nr" style="font-size:9pt">'+(idx+1)+'.</span>'
-            +'<span class="ws-eq" style="font-size:'+fs+'pt">'+aStr+' × '+bStr+' = '+rStr+'</span></td>';
-        } else tt+='<td style="width:'+colW+'"></td>';
-      }
-      tt+='</tr>';
-    }
-    return tt+'</table>';
-  }
-  var splits=pageSplits();
-  var start=0;
-  for(var pg=0;pg<splits.length;pg++){
-    var slice=tasks.slice(start,start+splits[pg]);
-    if(!slice.length)break;
-    if(pg>0){ h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>'; }
-    h+=renderTaskTable(slice,start);
-    start+=splits[pg];
-  }
-  if(start<tasks.length){
-    h+='<div style="break-before:page;page-break-before:always;height:0;line-height:0;font-size:0">&nbsp;</div><div style="height:2mm"></div>';
-    h+=renderTaskTable(tasks.slice(start),start);
-  }
-  if(showSol){
-    h+='<div style="margin-top:6mm;padding-top:3mm;border-top:1px solid #e5e7eb;break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid">'
-      +'<div style="font-size:7pt;font-weight:800;color:#0369a1;margin-bottom:3mm">LÖSUNGEN</div>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:3mm 6mm;font-family:Nunito,sans-serif;font-size:7pt;color:#777">';
-    tasks.forEach(function(t,i){h+='<span>'+(i+1)+'. '+t.sol+'</span>';});
-    h+='</div></div>';
-  }
-  h+='<div class="ws-foot">★ ★ ★ &nbsp; Super gemacht! &nbsp; ★ ★ ★<br>'
-    +'© 2026 Sascha Rothenburg · Grundschrift von Christian Urff</div>';
-  return h;
-}
+/* buildWS entfällt - Arbeitsblatt wird im PDF-Modul erzeugt */
 
 
 
@@ -335,42 +247,73 @@ document.getElementById('t-reihen').addEventListener('click',function(){showTab(
 document.getElementById('t-set').addEventListener('click',function(){showTab('set');});
 document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
 
-function buildMeta(){
-  var sN=document.getElementById('showName').checked;
-  var sD=document.getElementById('showDate').checked;
-  var sK=document.getElementById('showKl').checked;
-  var name=document.getElementById('nameF').value.trim();
-  if(!sN&&!sD&&!sK) return '';
-  var tdL='style="font-family:Nunito,sans-serif;font-size:8pt;color:#555;white-space:nowrap;padding-right:4pt"';
-  var tdR='style="border-bottom:1px solid #888;min-width:90pt;width:100%;font-size:8pt"';
-  var rows='';
-  if(sN) rows+='<tr><td '+tdL+'>Name:</td><td '+tdR+'>&nbsp;'+name+'</td></tr>';
-  if(sD) rows+='<tr><td '+tdL+'>Datum:</td><td '+tdR+'>&nbsp;</td></tr>';
-  if(sK) rows+='<tr><td '+tdL+'>Klasse:</td><td '+tdR+'>&nbsp;</td></tr>';
-  return '<table style="border-collapse:collapse;line-height:2.2">'+rows+'</table>';
+/* ===== Spec für das PDF-Modul einsammeln ===== */
+function pdfSpec(){
+  var inv=document.getElementById('inverted').checked;
+  var rLabel=selReihen.slice().sort(function(a,b){return a-b;}).map(function(r){return r+'\u00d7';}).join('  ');
+  return {
+    gen: makeTaskGen(),
+    cols: cols,
+    numPages: numPages,
+    inverted: inv,
+    reihenLabel: rLabel,
+    showSol: document.getElementById('showSol').checked
+  };
+}
+function pdfHeaderOpts(){
+  return {
+    showName:document.getElementById('showName').checked,
+    showDate:document.getElementById('showDate').checked,
+    showKl:document.getElementById('showKl').checked
+  };
+}
+async function makePDFBytes(){
+  if(!window.fontkit && window.PDFLib && window.PDFLib.fontkit){window.fontkit=window.PDFLib.fontkit;}
+  return await EinmaleinsPDF.buildWorksheetPDF(pdfSpec(), pdfHeaderOpts(), null);
 }
 function buildPreview(){
-  try{
-    var c=buildWS();
-    // A4-Blatt in echten px (210mm @96dpi ≈ 793.7px), Padding = @page-Ränder 12mm/14mm
-    var pageW=793.7, sw=Math.min(window.innerWidth,480)-28, sc=sw/pageW;
-    var padV=Math.round(12/25.4*96), padH=Math.round(14/25.4*96);
-    var wrap=document.getElementById('previewContent');wrap.innerHTML='';
-    var outer=document.createElement('div'),inner=document.createElement('div');
-    outer.style.cssText='width:'+sw+'px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;background:#fff;margin-bottom:8px';
-    inner.style.cssText='width:'+pageW+'px;transform-origin:top left;transform:scale('+sc.toFixed(4)+');padding:'+padV+'px '+padH+'px;background:#fff;box-sizing:border-box';
-    inner.innerHTML=c;outer.appendChild(inner);wrap.appendChild(outer);
-    requestAnimationFrame(function(){outer.style.height=Math.round(inner.scrollHeight*sc)+'px';});
-  }catch(e){document.getElementById('previewContent').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
+  var wrap=document.getElementById('previewContent');
+  wrap.innerHTML='<p style="color:#6b7280;padding:16px;font-size:.8rem">Vorschau wird erstellt &hellip;</p>';
+  (async function(){
+    try{
+      if(selReihen.length===0){
+        wrap.innerHTML='<p style="color:#b91c1c;padding:20px;font-family:Nunito,sans-serif">Bitte mindestens eine Reihe ausw\u00e4hlen.</p>';
+        return;
+      }
+      var bytes=await makePDFBytes();
+      if(window.pdfjsLib){
+        var pdf=await window.pdfjsLib.getDocument({data:bytes}).promise;
+        wrap.innerHTML='';
+        var sw=Math.min(window.innerWidth,480)-28;
+        for(var p=1;p<=pdf.numPages;p++){
+          var page=await pdf.getPage(p);
+          var vp1=page.getViewport({scale:1});
+          var scale=sw/vp1.width;
+          var vp=page.getViewport({scale:scale*2});
+          var canvas=document.createElement('canvas');
+          canvas.style.cssText='display:block;width:'+sw+'px;border:1px solid #e2e8f0;border-radius:6px;margin-bottom:10px;background:#fff';
+          canvas.width=vp.width;canvas.height=vp.height;
+          await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+          wrap.appendChild(canvas);
+        }
+      }else{
+        var blob=new Blob([bytes],{type:'application/pdf'});
+        wrap.innerHTML='<embed src="'+URL.createObjectURL(blob)+'" type="application/pdf" style="width:100%;height:70vh;border:1px solid #e2e8f0;border-radius:6px">';
+      }
+    }catch(e){
+      wrap.innerHTML='<p style="color:red;padding:20px">'+(e.message||String(e))+'</p>';
+      console.error(e);
+    }
+  })();
 }
-function doPrint(){
-  // Inhalt SYNCHRON im Klick-Kontext setzen, damit Safari den Druck nicht als "automatisch" blockt
-  document.getElementById('printArea').innerHTML=buildWS();
-  if(document.fonts&&document.fonts.status!=='loaded'){
-    // Schriften noch nicht fertig: kurz warten, dann drucken (Safari erlaubt das nach erfolgter Nutzerinteraktion meist)
-    document.fonts.ready.then(function(){window.print();});
-  } else {
-    window.print();
+async function doPrint(){
+  try{
+    if(selReihen.length===0){alert('Bitte mindestens eine Reihe ausw\u00e4hlen.');return;}
+    var bytes=await makePDFBytes();
+    await PrintBridge.printPDF(bytes,'Einmaleins.pdf');
+  }catch(e){
+    alert('Druck fehlgeschlagen: '+(e.message||e));
+    console.error(e);
   }
 }
 var sbar=document.getElementById('sbar');
@@ -401,5 +344,6 @@ document.addEventListener('selectstart',function(e){if(e.target.tagName==='INPUT
 
 renderReihen();
 </script>
+<script src="ads.js"></script>
 </body>
 </html>

@@ -2,237 +2,221 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Übio">
 <meta name="theme-color" content="#0369a1">
-<title>Lern-Apps · Sascha Rothenburg</title>
+<title>Übio · Grundschulübungen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Nunito',sans-serif;background:#f0f4f8;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px}
-h1{font-size:1.7rem;font-weight:900;color:#1e1b4b;margin-bottom:6px;text-align:center}
-.sub{color:#6b7280;margin-bottom:22px;text-align:center;font-size:.9rem}
-.tabs{display:flex;flex-wrap:wrap;gap:7px;width:100%;max-width:360px;margin-bottom:18px}
-.tab{flex:1 1 0;min-width:78px;padding:11px 4px;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:.92rem;font-weight:900;cursor:pointer;background:#fff;color:#9ca3af;box-shadow:0 2px 8px rgba(0,0,0,.07);transition:all .18s}
-.tab.active.mathe{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;box-shadow:0 4px 14px rgba(3,105,161,.3)}
-.tab.active.deutsch{background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;box-shadow:0 4px 14px rgba(185,28,28,.3)}
-.tab.active.englisch{background:linear-gradient(135deg,#6d28d9,#a855f7);color:#fff;box-shadow:0 4px 14px rgba(109,40,217,.3)}
-.tab.active.sach{background:linear-gradient(135deg,#15803d,#22c55e);color:#fff;box-shadow:0 4px 14px rgba(21,128,61,.3)}
-.pane{width:100%;max-width:360px}
-.pane.hidden{display:none}
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap");
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:Nunito,system-ui,sans-serif;background:#f1f5f9;color:#1e293b;-webkit-user-select:none;user-select:none;overscroll-behavior:none}
+.wrap{min-height:100%;max-width:480px;margin:0 auto;background:#fff;box-shadow:0 0 40px rgba(0,0,0,.08);display:flex;flex-direction:column}
 
-/* Accordion */
-.acc{margin-bottom:10px;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.acc-head{display:flex;align-items:center;gap:11px;width:100%;border:none;background:#fff;padding:15px 18px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:1.02rem;font-weight:900;color:#1e1b4b;text-align:left}
-.acc-head .ico{font-size:1.15rem;line-height:1}
-.acc-head .cnt{margin-left:auto;font-size:.72rem;font-weight:800;color:#9ca3af;background:#f1f5f9;padding:3px 9px;border-radius:20px}
-.acc-head .chev{margin-left:8px;color:#cbd5e1;transition:transform .25s;font-size:.8rem}
-.acc.open .acc-head .chev{transform:rotate(180deg)}
-.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
-.acc.open .acc-body{max-height:1100px}
-.acc-divider{margin:6px 0 2px;padding-top:12px;border-top:2px dashed #e2e8f0;font-size:.72rem;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px}
-.acc-inner{display:flex;flex-direction:column;gap:10px;padding:4px 14px 16px}
-.acc-note{font-size:.74rem;font-weight:700;color:#94a3b8;padding:0 4px 8px;line-height:1.4}
-a.app-link{display:block;padding:15px 20px;border-radius:13px;text-decoration:none;font-weight:800;font-size:1.02rem;text-align:center;color:#fff;box-shadow:0 3px 11px rgba(0,0,0,.14)}
-small{margin-top:22px;color:#9ca3af;font-size:.73rem;text-align:center;line-height:1.6}
+/* Kopf */
+.hero{padding:calc(26px + env(safe-area-inset-top,0px) + var(--ad-top,0px)) 22px 26px;background:linear-gradient(150deg,#0369a1 0%,#0ea5e9 45%,#22c55e 100%);color:#fff;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.12)}
+.hero::before{content:"";position:absolute;left:-30px;bottom:-50px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.10)}
+.hero h1{font-size:1.7rem;font-weight:900;letter-spacing:-.5px;position:relative;z-index:1}
+.hero h1 .sub{font-size:1.15rem;font-weight:600;letter-spacing:0;opacity:.85}
+.hero p{font-size:.86rem;opacity:.9;margin-top:5px;position:relative;z-index:1}
+
+/* Auswahl-Überschrift */
+.lead{padding:22px 22px 6px;font-size:.78rem;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#64748b}
+
+/* Fach-Kacheln */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:12px 18px 18px}
+.tile{position:relative;border:none;border-radius:20px;padding:18px 16px 16px;text-align:left;color:#fff;cursor:pointer;text-decoration:none;display:flex;flex-direction:column;gap:6px;min-height:142px;overflow:hidden;font-family:inherit;box-shadow:0 6px 18px rgba(0,0,0,.13);transition:transform .12s ease, box-shadow .12s ease}
+.tile:active{transform:scale(.97);box-shadow:0 3px 10px rgba(0,0,0,.16)}
+.tile .ic{font-size:2.3rem;line-height:1}
+.tile .nm{font-size:1.18rem;font-weight:900;letter-spacing:-.3px}
+.tile .ct{font-size:.74rem;font-weight:700;opacity:.92;margin-top:auto}
+.tile .bubble{position:absolute;right:-22px;top:-22px;width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.16)}
+.tile.mathe{background:linear-gradient(140deg,#0369a1,#0ea5e9)}
+.tile.deutsch{background:linear-gradient(140deg,#b91c1c,#ef4444)}
+.tile.englisch{background:linear-gradient(140deg,#6d28d9,#8b5cf6)}
+.tile.sachkunde{background:linear-gradient(140deg,#15803d,#22c55e)}
+.tile.interaktiv{background:linear-gradient(140deg,#f59e0b,#ec4899 55%,#8b5cf6)}
+.tile.interaktiv{grid-column:1 / -1;min-height:0;flex-direction:row;align-items:center;gap:14px;padding:16px 18px}
+.tile.interaktiv .ic{font-size:2rem}
+.tile.interaktiv .txt{display:flex;flex-direction:column;gap:3px}
+.tile.interaktiv .nm{font-size:1.18rem}
+.tile.interaktiv .ct{margin-top:0;opacity:.92}
+.tile.interaktiv .bubble{width:96px;height:96px;right:-26px;top:-26px}
+
+/* Fuß */
+.foot{margin-top:auto;padding:18px 22px calc(20px + env(safe-area-inset-bottom,0px));text-align:center;color:#94a3b8;font-size:.72rem;line-height:1.6}
+.foot a{color:#64748b;text-decoration:none;font-weight:700}
+.coffee-wrap{position:relative;display:inline-block;margin-bottom:14px}
+.coffee{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:#fff;border:1.5px solid #e2e8f0;border-radius:22px;color:#475569;font-size:.8rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.coffee:active{transform:scale(.97)}
+.coffee-pop{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 10px);width:236px;background:#fff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.22);padding:14px;z-index:50;display:none;text-align:left;color:#1e293b}
+.coffee-pop.open{display:block}
+.coffee-pop::after{content:"";position:absolute;left:50%;transform:translateX(-50%) rotate(45deg);bottom:-7px;width:14px;height:14px;background:#fff}
+.coffee-pop .ct{font-size:.84rem;font-weight:900;margin-bottom:2px}
+.coffee-pop .cs{font-size:.72rem;color:#64748b;margin-bottom:11px;line-height:1.4}
+.coffee-pop .amts{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px}
+.coffee-pop .amt{padding:9px 0;border:1.5px solid #e2e8f0;border-radius:11px;background:#fff;font-size:.92rem;font-weight:800;color:#1e293b;cursor:pointer;font-family:inherit;text-align:center;transition:border-color .1s,background .1s}
+.coffee-pop .amt:active{transform:scale(.97)}
+.coffee-pop .amt.sel{border-color:#0ea5e9;background:#0ea5e9;color:#fff}
+.coffee-pop .custom{display:flex;align-items:center;gap:7px;margin-bottom:11px;border:1.5px solid #e2e8f0;border-radius:11px;padding:7px 11px}
+.coffee-pop .custom:focus-within{border-color:#0ea5e9}
+.coffee-pop .custom span{font-size:.95rem;font-weight:800;color:#94a3b8}
+.coffee-pop .custom input{flex:1;min-width:0;border:none;outline:none;font-family:inherit;font-size:.95rem;font-weight:800;color:#1e293b;background:transparent}
+.coffee-pop .go{display:block;width:100%;padding:11px 0;border:none;border-radius:12px;background:#0ea5e9;color:#fff;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit;text-align:center;text-decoration:none}
+.coffee-pop .go:active{filter:brightness(.93)}
+
+/* Schulmaterial-Banner (nur Web-Version, Amazon-Affiliate) */
+.shop-banner{margin:6px 22px 4px}
+.shop-link{
+  display:flex;align-items:center;gap:13px;text-decoration:none;color:#fff;
+  padding:14px 16px;border-radius:16px;
+  background:linear-gradient(135deg,#ea580c,#f59e0b);
+  box-shadow:0 5px 16px rgba(0,0,0,.13);
+  transition:transform .12s ease;
+}
+.shop-link:active{transform:scale(.98)}
+.shop-ic{font-size:1.6rem;flex:none}
+.shop-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.shop-nm{font-size:.98rem;font-weight:800}
+.shop-sub{font-size:.76rem;opacity:.92;display:flex;align-items:center;gap:6px}
+.ad-tag{
+  display:inline-block;background:rgba(255,255,255,.28);font-size:.62rem;
+  font-weight:800;letter-spacing:.3px;text-transform:uppercase;
+  padding:2px 7px;border-radius:5px;
+}
 </style>
 </head>
-<body>
-<h1>&#x1F4DA; Lern-Apps</h1>
-<p class="sub">&copy; 2026 Sascha Rothenburg</p>
-
-<div class="tabs">
-  <button class="tab mathe active" onclick="showTab('mathe')">&#x1F522; Mathe</button>
-  <button class="tab deutsch" onclick="showTab('deutsch')">&#x270F;&#xFE0F; Deutsch</button>
-  <button class="tab englisch" onclick="showTab('englisch')">&#x1F1EC;&#x1F1E7; Engl.</button>
-  <button class="tab sach" onclick="showTab('sach')">&#x1F30D; Sachk.</button>
-</div>
-
-<!-- MATHE -->
-<div class="pane mathe" id="g-mathe">
-
-  <div class="acc" id="acc-grundrechnen">
-    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F522;</span>Grundrechnen<span class="cnt">11</span><span class="chev">&#x25BC;</span></button>
-    <div class="acc-body"><div class="acc-inner">
-      <a href="mengen.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F34E; Mengen</a>
-      <a href="grundrechnen.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F522; Grundrechenarten + und -</a>
-      <a href="einmaleins.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x2716;&#xFE0F; 1×1 Trainer</a>
-      <a href="schriftliches-rechnen.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x270D;&#xFE0F; Schriftliches Rechnen</a>
-      <a href="rechenmauern.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F9F1; Rechenmauern</a>
-      <a href="stellenwerttafel.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F522; Stellenwerttafel</a>
-      <a href="zahlenstrahl.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F4CF; Zahlenstrahl</a>
-      <a href="bruchrechnen.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x00BD; Bruchrechnen</a>
-      <div class="acc-divider">&#x1F4F1; Interaktiv &uuml;ben</div>
-      <a href="interaktiv-mengen.html" class="app-link" style="background:linear-gradient(135deg,#0e7490,#22d3ee)">&#x1F34E; Mengen &uuml;ben</a>
-      <a href="interaktiv-grundrechnen.html" class="app-link" style="background:linear-gradient(135deg,#0e7490,#22d3ee)">&#x2795; Plus &amp; Minus &uuml;ben</a>
-      <a href="interaktiv-einmaleins.html" class="app-link" style="background:linear-gradient(135deg,#0e7490,#22d3ee)">&#x2716;&#xFE0F; 1×1 &uuml;ben</a>
-    </div></div>
+<body data-root="true">
+<script src="back-button.js"></script>
+<div class="wrap">
+  <div class="hero">
+    <h1>Übio <span class="sub">– Grundschulübungen</span></h1>
+    <p>Arbeitsblätter &amp; interaktive Übungen</p>
   </div>
 
-  <div class="acc" id="acc-geometrie">
-    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F4D0;</span>Geometrie<span class="cnt">3</span><span class="chev">&#x25BC;</span></button>
-    <div class="acc-body"><div class="acc-inner">
-      <a href="geometrie-formen-symmetrien.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F537; Formen &amp; Symmetrien</a>
-      <a href="geometrie-gitter-koerper.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F4D0; Gitter &amp; K&ouml;rper</a>
-      <a href="geometrie-wuerfelnetze-koerper.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F9CA; W&uuml;rfelnetze &amp; K&ouml;rper</a>
-    </div></div>
-  </div>
+  <div class="lead">Wähle ein Fach</div>
+  <div class="grid" id="grid"></div>
 
-  <div class="acc" id="acc-sachrechnen">
-    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F4CF;</span>Sachrechnen<span class="cnt">4</span><span class="chev">&#x25BC;</span></button>
-    <div class="acc-body"><div class="acc-inner">
-      <a href="uhr.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F551; Uhr lernen</a>
-      <a href="geld.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F4B6; Geld rechnen</a>
-      <a href="laengen.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x1F4CF; L&auml;ngen &amp; Gewichte</a>
-      <a href="zeit.html" class="app-link" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">&#x23F1; Zeit rechnen</a>
-    </div></div>
-  </div>
-
-</div>
-
-<!-- DEUTSCH -->
-<div class="pane deutsch hidden" id="g-deutsch">
-
-  <div class="acc" id="acc-lesen-schreiben">
-    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F4D6;</span>Lesen &amp; Schreiben<span class="cnt">2</span><span class="chev">&#x25BC;</span></button>
-    <div class="acc-body"><div class="acc-inner">
-      <a href="schreiben.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x270F;&#xFE0F; Schreib&uuml;bung</a>
-      <a href="lesen.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x1F4D6; Lesen &uuml;ben</a>
-    </div></div>
-  </div>
-
-  <div class="acc" id="acc-rechtschreibung">
-    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F170;&#xFE0F;</span>Rechtschreibung<span class="cnt">1</span><span class="chev">&#x25BC;</span></button>
-    <div class="acc-body"><div class="acc-inner">
-      <a href="grossklein.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x1F170;&#xFE0F; Gro&szlig;- &amp; Kleinschreibung</a>
-    </div></div>
-  </div>
-
-  <div class="acc" id="acc-rechtschreibphaenomene">
-    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F50A;</span>Rechtschreibph&auml;nomene<span class="cnt">5</span><span class="chev">&#x25BC;</span></button>
-    <div class="acc-body"><div class="acc-inner">
-      <a href="auslaut.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x1F50A; Auslautverh&auml;rtung</a>
-      <a href="laute.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x1F442; &Auml;hnliche Laute</a>
-      <a href="dehnung.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x2194;&#xFE0F; Dehnung</a>
-      <a href="doppelkons.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x1F4D1; Doppelkonsonanten</a>
-      <a href="schaerfung.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x270F;&#xFE0F; Sch&auml;rfung</a>
-    </div></div>
-  </div>
-
-  <div class="acc" id="acc-grammatik">
-    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F524;</span>Grammatik<span class="cnt">1</span><span class="chev">&#x25BC;</span></button>
-    <div class="acc-body"><div class="acc-inner">
-      <a href="wortarten.html" class="app-link" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">&#x1F524; Wortarten</a>
-    </div></div>
-  </div>
-
-</div>
-
-<!-- ENGLISCH -->
-<div class="pane englisch hidden" id="g-englisch">
-
-  <div class="acc" id="acc-english-worksheets">
-    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F5A8;&#xFE0F;</span>Arbeitsbl&auml;tter<span class="cnt">1</span><span class="chev">&#x25BC;</span></button>
-    <div class="acc-body"><div class="acc-inner">
-      <div class="acc-note">Zum Ausdrucken auf A4.</div>
-      <a href="english.html" class="app-link" style="background:linear-gradient(135deg,#6d28d9,#a855f7)">&#x1F1EC;&#x1F1E7; English Worksheets</a>
-    </div></div>
-  </div>
-
-  <div class="acc" id="acc-english-practice">
-    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F4F1;</span>Interaktiv &uuml;ben<span class="cnt">1</span><span class="chev">&#x25BC;</span></button>
-    <div class="acc-body"><div class="acc-inner">
-      <div class="acc-note">Direkt am Tablet oder PC &uuml;ben &ndash; ohne drucken.</div>
-      <a href="interaktiv-english.html" class="app-link" style="background:linear-gradient(135deg,#7c3aed,#c084fc)">&#x1F4F1; English Interactive</a>
-    </div></div>
-  </div>
-
-</div>
-
-<!-- SACHKUNDE -->
-<div class="pane sach hidden" id="g-sach">
-  <div class="acc" id="acc-sachkunde">
-    <button class="acc-head" onclick="toggleAcc(this)"><span class="ico">&#x1F30D;</span>Sachkunde<span class="cnt">2</span><span class="chev">&#x25BC;</span></button>
-    <div class="acc-body"><div class="acc-inner">
-      <a href="bundeslaender.html" class="app-link" style="background:linear-gradient(135deg,#15803d,#22c55e)">&#x1F5FA;&#xFE0F; Bundesl&auml;nder</a>
-      <a href="verkehr.html" class="app-link" style="background:linear-gradient(135deg,#15803d,#22c55e)">&#x1F6A6; Verkehr</a>
-    </div></div>
-  </div>
-</div>
-
-<small>Grundschrift von Christian Urff<br><a href="hilfe.html" style="color:#9ca3af;text-decoration:underline">Hilfe &amp; Anleitung</a> &middot; <a href="impressum.html" style="color:#9ca3af;text-decoration:underline">Impressum</a></small>
-
-<style>
-.pp-wrap{position:relative;display:inline-block}
-.pp-bubble{display:none;position:absolute;top:calc(100% + 8px);left:0;background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 28px rgba(0,0,0,.18);width:210px;z-index:9999;animation:ppIn .2s ease}
-.pp-bubble::before{content:'';position:absolute;top:-6px;left:18px;width:12px;height:12px;background:#fff;transform:rotate(45deg);box-shadow:-2px -2px 4px rgba(0,0,0,.06)}
-.pp-bubble.open{display:block}
-@keyframes ppIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-.pp-amts{display:flex;gap:5px;margin:8px 0}
-.pp-a{flex:1;padding:6px 2px;border-radius:9px;border:2px solid #e2e8f0;background:#f8fafc;font-family:Nunito,sans-serif;font-size:.78rem;font-weight:800;color:#1e1b4b;cursor:pointer;transition:all .15s}
-.pp-a.sel{background:#0070ba;color:#fff;border-color:#0070ba}
-.pp-inp{width:100%;padding:6px 9px;border:2px solid #e2e8f0;border-radius:9px;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:600;color:#1e1b4b;outline:none;margin-bottom:8px}
-.pp-inp:focus{border-color:#0070ba}
-.pp-go{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:10px;background:#0070ba;color:#fff;font-weight:800;font-size:.85rem;text-decoration:none;box-shadow:0 3px 10px rgba(0,112,186,.3)}
-.pp-note{font-size:.62rem;color:#94a3b8;text-align:center;margin-top:6px}
-</style>
-<div class="pp-wrap" id="ppWrap">
-  <a href="#" onclick="ppToggle(event)" style="margin-top:18px;display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:#0070ba;border-radius:50px;color:#fff;font-family:Nunito,sans-serif;font-size:.85rem;font-weight:800;text-decoration:none;box-shadow:0 4px 14px rgba(0,112,186,.35)">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c1.379 8.741-5.832 9.76-8.084 9.76H9.942L8.684 23h3.603c.458 0 .848-.333.92-.786l.038-.199.733-4.64.047-.256a.932.932 0 0 1 .92-.786h.579c3.754 0 6.694-1.525 7.552-5.933.36-1.847.174-3.389-.854-4.483z"/></svg>
-    &#x2615; Buy me a Coffee
-  </a>
-  <div class="pp-bubble" id="ppBubble">
-    <div style="font-weight:900;font-size:.88rem;color:#1e1b4b;text-align:center;margin-bottom:4px">&#x2615; Buy me a Coffee</div>
-    <div class="pp-amts">
-      <button class="pp-a" onclick="ppAmt(1)">1&euro;</button>
-      <button class="pp-a sel" onclick="ppAmt(2)">2&euro;</button>
-      <button class="pp-a" onclick="ppAmt(5)">5&euro;</button>
-      <button class="pp-a" onclick="ppAmt(10)">10&euro;</button>
-    </div>
-    <input class="pp-inp" id="ppCustom" type="number" min="1" placeholder="Eigener Betrag &euro;" oninput="ppCustom(this.value)">
-    <a class="pp-go" id="ppGo" href="https://paypal.me/SaschaRothenburg/2EUR" target="_blank">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c1.379 8.741-5.832 9.76-8.084 9.76H9.942L8.684 23h3.603c.458 0 .848-.333.92-.786l.038-.199.733-4.64.047-.256a.932.932 0 0 1 .92-.786h.579c3.754 0 6.694-1.525 7.552-5.933.36-1.847.174-3.389-.854-4.483z"/></svg>
-      Jetzt <span id="ppLbl">2&euro;</span> spenden
+  <!-- AFFILIATE:START (nur Web-Version – im Node-Build-Script für den
+       Android-Build zwischen diesen Markern entfernen) -->
+  <div class="shop-banner">
+    <a class="shop-link" href="schulmaterialien.html">
+      <span class="shop-ic">🛍️</span>
+      <span class="shop-txt">
+        <span class="shop-nm">Schulmaterial-Empfehlungen</span>
+        <span class="shop-sub">Hefte, Stifte &amp; mehr <span class="ad-tag">Werbung</span></span>
+      </span>
     </a>
-    <div class="pp-note">via PayPal &middot; 0% Geb&uuml;hren</div>
+  </div>
+  <!-- AFFILIATE:END -->
+
+  <div class="foot">
+    <div class="coffee-wrap">
+      <button class="coffee" type="button" onclick="toggleCoffee(event)">☕ Buy me a coffee</button>
+      <div class="coffee-pop" id="coffeePop">
+        <div class="ct">☕ Kaffeekasse</div>
+        <div class="cs">Diese Apps sind kostenlos. Über eine kleine Unterstützung freue ich mich sehr!</div>
+        <div class="amts">
+          <button class="amt" type="button" data-eur="1" onclick="pickAmt(this)">1 €</button>
+          <button class="amt sel" type="button" data-eur="2" onclick="pickAmt(this)">2 €</button>
+          <button class="amt" type="button" data-eur="5" onclick="pickAmt(this)">5 €</button>
+          <button class="amt" type="button" data-eur="10" onclick="pickAmt(this)">10 €</button>
+        </div>
+        <div class="custom">
+          <span>€</span>
+          <input type="text" inputmode="decimal" placeholder="Eigener Betrag" id="coffeeCustom" oninput="customAmt()">
+        </div>
+        <a class="go" id="coffeeGo" href="https://paypal.me/SaschaRothenburg/2EUR" target="_blank" rel="noopener">Spenden</a>
+      </div>
+    </div>
+    <div class="foot-credits">Übio &middot; © 2026 Sascha Rothenburg<br>
+    Grundschrift von Christian Urff<br>
+    <a href="hilfe.html">Hilfe & Tipps</a></div>
   </div>
 </div>
-<script>
-function showTab(t){
-  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active');});
-  document.querySelector('.tab.'+t).classList.add('active');
-  ['mathe','deutsch','englisch','sach'].forEach(function(k){
-    document.getElementById('g-'+k).classList.toggle('hidden', k!==t);
-  });
-}
-function toggleAcc(btn){
-  var acc=btn.parentElement;
-  var pane=acc.closest('.pane');
-  var wasOpen=acc.classList.contains('open');
-  pane.querySelectorAll('.acc').forEach(function(a){a.classList.remove('open');});
-  if(!wasOpen)acc.classList.add('open');
-}
-function ppToggle(e){e.preventDefault();document.getElementById('ppBubble').classList.toggle('open');}
-function ppAmt(n){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20AC';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');if(b.textContent.trim()===n+'\u20AC')b.classList.add('sel');});document.getElementById('ppCustom').value='';}
-function ppCustom(v){var n=parseFloat(v);if(n>0){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20AC';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');});}}
-document.addEventListener('click',function(e){var w=document.getElementById('ppWrap');if(w&&!w.contains(e.target))document.getElementById('ppBubble').classList.remove('open');});
 
-// Beim Laden: gemerkten Bereich (aus URL-Anker) wiederherstellen.
-// Anker-Format: #acc-<id>  z.B. index.html#acc-grammatik
-function restoreFromHash(){
-  var h=(location.hash||'').replace('#','');
-  if(!h) return;
-  var acc=document.getElementById(h);
-  if(!acc) return;
-  var pane=acc.closest('.pane');
-  if(pane){
-    var t=pane.id.replace('g-','');   // g-deutsch -> deutsch
-    showTab(t);
-  }
-  acc.classList.add('open');
-  acc.scrollIntoView({block:'center',behavior:'auto'});
+<script>
+/* Fächer – zentral gepflegt. count = Anzahl fertiger Apps (für die Kachel). */
+var SUBJECTS=[
+  {id:'mathe',    name:'Mathematik', icon:'\u2795', page:'mathe.html',     count:18},
+  {id:'deutsch',  name:'Deutsch',    icon:'\u270F\uFE0F', page:'deutsch.html', count:9},
+  {id:'englisch', name:'Englisch',   icon:'🇬🇧', page:'englisch.html', count:2},
+  {id:'sachkunde',name:'Sachkunde',  icon:'\uD83C\uDF0D', page:'sachkunde.html', count:2},
+  {id:'interaktiv',name:'Interaktiv',icon:'\u26A1', page:'interaktiv.html', count:5, sub:'Spielerisch am Bildschirm üben'}
+];
+
+function appCountLabel(n){
+  if(n<=0) return 'In Vorbereitung';
+  return n+(n===1?' App':' Apps');
 }
-restoreFromHash();
-window.addEventListener('hashchange',restoreFromHash);
+
+(function render(){
+  var g=document.getElementById('grid');
+  SUBJECTS.forEach(function(s){
+    var a=document.createElement('a');
+    a.className='tile '+s.id;
+    a.href=s.page;
+    if(s.id==='interaktiv'){
+      a.innerHTML='<div class="bubble"></div>'+
+        '<div class="ic">'+s.icon+'</div>'+
+        '<div class="txt"><div class="nm">'+s.name+'</div>'+
+        '<div class="ct">'+(s.sub||appCountLabel(s.count))+'</div></div>';
+    } else {
+      a.innerHTML='<div class="bubble"></div>'+
+        '<div class="ic">'+s.icon+'</div>'+
+        '<div class="nm">'+s.name+'</div>'+
+        '<div class="ct">'+appCountLabel(s.count)+'</div>';
+    }
+    g.appendChild(a);
+  });
+})();
+
+/* PWA manifest (inline) */
+var manifest={name:'Übio – Grundschulübungen',short_name:'Übio',start_url:'.',display:'standalone',background_color:'#f1f5f9',theme_color:'#0369a1',icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='90' fill='%230369a1'/%3E%3Ctext x='256' y='350' text-anchor='middle' font-size='280' font-family='sans-serif' fill='white'%3E%E2%9C%8F%3C/text%3E%3C/svg%3E",sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]};
+var mb=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+var ml=document.createElement('link');ml.rel='manifest';ml.href=URL.createObjectURL(mb);document.head.appendChild(ml);
+</script>
+<script src="ads.js"></script>
+<script>
+(function(){
+  var preset = 2; // Default 2 Euro
+  function buildUrl(eur){ return 'https://paypal.me/SaschaRothenburg/' + eur + 'EUR'; }
+  function fmt(v){ return (Math.round(v*100)/100).toString().replace(',','.'); }
+  function setGo(eur){ var go=document.getElementById('coffeeGo'); if(go) go.href=buildUrl(eur); }
+  window.toggleCoffee = function(e){
+    e.stopPropagation();
+    var pop=document.getElementById('coffeePop');
+    if(pop) pop.classList.toggle('open');
+  };
+  window.pickAmt = function(btn){
+    preset = parseFloat(btn.getAttribute('data-eur'));
+    document.querySelectorAll('.coffee-pop .amt').forEach(function(b){ b.classList.remove('sel'); });
+    btn.classList.add('sel');
+    var ci=document.getElementById('coffeeCustom'); if(ci) ci.value='';
+    setGo(fmt(preset));
+  };
+  window.customAmt = function(){
+    var ci=document.getElementById('coffeeCustom');
+    var raw=(ci.value||'').replace(',','.').trim();
+    var v=parseFloat(raw);
+    document.querySelectorAll('.coffee-pop .amt').forEach(function(b){ b.classList.remove('sel'); });
+    if(!isNaN(v) && v>0){
+      setGo(fmt(v));
+    } else {
+      var pb=document.querySelector('.coffee-pop .amt[data-eur="'+preset+'"]');
+      if(pb) pb.classList.add('sel');
+      setGo(fmt(preset));
+    }
+  };
+  document.addEventListener('click', function(e){
+    var pop=document.getElementById('coffeePop');
+    if(!pop || !pop.classList.contains('open')) return;
+    if(!e.target.closest('.coffee-wrap')) pop.classList.remove('open');
+  });
+})();
 </script>
 
 </body>

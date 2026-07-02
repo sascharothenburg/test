@@ -15,7 +15,7 @@ html,body{height:100%}
 body{font-family:Nunito,sans-serif;background:#fef2f2;color:#1e1b4b;-webkit-user-select:none;user-select:none;overscroll-behavior:none}
 input{-webkit-user-select:text;user-select:text}
 .app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;background:#fff;box-shadow:0 0 40px rgba(0,0,0,.1)}
-.hdr{background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top,0px));flex-shrink:0}
+.hdr{background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top,0px) + var(--ad-top,0px));flex-shrink:0}
 .hdr h1{font-size:1.1rem;font-weight:900}
 .hdr p{font-size:.68rem;opacity:.85;margin-top:1px}
 .hdr-btns{display:flex;gap:8px;margin-top:6px;align-items:center}
@@ -44,14 +44,6 @@ input{-webkit-user-select:text;user-select:text}
 .ni{width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:9px;font-family:Nunito,sans-serif;font-size:.9rem;font-weight:600;color:#1e1b4b;background:#fef2f2;outline:none}
 .ni:focus{border-color:#dc2626}
 .sbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(255,255,255,.97);border-top:1px solid #e2e8f0;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;z-index:100}
-.pp-wrap{position:relative;display:inline-block}
-.pp-bubble{display:none;position:absolute;top:calc(100% + 8px);left:0;background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 28px rgba(0,0,0,.18);width:210px;z-index:9999}
-.pp-bubble.open{display:block}
-.pp-amts{display:flex;gap:5px;margin:8px 0}
-.pp-a{flex:1;padding:6px 2px;border-radius:9px;border:2px solid #e2e8f0;background:#f8fafc;font-family:Nunito,sans-serif;font-size:.78rem;font-weight:800;color:#1e1b4b;cursor:pointer}
-.pp-a.sel{background:#0070ba;color:#fff;border-color:#0070ba}
-.pp-inp{width:100%;padding:6px 9px;border:2px solid #e2e8f0;border-radius:9px;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:600;color:#1e1b4b;outline:none;margin-bottom:8px}
-.pp-go{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:10px;background:#0070ba;color:#fff;font-weight:800;font-size:.85rem;text-decoration:none}
 @media print{.app,.sbar{display:none!important}.printarea{display:block!important}body{background:#fff}html,body{height:auto;overflow:visible}@page{size:A4 portrait;margin:12mm 14mm}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}}
 .printarea{display:none}
 .printarea *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -63,6 +55,13 @@ input{-webkit-user-select:text;user-select:text}
 .tag-item .meta{font-family:Nunito,sans-serif;font-size:.6rem;font-weight:800;color:#94a3b8;text-transform:uppercase;flex-shrink:0}
 .tag-item button{background:none;border:none;color:#f87171;font-size:1rem;cursor:pointer;padding:0;flex-shrink:0}
 </style>
+<script src="pdf-lib.min.js"></script>
+<script src="fontkit.umd.min.js"></script>
+<script src="pdf.min.js"></script>
+<script>if(window.pdfjsLib){window.pdfjsLib.GlobalWorkerOptions.workerSrc='pdf.worker.min.js';}</script>
+<script src="grossklein-pdf.js"></script>
+<script src="print-bridge.js"></script>
+<script src="back-button.js"></script>
 </head>
 <body>
 <div class="app">
@@ -70,22 +69,12 @@ input{-webkit-user-select:text;user-select:text}
   <h1>&#x1F170;&#xFE0F; Gro&szlig;- &amp; Kleinschreibung</h1>
   <p>&#169; 2026 Sascha Rothenburg &#183; Grundschrift von Christian Urff</p>
   <div class="hdr-btns">
-    <a href="index.html#acc-rechtschreibung" class="hdr-btn">&#x2190; Startseite</a>
-    <div class="pp-wrap" id="ppWrap">
-      <button class="hdr-btn" onclick="ppToggle(event)">&#x2615; Coffee</button>
-      <div class="pp-bubble" id="ppBubble">
-        <div style="font-weight:900;font-size:.88rem;color:#1e1b4b;text-align:center;margin-bottom:4px">&#x2615; Buy me a Coffee</div>
-        <div class="pp-amts"><button class="pp-a" onclick="ppAmt(1)">1&euro;</button><button class="pp-a sel" onclick="ppAmt(2)">2&euro;</button><button class="pp-a" onclick="ppAmt(5)">5&euro;</button><button class="pp-a" onclick="ppAmt(10)">10&euro;</button></div>
-        <input class="pp-inp" id="ppCustom" type="number" min="1" placeholder="Eigener Betrag" oninput="ppCustomAmt(this.value)">
-        <a class="pp-go" id="ppGo" href="https://paypal.me/SaschaRothenburg/2EUR" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c1.379 8.741-5.832 9.76-8.084 9.76H9.942L8.684 23h3.603c.458 0 .848-.333.92-.786l.038-.199.733-4.64.047-.256a.932.932 0 0 1 .92-.786h.579c3.754 0 6.694-1.525 7.552-5.933.36-1.847.174-3.389-.854-4.483z"/></svg> Jetzt <span id="ppLbl">2&euro;</span> spenden</a>
-        <div style="font-size:.62rem;color:#94a3b8;text-align:center;margin-top:6px">via PayPal &middot; 0% Geb&uuml;hren</div>
-      </div>
-    </div>
+    <a href="deutsch.html#acc-grammatik" class="hdr-btn">&#x2190; Zur&uuml;ck</a>
+    <a href="index.html" class="hdr-btn">&#x1F3E0; Hauptmen&uuml;</a>
   </div>
 </div>
 <div class="tabs">
   <button class="tab active" id="t-gen"><span class="ti">&#x26A1;</span>Generator</button>
-  <button class="tab" id="t-list"><span class="ti">&#x1F4DD;</span>Liste</button>
   <button class="tab" id="t-set"><span class="ti">&#x2699;</span>Einst.</button>
   <button class="tab" id="t-pre"><span class="ti">&#x1F441;</span>Vorschau</button>
 </div>
@@ -114,19 +103,8 @@ input{-webkit-user-select:text;user-select:text}
     </div>
     <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Aufgabenzahl ist passend zur Seite festgelegt.</p>
   </div>
-  <button class="btn bp" id="btnGen">&#x26A1; Aufgaben generieren</button>
-</div>
-<div class="screen" id="s-list">
-  <div class="card">
-    <h2 id="listTitle">Generierte Aufgaben</h2>
-    <div class="tag-list" id="tagList"><p style="color:#6b7280;font-size:.85rem">Noch nichts generiert &ndash; zuerst auf Generator!</p></div>
-  </div>
 </div>
 <div class="screen" id="s-set">
-  <div class="card">
-    <h2>Kind</h2>
-    <input class="ni" type="text" id="nameF" placeholder="Name des Kindes">
-  </div>
   <div class="card">
     <h2>Layout</h2>
     <div class="sr"><div class="sl">L&ouml;sungsblatt anh&auml;ngen</div><label class="tgl"><input type="checkbox" id="showSolution"><span class="tgl-s"></span></label></div>
@@ -136,8 +114,8 @@ input{-webkit-user-select:text;user-select:text}
     <h2>&#x1F4DD; Schreiblinien</h2>
     <div class="ss" style="margin-bottom:8px">Lineatur zum Berichtigen der S&auml;tze</div>
     <div class="seg" id="lineSeg">
-      <button class="seg-b active" data-v="1">Eine Linie</button>
-      <button class="seg-b" data-v="2">Zwei Linien</button>
+      <button class="seg-b" data-v="1">Eine Linie</button>
+      <button class="seg-b active" data-v="2">Zwei Linien</button>
       <button class="seg-b" data-v="3">Drei Linien</button>
     </div>
   </div>
@@ -157,11 +135,6 @@ input{-webkit-user-select:text;user-select:text}
 </div>
 <script>
 
-/* ===== PayPal ===== */
-function ppToggle(e){e.preventDefault();document.getElementById('ppBubble').classList.toggle('open');}
-function ppAmt(n){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20ac';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');if(b.textContent.trim()===n+'\u20ac')b.classList.add('sel');});document.getElementById('ppCustom').value='';}
-function ppCustomAmt(v){var n=parseFloat(v);if(n>0){document.getElementById('ppGo').href='https://paypal.me/SaschaRothenburg/'+n+'EUR';document.getElementById('ppLbl').textContent=n+'\u20ac';document.querySelectorAll('.pp-a').forEach(function(b){b.classList.remove('sel');});}}
-document.addEventListener('click',function(e){var w=document.getElementById('ppWrap');if(w&&!w.contains(e.target))document.getElementById('ppBubble').classList.remove('open');});
 
 /* ===== Satzkorpus =====
    Tokens: [wort, typ]
@@ -248,7 +221,7 @@ function activeModes(){
   return m;
 }
 function diffVal(){var b=document.querySelector('#diffSeg .seg-b.active');return b?b.dataset.v:'12';}
-function lineStyle(){var b=document.querySelector('#lineSeg .seg-b.active');return b?b.dataset.v:'1';}
+function lineStyle(){var b=document.querySelector('#lineSeg .seg-b.active');return b?b.dataset.v:'2';}
 
 function corpus(){return diff==='34'?CORPUS_34:CORPUS_12;}
 function pairs(){return diff==='34'?PAIRS_34:PAIRS_12;}
@@ -258,6 +231,7 @@ function pairs(){return diff==='34'?PAIRS_34:PAIRS_12;}
    der Umschalter steuert nur die Gesamtzahl.
    p1 = ca. 1 Seite, p2 = ca. 2 Seiten. Startwerte, am iPad nachjustieren. */
 var numPages=1;
+var taskSets=[];
 var PER_PAGE={p1:8,p2:18};
 function totalCount(){ var c=PER_PAGE; return numPages<=1?c.p1:(c.p2!=null?c.p2:c.p1*2); }
 function initPageSeg(){
@@ -270,28 +244,34 @@ function initPageSeg(){
     });
   });
 }
-function generate(){
-  diff=diffVal();
-  modes=activeModes();
-  if(!modes.length){alert('Bitte mindestens einen Aufgabentyp ausw\u00e4hlen.');return;}
-  var n=totalCount();
-  tasks=[];
+function countForOnePage(){ return PER_PAGE.p1; }
+function buildTaskSet(modes, n){
+  var out=[];
   var sents=shuffle(corpus());
   var prs=shuffle(pairs());
   var si=0, pi=0;
   for(var i=0;i<n;i++){
     var type=modes[i%modes.length];
     if(type==='pair'){
-      // ein paar: das gleiche grundwort in beiden formen anbieten
       var p=prs[pi%prs.length]; pi++;
-      tasks.push({type:'pair', word:p.w, cap:p.cap, note:p.note||''});
+      out.push({type:'pair', word:p.w, cap:p.cap, note:p.note||''});
     }else{
       var s=sents[si%sents.length]; si++;
-      tasks.push({type:type, sent:s});
+      out.push({type:type, sent:s});
     }
   }
+  return out;
+}
+function generate(){
+  diff=diffVal();
+  modes=activeModes();
+  if(!modes.length){alert('Bitte mindestens einen Aufgabentyp ausw\u00e4hlen.');return;}
+  var nPer=countForOnePage();
+  taskSets=[];
+  var nSets = numPages>=2 ? 2 : 1;
+  for(var p=0;p<nSets;p++){ taskSets.push(buildTaskSet(modes, nPer)); }
+  tasks=taskSets[0];
   renderList();
-  showTab('list');
 }
 
 function sentenceText(s,correct){
@@ -307,214 +287,41 @@ function sentenceText(s,correct){
   }).join(' ');
 }
 
-function renderList(){
-  var el=document.getElementById('tagList');
-  document.getElementById('listTitle').textContent='Generierte Aufgaben';
-  el.innerHTML='';
-  if(!tasks.length){el.innerHTML='<p style="color:#6b7280;font-size:.85rem">Noch nichts generiert.</p>';return;}
-  var TL={fix:'Berichtigen',find:'Nomen finden',pair:'Wortpaar'};
-  tasks.forEach(function(t,i){
-    var d=document.createElement('div'); d.className='tag-item';
-    var sp=document.createElement('span'); sp.style.flex='1';
-    if(t.type==='pair'){
-      sp.textContent=lc(t.word)+'  /  '+uc(t.word)+(t.note?'  ('+t.note+')':'');
-    }else if(t.type==='fix'){
-      sp.textContent=sentenceText(t.sent,false);
-    }else{
-      sp.textContent=sentenceText(t.sent,true);
-    }
-    var meta=document.createElement('span'); meta.className='meta'; meta.textContent=TL[t.type];
-    var b=document.createElement('button'); b.innerHTML='\u2715';
-    b.addEventListener('click',(function(idx){return function(){tasks.splice(idx,1);renderList();};})(i));
-    d.appendChild(sp); d.appendChild(meta); d.appendChild(b); el.appendChild(d);
-  });
-}
-
+function renderList(){ /* Listenansicht entfernt – Aufgaben werden direkt in der Vorschau erzeugt */ }
 /* ===== Schreiblinien =====
    Echte Grundschul-Lineatur wie in der Schreib-App:
    3 Linien = 4 Linien / 3 R\u00e4ume (Dach, Mitte, Keller), feste mm-B\u00e4nder.
    2 Linien = Mittelband (Hilfslinie gestrichelt + Grundlinie).
    1 Linie  = nur Grundlinie. */
-function lineRow(style,fs,topMargin){
-  var band=6.5; // mm pro Band, wie Schreib-App (f\u00fcr 3-Linien-Lineatur)
-  var mt=(topMargin||0);
-  var vert='<div style="position:absolute;left:0;top:0;bottom:0;border-left:1px solid #60a5fa"></div>'
-          +'<div style="position:absolute;right:0;top:0;bottom:0;border-left:1px solid #60a5fa"></div>';
-  if(style==='1'){
-    var h='<div style="position:relative;height:'+band+'mm;margin:'+(mt+12)+'pt 0 4mm 0">';
-    h+='<div style="position:absolute;left:0;right:0;bottom:0;border-top:2px solid #1d4ed8"></div>';
-    return h+'</div>';
-  }
-  if(style==='2'){
-    var h='<div style="position:relative;height:'+band+'mm;margin:'+(mt+12)+'pt 0 4mm 0">';
-    h+='<div style="position:absolute;left:0;right:0;top:0;border-top:1px dashed #93c5fd"></div>';
-    h+='<div style="position:absolute;left:0;right:0;bottom:0;border-top:2px solid #1d4ed8"></div>';
-    h+=vert;
-    return h+'</div>';
-  }
-  // 3 = volle 4-Linien-Lineatur: Dach (0), Hilfslinie (6.5mm), Grundlinie (13mm), Keller (19.5mm)
-  var total=band*3;
-  var h='<div style="position:relative;height:'+total+'mm;margin:'+(mt+3)+'pt 0 3.5mm 0">';
-  h+='<div style="position:absolute;left:0;right:0;top:0;border-top:1px solid #60a5fa"></div>';
-  h+='<div style="position:absolute;left:0;right:0;top:'+band+'mm;border-top:1px dashed #93c5fd"></div>';
-  h+='<div style="position:absolute;left:0;right:0;top:'+(band*2)+'mm;border-top:2px solid #1d4ed8"></div>';
-  h+='<div style="position:absolute;left:0;right:0;bottom:0;border-top:1px solid #60a5fa"></div>';
-  h+=vert;
-  return h+'</div>';
-}
 
 /* ===== Worksheet ===== */
-function buildWS(){
-  if(!tasks.length) return '<p style="padding:20px;color:#999">Keine Aufgaben generiert.</p>';
-  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  var fs=isIOS?11:13;
-  var meta=buildMeta();
-  var showRule=document.getElementById('showRule').checked;
-  var showSol=document.getElementById('showSolution').checked;
-  var style=lineStyle();
 
-  var h='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:4mm;padding-bottom:3mm;border-bottom:2.5px solid #dc2626">'
-       +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#dc2626">\ud83c\udd70\ufe0f Gro\u00df- und Kleinschreibung</div>'
-       +'<div style="font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif">'+(diff==='34'?'Klasse 3\u20134':'Klasse 1\u20132')+'</div></div>'
-       +(meta?'<div style="flex-shrink:0">'+meta+'</div>':'')+'</div>';
-
-  if(showRule){
-    var rule = diff==='34'
-      ? 'Merke: Nomen schreibt man gro\u00df \u2013 auch nominalisierte Verben und Adjektive (das Laufen, das Sch\u00f6ne). Am Satzanfang schreibt man immer gro\u00df.'
-      : 'Merke: Nomen (Namenw\u00f6rter) schreibt man gro\u00df. Am Satzanfang schreibt man immer gro\u00df.';
-    h+='<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:6pt;padding:3mm 4mm;margin-bottom:5mm;font-family:Nunito,sans-serif;font-size:8.5pt;color:#7f1d1d;-webkit-print-color-adjust:exact;print-color-adjust:exact">\u270f\ufe0f '+rule+'</div>';
-  }
-
-  // Aufgaben nach Typ gruppieren in Reihenfolge fix, find, pair
-  var groups={fix:[],find:[],pair:[]};
-  tasks.forEach(function(t){groups[t.type].push(t);});
-  var nr=1;
-  if(groups.fix.length){ h+=sectionFix(groups.fix,fs,style,nr); nr+=groups.fix.length; }
-  if(groups.find.length){ h+=sectionFind(groups.find,fs,nr); nr+=groups.find.length; }
-  if(groups.pair.length){ h+=sectionPair(groups.pair,fs,nr); nr+=groups.pair.length; }
-
-  if(showSol){
-    h+='<div style="break-before:page;page-break-before:always">';
-    h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-bottom:5mm;padding-bottom:3mm;border-bottom:2.5px solid #dc2626">'
-      +'<div><div style="font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:#dc2626">\u2713 L\u00f6sung</div>'
-      +'<div style="font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif">Gro\u00df- und Kleinschreibung</div></div></div>';
-    var snr=1;
-    if(groups.fix.length){ h+=solFix(groups.fix,fs,snr); snr+=groups.fix.length; }
-    if(groups.find.length){ h+=solFind(groups.find,fs,snr); snr+=groups.find.length; }
-    if(groups.pair.length){ h+=solPair(groups.pair,fs,snr); snr+=groups.pair.length; }
-    h+='</div>';
-  }
-  return h;
-}
-
-function secHead(txt){
-  return '<div style="font-family:Nunito,sans-serif;font-weight:900;font-size:9.5pt;color:#dc2626;margin:5mm 0 3mm">'+txt+'</div>';
-}
 
 /* --- Berichtigen: kleiner Satz + Schreiblinie --- */
-function sectionFix(arr,fs,style,startNr){
-  var h=secHead('\u270f\ufe0f Schreibe die S\u00e4tze richtig auf.');
-  arr.forEach(function(t,i){
-    h+='<div style="break-inside:avoid;page-break-inside:avoid;margin-bottom:4mm">';
-    h+='<div style="font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;color:#1e1b4b;margin-bottom:1mm">'+(startNr+i)+'. '+sentenceText(t.sent,false)+'</div>';
-    h+=lineRow(style,fs);
-    h+='</div>';
-  });
-  return h;
-}
-function solFix(arr,fs,startNr){
-  var h=secHead('\u270f\ufe0f S\u00e4tze richtig');
-  arr.forEach(function(t,i){
-    h+='<div style="break-inside:avoid;margin-bottom:2.5mm;font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;color:#1e1b4b">'+(startNr+i)+'. '+solSentence(t.sent)+'</div>';
-  });
-  return h;
-}
-function solSentence(s){
-  return s.map(function(t){
-    var w=t[0];
-    if(t[1]==='S'||t[1]==='N'||t[1]==='X'){
-      return '<span style="color:#dc2626;text-decoration:underline;-webkit-print-color-adjust:exact;print-color-adjust:exact">'+uc(w)+'</span>';
-    }
-    return lc(w);
-  }).join(' ');
-}
 
 /* --- Nomen finden: korrekter Satz, Kind unterstreicht Nomen --- */
-function sectionFind(arr,fs,startNr){
-  var h=secHead('\u270f\ufe0f Unterstreiche alle gro\u00df geschriebenen W\u00f6rter (Nomen).');
-  arr.forEach(function(t,i){
-    h+='<div style="break-inside:avoid;page-break-inside:avoid;margin-bottom:4.5mm;font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;color:#1e1b4b;line-height:2.0">'+(startNr+i)+'. '+sentenceText(t.sent,true)+'</div>';
-  });
-  return h;
-}
-function solFind(arr,fs,startNr){
-  var h=secHead('\u270f\ufe0f Nomen markiert');
-  arr.forEach(function(t,i){
-    h+='<div style="break-inside:avoid;margin-bottom:2.5mm;font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;color:#1e1b4b">'+(startNr+i)+'. '+solSentence(t.sent)+'</div>';
-  });
-  return h;
-}
 
 /* --- Wortpaare ankreuzen --- */
-function sectionPair(arr,fs,startNr){
-  var h=secHead('\u270f\ufe0f Kreuze die richtige Schreibweise an.');
-  h+='<table style="width:100%;border-collapse:collapse;font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt">';
-  arr.forEach(function(t,i){
-    // zufaellige reihenfolge der beiden optionen
-    var opts=Math.random()<.5?[lc(t.word),uc(t.word)]:[uc(t.word),lc(t.word)];
-    var note=t.note?' <span style="font-family:Nunito,sans-serif;font-weight:600;font-size:7.5pt;color:#777">('+t.note+')</span>':'';
-    h+='<tr style="border-bottom:1px solid #e2e8f0">'
-      +'<td style="padding:2.2mm 2mm;width:14pt;color:#94a3b8">'+(startNr+i)+'.</td>'
-      +'<td style="padding:2.2mm 2mm">'
-        +'<span style="display:inline-block;width:12pt;height:12pt;border:1.4pt solid #555;border-radius:2pt;vertical-align:middle;margin-right:4pt"></span>'+opts[0]
-        +'<span style="display:inline-block;width:12pt;height:12pt;border:1.4pt solid #555;border-radius:2pt;vertical-align:middle;margin:0 4pt 0 14pt"></span>'+opts[1]
-        +note
-      +'</td></tr>';
-  });
-  h+='</table>';
-  return h;
-}
-function solPair(arr,fs,startNr){
-  var h=secHead('\u270f\ufe0f Wortpaare');
-  h+='<div style="font-family:Grundschrift,sans-serif;font-weight:bold;font-size:'+fs+'pt;color:#1e1b4b">';
-  arr.forEach(function(t,i){
-    var correct=t.cap?uc(t.word):lc(t.word);
-    h+='<div style="margin-bottom:1.5mm">'+(startNr+i)+'. <span style="color:#dc2626;text-decoration:underline;-webkit-print-color-adjust:exact;print-color-adjust:exact">'+correct+'</span>'+(t.note?' <span style="font-family:Nunito,sans-serif;font-weight:600;font-size:7.5pt;color:#777">('+t.note+')</span>':'')+'</div>';
-  });
-  h+='</div>';
-  return h;
-}
 
 /* ===== Kopfzeile ===== */
-function buildMeta(){
-  var sN=document.getElementById('showName').checked, sD=document.getElementById('showDate').checked, sK=document.getElementById('showKl').checked;
-  var name=document.getElementById('nameF').value.trim();
-  if(!sN&&!sD&&!sK)return '';
-  var tdL='style="font-family:Nunito,sans-serif;font-size:8pt;color:#555;white-space:nowrap;padding-right:4pt"';
-  var tdR='style="border-bottom:1px solid #888;min-width:90pt;width:100%;font-size:8pt"';
-  var rows='';
-  if(sN)rows+='<tr><td '+tdL+'>Name:</td><td '+tdR+'>&nbsp;'+name.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</td></tr>';
-  if(sD)rows+='<tr><td '+tdL+'>Datum:</td><td '+tdR+'>&nbsp;</td></tr>';
-  if(sK)rows+='<tr><td '+tdL+'>Klasse:</td><td '+tdR+'>&nbsp;</td></tr>';
-  return '<table style="border-collapse:collapse;line-height:2.2">'+rows+'</table>';
-}
 
 /* ===== Tabs + Sbar ===== */
 var sbar=document.getElementById('sbar');
 function showTab(name){
-  var map={gen:'s-gen',list:'s-list',set:'s-set',pre:'s-pre'};
-  var tmap={gen:'t-gen',list:'t-list',set:'t-set',pre:'t-pre'};
+  var map={gen:'s-gen',set:'s-set',pre:'s-pre'};
+  var tmap={gen:'t-gen',set:'t-set',pre:'t-pre'};
   document.querySelectorAll('.screen').forEach(function(el){el.classList.remove('active');});
   document.querySelectorAll('.tab').forEach(function(el){el.classList.remove('active');});
   document.getElementById(map[name]).classList.add('active');
   document.getElementById(tmap[name]).classList.add('active');
   if(name==='pre'){
+    generate();
     sbar.innerHTML='';
     var b1=document.createElement('button'),b2=document.createElement('button');
     b1.style.cssText='flex:1;padding:13px 0;border-radius:12px;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;background:#f0f4f8;color:#6b7280;border:2px solid #e2e8f0';
     b2.style.cssText='flex:1;padding:13px 0;border-radius:12px;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;border:none';
     b1.textContent='\u2190 Zur\u00fcck';b2.textContent='Drucken / PDF';
-    b1.onclick=function(){showTab('list');};b2.onclick=doPrint;
+    b1.onclick=function(){showTab('gen');};b2.onclick=doPrint;
     sbar.appendChild(b1);sbar.appendChild(b2);
     setTimeout(buildPreview,50);
   }else{
@@ -523,22 +330,76 @@ function showTab(name){
     btn.onclick=function(){showTab('pre');};sbar.appendChild(btn);
   }
 }
-function buildPreview(){
-  try{
-    var c=buildWS(),sw=Math.min(window.innerWidth,480)-28,sc=sw/688;
-    var wrap=document.getElementById('previewContent');wrap.innerHTML='';
-    var outer=document.createElement('div'),inner=document.createElement('div');
-    outer.style.cssText='width:'+sw+'px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;background:#fff;margin-bottom:8px';
-    inner.style.cssText='width:688px;transform-origin:top left;transform:scale('+sc.toFixed(4)+');padding:42px 50px;background:#fff;box-sizing:border-box';
-    inner.innerHTML=c;outer.appendChild(inner);wrap.appendChild(outer);
-    requestAnimationFrame(function(){outer.style.height=Math.round(inner.scrollHeight*sc)+'px';});
-  }catch(e){document.getElementById('previewContent').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
+function pdfSpec(){
+  return {
+    tasks: tasks,
+    taskSets: taskSets,
+    numPages: numPages,
+    showSol: document.getElementById('showSolution').checked,
+    showRule: document.getElementById('showRule').checked,
+    lineStyle: lineStyle(),
+    diff: diffVal()
+  };
 }
-async function doPrint(){await document.fonts.ready;document.getElementById('printArea').innerHTML=buildWS();setTimeout(function(){window.print();},150);}
+function pdfHeaderOpts(){
+  return {
+    showName:document.getElementById('showName').checked,
+    showDate:document.getElementById('showDate').checked,
+    showKl:document.getElementById('showKl').checked
+  };
+}
+async function makePDFBytes(){
+  if(!window.fontkit && window.PDFLib && window.PDFLib.fontkit){window.fontkit=window.PDFLib.fontkit;}
+  return await GrossKleinPDF.buildWorksheetPDF(pdfSpec(), pdfHeaderOpts(), null);
+}
+function buildPreview(){
+  var wrap=document.getElementById('previewContent');
+  wrap.innerHTML='<p style="color:#6b7280;padding:16px;font-size:.8rem">Vorschau wird erstellt &hellip;</p>';
+  (async function(){
+    try{
+      if(!tasks.length){
+        wrap.innerHTML='<p style="color:#b91c1c;padding:20px;font-family:Nunito,sans-serif">Bitte zuerst Aufgaben generieren.</p>';
+        return;
+      }
+      var bytes=await makePDFBytes();
+      if(window.pdfjsLib){
+        var pdf=await window.pdfjsLib.getDocument({data:bytes}).promise;
+        wrap.innerHTML='';
+        var sw=Math.min(window.innerWidth,480)-28;
+        for(var p=1;p<=pdf.numPages;p++){
+          var page=await pdf.getPage(p);
+          var vp1=page.getViewport({scale:1});
+          var scale=sw/vp1.width;
+          var vp=page.getViewport({scale:scale*2});
+          var canvas=document.createElement('canvas');
+          canvas.style.cssText='display:block;width:'+sw+'px;border:1px solid #e2e8f0;border-radius:6px;margin-bottom:10px;background:#fff';
+          canvas.width=vp.width;canvas.height=vp.height;
+          await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+          wrap.appendChild(canvas);
+        }
+      }else{
+        var blob=new Blob([bytes],{type:'application/pdf'});
+        wrap.innerHTML='<embed src="'+URL.createObjectURL(blob)+'" type="application/pdf" style="width:100%;height:70vh;border:1px solid #e2e8f0;border-radius:6px">';
+      }
+    }catch(e){
+      wrap.innerHTML='<p style="color:red;padding:20px">'+(e.message||String(e))+'</p>';
+      console.error(e);
+    }
+  })();
+}
+async function doPrint(){
+  try{
+    if(!tasks.length){alert('Bitte zuerst Aufgaben generieren.');return;}
+    var bytes=await makePDFBytes();
+    await PrintBridge.printPDF(bytes,'Gross-Kleinschreibung.pdf');
+  }catch(e){
+    alert('Druck fehlgeschlagen: '+(e.message||e));
+    console.error(e);
+  }
+}
 
 /* ===== Events ===== */
 document.getElementById('t-gen').addEventListener('click',function(){showTab('gen');});
-document.getElementById('t-list').addEventListener('click',function(){showTab('list');});
 document.getElementById('t-set').addEventListener('click',function(){showTab('set');});
 document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
 
@@ -559,8 +420,7 @@ document.querySelectorAll('#lineSeg .seg-b').forEach(function(b){
   });
 });
 initPageSeg();
-document.getElementById('btnGen').addEventListener('click',generate);
-document.getElementById('btnGoPre').addEventListener('click',function(){showTab('pre');});
+showTab('gen');
 
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 document.addEventListener('selectstart',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;e.preventDefault();});
@@ -571,5 +431,6 @@ var mblob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
 var mlink=document.createElement('link');mlink.rel='manifest';mlink.href=URL.createObjectURL(mblob);document.head.appendChild(mlink);
 
 </script>
+<script src="ads.js"></script>
 </body>
 </html>
