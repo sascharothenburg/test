@@ -38,7 +38,6 @@ header .h-title{font-weight:800;font-size:1.2rem;display:flex;align-items:center
 
 .wrap{max-width:860px;margin:0 auto;padding:26px 20px 70px}
 
-/* Werbekennzeichnung – prominent, oben */
 .ad-banner{
   background:var(--soft);border:1px solid #fed7aa;border-radius:14px;
   padding:16px 20px;margin-bottom:22px;font-size:.92rem;color:var(--ink);
@@ -50,25 +49,28 @@ header .h-title{font-weight:800;font-size:1.2rem;display:flex;align-items:center
   padding:3px 9px;border-radius:6px;margin-right:8px;vertical-align:middle;
 }
 
-.intro{margin-bottom:22px}
+.intro{margin-bottom:20px}
 .intro h1{font-size:1.5rem;font-weight:800;color:var(--accent-d);margin-bottom:6px}
 .intro p{color:var(--muted);font-size:.98rem}
 
-/* Accordion */
-.acc{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.acc-head{
-  width:100%;border:none;background:none;cursor:pointer;font-family:inherit;
-  display:flex;align-items:center;gap:12px;padding:18px 20px;text-align:left;
+.tabs{
+  display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:18px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
 }
-.acc-head .ic{font-size:1.4rem;flex:none}
-.acc-head .nm{font-size:1.05rem;font-weight:800;color:var(--ink);flex:1}
-.acc-head .chev{font-size:1rem;color:var(--muted);transition:transform .18s}
-.acc.open .acc-head .chev{transform:rotate(180deg)}
-.acc-body{max-height:0;overflow:hidden;transition:max-height .22s ease}
-.acc.open .acc-body{max-height:3000px}
-.acc-inner{padding:0 20px 18px}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{
+  flex:none;display:flex;align-items:center;gap:7px;
+  border:1.5px solid var(--line);background:#fff;color:var(--muted);
+  font-family:inherit;font-weight:800;font-size:.86rem;
+  padding:9px 15px;border-radius:999px;cursor:pointer;white-space:nowrap;
+  transition:background .12s,color .12s,border-color .12s;
+}
+.tab-btn .ic{font-size:1rem}
+.tab-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
 
-/* Produkt-Karten */
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
 .pgrid{display:grid;grid-template-columns:1fr;gap:12px}
 .pcard{
   display:flex;gap:14px;align-items:center;border:1px solid var(--line);
@@ -90,6 +92,33 @@ header .h-title{font-weight:800;font-size:1.2rem;display:flex;align-items:center
 }
 .pcard .pbtn:active{filter:brightness(.93)}
 .pcard .ptag{font-size:.62rem;font-weight:800;color:var(--accent-d);letter-spacing:.3px;text-transform:uppercase}
+
+.acc{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.acc-head{
+  width:100%;border:none;background:none;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;gap:12px;padding:16px 18px;text-align:left;
+}
+.acc-head .nm{font-size:1rem;font-weight:800;color:var(--ink);flex:1}
+.acc-head .chev{font-size:.95rem;color:var(--muted);transition:transform .18s}
+.acc.open .acc-head .chev{transform:rotate(180deg)}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .22s ease}
+.acc.open .acc-body{max-height:4000px}
+.acc-inner{padding:0 18px 16px}
+
+.sub-acc{border:1px solid var(--line);border-radius:12px;margin-top:8px;overflow:hidden}
+.sub-acc:first-child{margin-top:0}
+.sub-head{
+  width:100%;border:none;background:var(--soft);cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;gap:10px;padding:11px 14px;text-align:left;
+  font-weight:800;font-size:.88rem;color:var(--accent-d);
+}
+.sub-head .chev{margin-left:auto;font-size:.8rem;transition:transform .18s}
+.sub-acc.open .sub-head .chev{transform:rotate(180deg)}
+.sub-body{max-height:0;overflow:hidden;transition:max-height .2s ease}
+.sub-acc.open .sub-body{max-height:2000px}
+.sub-inner{padding:10px 14px}
+.sub-inner .pgrid{gap:10px}
+.sub-inner .pcard{padding:10px}
 
 footer{text-align:center;color:var(--muted);font-size:.85rem;padding:24px 20px 40px}
 footer a{color:var(--accent-d);font-weight:700}
@@ -117,11 +146,12 @@ footer a{color:var(--accent-d);font-weight:700}
   </div>
 
   <div class="intro">
-    <h1>Empfehlungen für den Schulstart</h1>
-    <p>Eine kleine, handverlesene Auswahl an Materialien, die gut zu den Übio-Übungen passen – nach Kategorie sortiert.</p>
+    <h1>Empfehlungen für den Schulstart und die Grundschule</h1>
+    <p>Eine kleine, handverlesene Auswahl an Materialien, die gut zu den Übio-Übungen passen.</p>
   </div>
 
-  <div id="accWrap"></div>
+  <div class="tabs" id="tabsWrap"></div>
+  <div id="panelsWrap"></div>
 
   <footer>
     Übio &middot; © 2026 Sascha Rothenburg &middot;
@@ -132,26 +162,23 @@ footer a{color:var(--accent-d);font-weight:700}
 
 <script>
 /* =====================================================================
-   Kategorien: einmal definieren, Reihenfolge bestimmt die Anzeige.
+   KATEGORIEN (= Tabs). Reihenfolge bestimmt die Tab-Reihenfolge.
+   type: 'flat'        -> einfache Produktliste (wie bisher)
+         'lehrbuecher' -> eigene Klasse->Fach-Struktur (siehe LEHRBUECHER)
    ===================================================================== */
 var CATEGORIES = [
-  { id:'schreiben',  name:'Schreiblernhefte & Stifte', icon:'✏️' },
-  { id:'rechnen',    name:'Rechnen & Geometrie',       icon:'📐' },
-  { id:'nachschlagen', name:'Nachschlagewerke',        icon:'📚' },
-  { id:'zubehoer',   name:'Lernmaterialien',           icon:'🎒' }
+  { id:'schreiben',    name:'Schreiben',        icon:'✏️', type:'flat' },
+  { id:'rechnen',      name:'Rechnen',          icon:'📐', type:'flat' },
+  { id:'nachschlagen', name:'Nachschlagewerke', icon:'📚', type:'flat' },
+  { id:'zubehoer',     name:'Lernmaterialien',  icon:'🎒', type:'flat' },
+  { id:'lehrbuecher',  name:'Lehrbücher',       icon:'📖', type:'lehrbuecher' }
 ];
 
 /* =====================================================================
-   PRODUKTE: Pro Eintrag nur diese eine Zeile ergänzen/ändern.
+   PRODUKTE für die "flat"-Kategorien: pro Eintrag eine Zeile.
    - cat:   ID aus CATEGORIES oben
-   - title: Produktname
-   - desc:  kurze Beschreibung (1 Satz)
-   - img:   Bild-URL (per SiteStripe -> "Bild+Text" -> Bild-URL kopieren,
-            oder auf der Amazon-Produktseite Rechtsklick -> Grafikadresse
-            kopieren). Leer lassen ("") für Platzhalter-Icon.
-   - url:   Affiliate-Link mit deinem Tag ?tag=uebiorg-21 am Ende
-   Die untenstehenden Einträge sind BEISPIELE zur Orientierung -
-   bitte durch echte Produkte/Links ersetzen.
+   - title, desc, img (SiteStripe/Grafikadresse kopieren, "" = Platzhalter-Icon), url
+   BEISPIEL-Einträge bitte durch echte Produkte ersetzen.
    ===================================================================== */
 var PRODUCTS = [
   { cat:'schreiben', title:'BEISPIEL: Schreiblernheft Lineatur 1', desc:'Passend zur Grundschrift, 16 Blatt', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
@@ -166,14 +193,25 @@ var PRODUCTS = [
 ];
 
 /* =====================================================================
-   Rendering + Accordion (Standard: eingeklappt, Hash-Restore wie auf
-   den anderen Übio-Seiten)
+   LEHRBÜCHER: eigene flache Liste, pro Eintrag eine Zeile.
+   - klasse: 1-4
+   - fach:   Fachname (wird zur Fach-Unter-Accordion gruppiert)
+   - title, desc, img, url  wie oben
+   BEISPIEL-Einträge bitte durch echte Bücher ersetzen.
    ===================================================================== */
-function closeAllAcc(){
-  document.querySelectorAll('.acc.open').forEach(function(a){ a.classList.remove('open'); });
-}
+var LEHRBUECHER = [
+  { klasse:3, fach:'Deutsch', title:'BEISPIEL: Deutschbuch 3 – Schulbuch', desc:'Lehrwerk zum Lesen & Schreiben', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
+  { klasse:3, fach:'Deutsch', title:'BEISPIEL: Deutschbuch 3 – Arbeitsheft', desc:'Passend zum Schulbuch', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
+  { klasse:3, fach:'Deutsch', title:'BEISPIEL: Deutschbuch 3 – Zusatzmaterial Rechtschreibung', desc:'Ergänzende Übungen', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
 
-function renderProductCard(p){
+  { klasse:3, fach:'Mathematik', title:'BEISPIEL: Mathebuch 3 – Schulbuch', desc:'Lehrwerk zum Zahlenraum bis 1000', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
+  { klasse:3, fach:'Mathematik', title:'BEISPIEL: Mathebuch 3 – Arbeitsheft', desc:'Passend zum Schulbuch', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' }
+];
+
+/* =====================================================================
+   Rendering-Helfer
+   ===================================================================== */
+function productCardHtml(p){
   var imgHtml = p.img
     ? '<img class="pimg" src="'+p.img+'" alt="" loading="lazy">'
     : '<div class="pimg ph">🛒</div>';
@@ -192,62 +230,121 @@ function renderProductCard(p){
   );
 }
 
-(function render(){
-  var wrap = document.getElementById('accWrap');
-  CATEGORIES.forEach(function(cat){
-    var items = PRODUCTS.filter(function(p){ return p.cat === cat.id; });
-    if(!items.length) return;
+function renderFlatPanel(cat){
+  var items = PRODUCTS.filter(function(p){ return p.cat === cat.id; });
+  var grid = document.createElement('div');
+  grid.className = 'pgrid';
+  grid.innerHTML = items.map(productCardHtml).join('');
+  return grid;
+}
 
+function renderLehrbuecherPanel(){
+  var container = document.createElement('div');
+
+  var klassen = [1,2,3,4].filter(function(k){
+    return LEHRBUECHER.some(function(b){ return b.klasse === k; });
+  });
+
+  klassen.forEach(function(k){
     var acc = document.createElement('div');
     acc.className = 'acc';
-    acc.id = 'acc-' + cat.id;
+    acc.id = 'klasse-' + k;
 
     var head = document.createElement('button');
     head.type = 'button';
     head.className = 'acc-head';
-    head.innerHTML =
-      '<span class="ic">'+cat.icon+'</span>'+
-      '<span class="nm">'+cat.name+'</span>'+
-      '<span class="chev">▾</span>';
-    head.addEventListener('click', function(){
-      var wasOpen = acc.classList.contains('open');
-      closeAllAcc();
-      if(!wasOpen){
-        acc.classList.add('open');
-        history.replaceState(null, '', '#' + acc.id);
-      } else {
-        history.replaceState(null, '', location.pathname);
-      }
-    });
+    head.innerHTML = '<span class="nm">Klasse '+k+'</span><span class="chev">▾</span>';
+    head.addEventListener('click', function(){ acc.classList.toggle('open'); });
 
     var body = document.createElement('div');
     body.className = 'acc-body';
     var inner = document.createElement('div');
     inner.className = 'acc-inner';
-    var grid = document.createElement('div');
-    grid.className = 'pgrid';
-    grid.innerHTML = items.map(renderProductCard).join('');
-    inner.appendChild(grid);
-    body.appendChild(inner);
 
+    var faecher = [];
+    LEHRBUECHER.filter(function(b){ return b.klasse === k; }).forEach(function(b){
+      if(faecher.indexOf(b.fach) === -1) faecher.push(b.fach);
+    });
+
+    faecher.forEach(function(fach){
+      var items = LEHRBUECHER.filter(function(b){ return b.klasse === k && b.fach === fach; });
+
+      var subAcc = document.createElement('div');
+      subAcc.className = 'sub-acc';
+
+      var subHead = document.createElement('button');
+      subHead.type = 'button';
+      subHead.className = 'sub-head';
+      subHead.innerHTML = fach + ' <span class="chev">▾</span>';
+      subHead.addEventListener('click', function(){ subAcc.classList.toggle('open'); });
+
+      var subBody = document.createElement('div');
+      subBody.className = 'sub-body';
+      var subInner = document.createElement('div');
+      subInner.className = 'sub-inner';
+      var subGrid = document.createElement('div');
+      subGrid.className = 'pgrid';
+      subGrid.innerHTML = items.map(productCardHtml).join('');
+      subInner.appendChild(subGrid);
+      subBody.appendChild(subInner);
+
+      subAcc.appendChild(subHead);
+      subAcc.appendChild(subBody);
+      inner.appendChild(subAcc);
+    });
+
+    body.appendChild(inner);
     acc.appendChild(head);
     acc.appendChild(body);
-    wrap.appendChild(acc);
+    container.appendChild(acc);
   });
 
-  restoreFromHash();
+  return container;
+}
+
+/* =====================================================================
+   Tabs aufbauen + Umschalten (mit Hash-Restore wie auf den Fach-Seiten)
+   ===================================================================== */
+function activateTab(id){
+  document.querySelectorAll('.tab-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.tab === id);
+  });
+  document.querySelectorAll('.tab-panel').forEach(function(p){
+    p.classList.toggle('active', p.dataset.tab === id);
+  });
+  history.replaceState(null, '', '#' + id);
+}
+
+(function render(){
+  var tabsWrap = document.getElementById('tabsWrap');
+  var panelsWrap = document.getElementById('panelsWrap');
+
+  CATEGORIES.forEach(function(cat){
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tab-btn';
+    btn.dataset.tab = cat.id;
+    btn.innerHTML = '<span class="ic">'+cat.icon+'</span><span>'+cat.name+'</span>';
+    btn.addEventListener('click', function(){ activateTab(cat.id); });
+    tabsWrap.appendChild(btn);
+
+    var panel = document.createElement('div');
+    panel.className = 'tab-panel';
+    panel.dataset.tab = cat.id;
+    panel.appendChild(cat.type === 'lehrbuecher' ? renderLehrbuecherPanel() : renderFlatPanel(cat));
+    panelsWrap.appendChild(panel);
+  });
+
+  var startTab = location.hash.replace('#', '');
+  var valid = CATEGORIES.some(function(c){ return c.id === startTab; });
+  activateTab(valid ? startTab : CATEGORIES[0].id);
 })();
 
-function restoreFromHash(){
-  var hash = location.hash.replace('#', '');
-  if(!hash) return;
-  var target = document.getElementById(hash);
-  if(target && target.classList.contains('acc')){
-    closeAllAcc();
-    target.classList.add('open');
-  }
-}
-window.addEventListener('hashchange', restoreFromHash);
+window.addEventListener('hashchange', function(){
+  var id = location.hash.replace('#', '');
+  var valid = CATEGORIES.some(function(c){ return c.id === id; });
+  if(valid) activateTab(id);
+});
 </script>
 
 </body>
