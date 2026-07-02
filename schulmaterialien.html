@@ -195,6 +195,7 @@ var CATEGORIES = [
   { id:'rechnen',      name:'Rechnen',          icon:'📐', type:'flat' },
   { id:'nachschlagen', name:'Nachschlagewerke', icon:'📚', type:'flat' },
   { id:'zubehoer',     name:'Lernmaterialien',  icon:'🎒', type:'flat' },
+  { id:'luek',         name:'LÜK-Lernspiele',   icon:'🧩', type:'luek' },
   { id:'lehrbuecher',  name:'Lehrbücher',       icon:'📖', type:'lehrbuecher' }
 ];
 
@@ -204,17 +205,11 @@ var CATEGORIES = [
    - title, desc, img (SiteStripe/Grafikadresse kopieren, "" = Platzhalter-Icon), url
    BEISPIEL-Einträge bitte durch echte Produkte ersetzen.
    ===================================================================== */
+/* PRODUCTS:START */
 var PRODUCTS = [
-  { cat:'schreiben', title:'BEISPIEL: Schreiblernheft Lineatur 1', desc:'Passend zur Grundschrift, 16 Blatt', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
-  { cat:'schreiben', title:'BEISPIEL: Dreikant-Bleistifte 2B (12er-Set)', desc:'Ergonomisch für Schreibanfänger', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
-
-  { cat:'rechnen', title:'BEISPIEL: Rechenschieber bis 100', desc:'Anschauliches Rechnen im Zahlenraum bis 100', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
-  { cat:'rechnen', title:'BEISPIEL: Geometrie-Set (Zirkel, Geodreieck, Lineal)', desc:'Grundausstattung für die 3./4. Klasse', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
-
-  { cat:'nachschlagen', title:'BEISPIEL: Grundschulwörterbuch', desc:'Rechtschreibung einfach nachschlagen', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
-
   { cat:'zubehoer', title:'LÜK-Kontrollgerät', desc:'Inkl. 24 Aufgabenplättchen – selbstständiges Üben mit Selbstkontrolle', img:'https://m.media-amazon.com/images/I/61Tui262KBL._SL1500_.jpg', url:'https://amzn.to/4v3S3vb' }
 ];
+/* PRODUCTS:END */
 
 /* =====================================================================
    LEHRBÜCHER: eigene flache Liste, pro Eintrag eine Zeile.
@@ -223,14 +218,50 @@ var PRODUCTS = [
    - title, desc, img, url  wie oben
    BEISPIEL-Einträge bitte durch echte Bücher ersetzen.
    ===================================================================== */
-var LEHRBUECHER = [
-  { klasse:3, fach:'Deutsch', title:'BEISPIEL: Deutschbuch 3 – Schulbuch', desc:'Lehrwerk zum Lesen & Schreiben', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
-  { klasse:3, fach:'Deutsch', title:'BEISPIEL: Deutschbuch 3 – Arbeitsheft', desc:'Passend zum Schulbuch', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
-  { klasse:3, fach:'Deutsch', title:'BEISPIEL: Deutschbuch 3 – Zusatzmaterial Rechtschreibung', desc:'Ergänzende Übungen', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
-
-  { klasse:3, fach:'Mathematik', title:'BEISPIEL: Mathebuch 3 – Schulbuch', desc:'Lehrwerk zum Zahlenraum bis 1000', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' },
-  { klasse:3, fach:'Mathematik', title:'BEISPIEL: Mathebuch 3 – Arbeitsheft', desc:'Passend zum Schulbuch', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' }
+/* LUEK_KAESTEN:START */
+var LUEK_KAESTEN = [
+  { title:'miniLÜK-Kontrollgerät Klarsichtdeckel rot (12 Plättchen)', desc:'Standardversion, für Kindergarten bis 4. Klasse', img:'', url:'https://www.amazon.de/dp/3894142006?tag=uebiorg-21' },
+  { title:'miniLÜK-Kontrollgerät Klarsichtdeckel violett (12 Plättchen)', desc:'Für Kindergarten bis 4. Klasse', img:'', url:'https://www.amazon.de/dp/3837710041?tag=uebiorg-21' },
+  { title:'miniLÜK-Kontrollgerät Klarsichtdeckel pink (12 Plättchen)', desc:'Für Kindergarten bis 4. Klasse', img:'', url:'https://www.amazon.de/dp/383771005X?tag=uebiorg-21' },
+  { title:'miniLÜK-Kontrollgerät Klarsichtdeckel blau (12 Plättchen)', desc:'Für Kindergarten bis 4. Klasse', img:'', url:'https://www.amazon.de/dp/3837710068?tag=uebiorg-21' },
+  { title:'miniLÜK-Jubiläumskontrollgerät Gold (12 Plättchen)', desc:'Für Kindergarten bis 4. Klasse', img:'', url:'https://www.amazon.de/dp/3837710009?tag=uebiorg-21' },
+  { title:'LÜK-Kontrollgerät 24 Plättchen, klassik (rot)', desc:'Für 1. bis 6./9. Klasse - eigener Kasten, NICHT mit miniLÜK kompatibel', img:'', url:'https://www.amazon.de/dp/3894145005?tag=uebiorg-21' },
+  { title:'LÜK-Kontrollgerät 24 Plättchen, kompakt (rot)', desc:'Kleinere Bauform, für 1. bis 6./9. Klasse', img:'', url:'https://www.amazon.de/dp/3894149000?tag=uebiorg-21' },
+  { title:'LÜK-Kontrollgerät 24 Plättchen, kompakt (pink)', desc:'Kleinere Bauform, für 1. bis 6./9. Klasse', img:'', url:'https://www.amazon.de/dp/3072450056?tag=uebiorg-21' }
 ];
+/* LUEK_KAESTEN:END */
+
+/* =====================================================================
+   LUEK_HEFTE: Sets & Einzelhefte, gruppiert nach Altersstufe -> Fach.
+   - altersstufe: freier Text, empfohlen: 'Kindergarten/Vorschule',
+     'Vorschule/1. Klasse', '2. Klasse', '3. Klasse', '4. Klasse',
+     '5./6. Klasse' (Reihenfolge wird über ALTERSSTUFEN_ORDER gesteuert)
+   - fach: z.B. Mathematik, Deutsch, Englisch, Konzentration/Logik, Sachkunde
+   ===================================================================== */
+/* LUEK_HEFTE:START */
+var LUEK_HEFTE = [
+  { altersstufe:'Kindergarten/Vorschule', fach:'Deutsch', title:'miniLÜK: Schwierige Laute', desc:'Sprachtraining Zischlaute/G/K/R, ab 4 Jahre - Einzelheft', img:'', url:'https://www.amazon.de/dp/389414324X?tag=uebiorg-21' },
+  { altersstufe:'Kindergarten/Vorschule', fach:'Mathematik', title:'miniLÜK-Koffer für die Vorschule', desc:'Kontrollgerät + 7 Übungshefte', img:'', url:'https://www.amazon.de/dp/3072450528?tag=uebiorg-21' },
+  { altersstufe:'Vorschule/1. Klasse', fach:'Mathematik', title:'miniLÜK-Set: Vorschulübungen für Einsteiger', desc:'Kasten + Übungsheft', img:'', url:'https://www.amazon.de/dp/389414758X?tag=uebiorg-21' },
+  { altersstufe:'Vorschule/1. Klasse', fach:'Mathematik', title:'miniLÜK: Zählen üben mit dem Einhorn', desc:'Einzelheft, Kasten benötigt', img:'', url:'https://www.amazon.de/dp/3837746089?tag=uebiorg-21' },
+  { altersstufe:'Vorschule/1. Klasse', fach:'Mathematik', title:'miniLÜK-Set Schulstart', desc:'Kasten + Doppelband', img:'', url:'https://www.amazon.de/dp/3894142405?tag=uebiorg-21' },
+  { altersstufe:'Vorschule/1. Klasse', fach:'Mathematik', title:'miniLÜK-Set: Prinz(essinn)en-Set (Mathe & Deutsch)', desc:'Kasten pink + 2 Übungshefte', img:'', url:'https://www.amazon.de/dp/3837777774?tag=uebiorg-21' },
+  { altersstufe:'Vorschule/1. Klasse', fach:'Deutsch', title:'miniLÜK-Set: Erstes Lesen, erstes Rechnen mit Conni', desc:'Kasten + Übungsheft', img:'', url:'https://www.amazon.de/dp/3072448108?tag=uebiorg-21' },
+  { altersstufe:'Vorschule/1. Klasse', fach:'Konzentration/Logik', title:'miniLÜK: Logisches Denken mit Conni', desc:'Einzelheft, Kasten benötigt', img:'', url:'https://www.amazon.de/dp/3072448132?tag=uebiorg-21' },
+  { altersstufe:'Vorschule/1. Klasse', fach:'Konzentration/Logik', title:'miniLÜK: Vorschultraining 1', desc:'Einzelheft, Kasten benötigt', img:'', url:'https://www.amazon.de/dp/3837701352?tag=uebiorg-21' },
+  { altersstufe:'Vorschule/1. Klasse', fach:'Sachkunde', title:'miniLÜK-Set: WAS IST WAS Weltraum', desc:'Kasten + Übungsheft', img:'', url:'https://www.amazon.de/dp/3072448353?tag=uebiorg-21' },
+  { altersstufe:'5./6. Klasse', fach:'Mathematik', title:'LÜK: 5./6. Klasse - Mathematik Rechnen', desc:'Einzelheft, LÜK-Kasten (24) benötigt', img:'', url:'https://www.amazon.de/dp/3894145048?tag=uebiorg-21' },
+  { altersstufe:'5./6. Klasse', fach:'Mathematik', title:'LÜK: 5./6. Klasse - Mathematik Bruchrechnen (Doppelband)', desc:'Einzelheft, LÜK-Kasten (24) benötigt', img:'', url:'https://www.amazon.de/dp/3894145587?tag=uebiorg-21' },
+  { altersstufe:'5./6. Klasse', fach:'Mathematik', title:'LÜK: 6. Klasse - Mathematik Mathekurs', desc:'Einzelheft, LÜK-Kasten (24) benötigt', img:'', url:'https://www.amazon.de/dp/389414517X?tag=uebiorg-21' },
+  { altersstufe:'5./6. Klasse', fach:'Deutsch', title:'LÜK: Rechtschreibwerkstatt 5. Klasse', desc:'Einzelheft, LÜK-Kasten (24) benötigt', img:'', url:'https://www.amazon.de/dp/3894148632?tag=uebiorg-21' }
+];
+/* LUEK_HEFTE:END */
+
+/* LEHRBUECHER:START */
+var LEHRBUECHER = [
+  { klasse:3, fach:'Deutsch', title:'BEISPIEL: Deutschbuch 3 – Schulbuch', desc:'Lehrwerk zum Lesen & Schreiben', img:'', url:'https://www.amazon.de/dp/XXXXXXXXXX?tag=uebiorg-21' }
+];
+/* LEHRBUECHER:END */
 
 /* =====================================================================
    Rendering-Helfer
@@ -260,6 +291,95 @@ function renderFlatPanel(cat){
   grid.className = 'pgrid';
   grid.innerHTML = items.map(productCardHtml).join('');
   return grid;
+}
+
+var ALTERSSTUFEN_ORDER = [
+  'Kindergarten/Vorschule', 'Vorschule/1. Klasse', '1. Klasse', '2. Klasse',
+  '3. Klasse', '4. Klasse', '3./4. Klasse', '5./6. Klasse'
+];
+
+function altersstufeSortKey(a){
+  var i = ALTERSSTUFEN_ORDER.indexOf(a);
+  return i === -1 ? 999 : i;
+}
+
+function renderLuekPanel(){
+  var container = document.createElement('div');
+
+  if(LUEK_KAESTEN.length){
+    var kastenHeading = document.createElement('div');
+    kastenHeading.className = 'fach-heading';
+    kastenHeading.textContent = 'Kontrollgeräte (Kästen)';
+    kastenHeading.style.cssText = 'font-size:.8rem;font-weight:800;color:var(--accent-d);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px';
+    container.appendChild(kastenHeading);
+
+    var kastenGrid = document.createElement('div');
+    kastenGrid.className = 'pgrid';
+    kastenGrid.style.marginBottom = '22px';
+    kastenGrid.innerHTML = LUEK_KAESTEN.map(productCardHtml).join('');
+    container.appendChild(kastenGrid);
+  }
+
+  var stufen = [];
+  LUEK_HEFTE.forEach(function(h){
+    if(stufen.indexOf(h.altersstufe) === -1) stufen.push(h.altersstufe);
+  });
+  stufen.sort(function(a, b){ return altersstufeSortKey(a) - altersstufeSortKey(b); });
+
+  stufen.forEach(function(stufe){
+    var acc = document.createElement('div');
+    acc.className = 'acc';
+
+    var head = document.createElement('button');
+    head.type = 'button';
+    head.className = 'acc-head';
+    head.innerHTML = '<span class="nm">'+stufe+'</span><span class="chev">▾</span>';
+    head.addEventListener('click', function(){ acc.classList.toggle('open'); });
+
+    var body = document.createElement('div');
+    body.className = 'acc-body';
+    var inner = document.createElement('div');
+    inner.className = 'acc-inner';
+
+    var faecher = [];
+    LUEK_HEFTE.filter(function(h){ return h.altersstufe === stufe; }).forEach(function(h){
+      if(faecher.indexOf(h.fach) === -1) faecher.push(h.fach);
+    });
+
+    faecher.forEach(function(fach){
+      var items = LUEK_HEFTE.filter(function(h){ return h.altersstufe === stufe && h.fach === fach; });
+
+      var subAcc = document.createElement('div');
+      subAcc.className = 'sub-acc';
+
+      var subHead = document.createElement('button');
+      subHead.type = 'button';
+      subHead.className = 'sub-head';
+      subHead.innerHTML = fach + ' <span class="chev">▾</span>';
+      subHead.addEventListener('click', function(){ subAcc.classList.toggle('open'); });
+
+      var subBody = document.createElement('div');
+      subBody.className = 'sub-body';
+      var subInner = document.createElement('div');
+      subInner.className = 'sub-inner';
+      var subGrid = document.createElement('div');
+      subGrid.className = 'pgrid';
+      subGrid.innerHTML = items.map(productCardHtml).join('');
+      subInner.appendChild(subGrid);
+      subBody.appendChild(subInner);
+
+      subAcc.appendChild(subHead);
+      subAcc.appendChild(subBody);
+      inner.appendChild(subAcc);
+    });
+
+    body.appendChild(inner);
+    acc.appendChild(head);
+    acc.appendChild(body);
+    container.appendChild(acc);
+  });
+
+  return container;
 }
 
 function renderLehrbuecherPanel(){
@@ -355,7 +475,11 @@ function activateTab(id){
     var panel = document.createElement('div');
     panel.className = 'tab-panel';
     panel.dataset.tab = cat.id;
-    panel.appendChild(cat.type === 'lehrbuecher' ? renderLehrbuecherPanel() : renderFlatPanel(cat));
+    panel.appendChild(
+      cat.type === 'lehrbuecher' ? renderLehrbuecherPanel() :
+      cat.type === 'luek' ? renderLuekPanel() :
+      renderFlatPanel(cat)
+    );
     panelsWrap.appendChild(panel);
   });
 
