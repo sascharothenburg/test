@@ -53,11 +53,29 @@ header .h-title{font-weight:800;font-size:1.2rem;display:flex;align-items:center
 .intro h1{font-size:1.5rem;font-weight:800;color:var(--accent-d);margin-bottom:6px}
 .intro p{color:var(--muted);font-size:.98rem}
 
+.tabs-wrap{position:relative;margin-bottom:18px}
 .tabs{
-  display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:18px;
+  display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;
   -webkit-overflow-scrolling:touch;scrollbar-width:none;
 }
 .tabs::-webkit-scrollbar{display:none}
+.tab-fade{
+  position:absolute;top:0;bottom:6px;width:34px;pointer-events:none;
+  opacity:0;transition:opacity .15s;
+}
+.tab-fade.left{left:0;background:linear-gradient(90deg,var(--bg) 10%,transparent)}
+.tab-fade.right{right:0;background:linear-gradient(270deg,var(--bg) 10%,transparent)}
+.tab-fade.show{opacity:1}
+.tab-arrow{
+  position:absolute;top:-2px;width:26px;height:26px;border-radius:50%;
+  border:1px solid var(--line);background:#fff;color:var(--accent-d);
+  font-size:.8rem;font-weight:900;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.1);
+  opacity:0;pointer-events:none;transition:opacity .15s;
+}
+.tab-arrow.show{opacity:1;pointer-events:auto}
+.tab-arrow.left{left:-4px}
+.tab-arrow.right{right:-4px}
 .tab-btn{
   flex:none;display:flex;align-items:center;gap:7px;
   border:1.5px solid var(--line);background:#fff;color:var(--muted);
@@ -146,11 +164,17 @@ footer a{color:var(--accent-d);font-weight:700}
   </div>
 
   <div class="intro">
-    <h1>Empfehlungen für den Schulstart und die Grundschule</h1>
+    <h1>Empfehlungen für den Schulstart</h1>
     <p>Eine kleine, handverlesene Auswahl an Materialien, die gut zu den Übio-Übungen passen.</p>
   </div>
 
-  <div class="tabs" id="tabsWrap"></div>
+  <div class="tabs-wrap">
+    <div class="tabs" id="tabsWrap"></div>
+    <div class="tab-fade left" id="fadeLeft"></div>
+    <div class="tab-fade right" id="fadeRight"></div>
+    <button class="tab-arrow left" id="arrowLeft" type="button" aria-label="Nach links scrollen">‹</button>
+    <button class="tab-arrow right" id="arrowRight" type="button" aria-label="Nach rechts scrollen">›</button>
+  </div>
   <div id="panelsWrap"></div>
 
   <footer>
@@ -338,7 +362,41 @@ function activateTab(id){
   var startTab = location.hash.replace('#', '');
   var valid = CATEGORIES.some(function(c){ return c.id === startTab; });
   activateTab(valid ? startTab : CATEGORIES[0].id);
+
+  initTabScrollIndicators();
 })();
+
+/* =====================================================================
+   Scroll-Indikatoren für die Tab-Leiste: Verlaufsschatten + Pfeile,
+   die anzeigen/ermöglichen, dass es weitere Kategorien gibt.
+   ===================================================================== */
+function initTabScrollIndicators(){
+  var tabsWrap = document.getElementById('tabsWrap');
+  var fadeLeft = document.getElementById('fadeLeft');
+  var fadeRight = document.getElementById('fadeRight');
+  var arrowLeft = document.getElementById('arrowLeft');
+  var arrowRight = document.getElementById('arrowRight');
+  if(!tabsWrap) return;
+
+  function update(){
+    var maxScroll = tabsWrap.scrollWidth - tabsWrap.clientWidth;
+    var atStart = tabsWrap.scrollLeft <= 2;
+    var atEnd = tabsWrap.scrollLeft >= maxScroll - 2;
+    var scrollable = maxScroll > 4;
+
+    fadeLeft.classList.toggle('show', scrollable && !atStart);
+    fadeRight.classList.toggle('show', scrollable && !atEnd);
+    arrowLeft.classList.toggle('show', scrollable && !atStart);
+    arrowRight.classList.toggle('show', scrollable && !atEnd);
+  }
+
+  tabsWrap.addEventListener('scroll', update);
+  window.addEventListener('resize', update);
+  arrowLeft.addEventListener('click', function(){ tabsWrap.scrollBy({left:-140, behavior:'smooth'}); });
+  arrowRight.addEventListener('click', function(){ tabsWrap.scrollBy({left:140, behavior:'smooth'}); });
+
+  update();
+}
 
 window.addEventListener('hashchange', function(){
   var id = location.hash.replace('#', '');
