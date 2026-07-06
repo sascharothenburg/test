@@ -433,7 +433,7 @@ function renderMatch(card,actions){
   var src=(state.pool&&state.pool.length>=2)?state.pool:state.queue;
   var set=shuffle(src.slice()).slice(0, Math.min(TARGET, src.length));
   if(set.length<2) set=shuffle(state.pool).slice(0,Math.min(4,state.pool.length));
-  matchState={set:set, leftSel:null, doneKeys:{}, pairs:set.length, found:0};
+  matchState={set:set, leftSel:null, doneKeys:{}, pairs:set.length, found:0, errors:0};
   // Anzeige: linke Spalte EN (mit Icon), rechte Spalte DE (gemischt)
   document.getElementById('progTxt').textContent='Paare: 0/'+set.length;
   var lefts=set.map(function(o,i){return {o:o,key:i};});
@@ -474,7 +474,7 @@ function matchClick(el,side,key){
     matchState.leftSel=null; matchState.found++;
     document.getElementById('progTxt').textContent='Paare: '+matchState.found+'/'+matchState.pairs;
     if(matchState.found>=matchState.pairs){
-      state.score=matchState.pairs; state.total=matchState.pairs;
+      state.score=matchState.pairs; state.total=matchState.pairs+matchState.errors;
       document.getElementById('scorePill').innerHTML='\u2713 '+state.score;
       setFeedback(true,'\ud83c\udf89 Alle Paare gefunden!');
       var b=document.createElement('button'); b.className='act-btn act-primary'; b.textContent='Weiter';
@@ -483,6 +483,7 @@ function matchClick(el,side,key){
     }
   } else {
     // falsch -> kurz rot zeigen
+    matchState.errors++;
     el.classList.add('wrong');
     var le=matchState.leftSel.el; le.classList.add('wrong');
     setTimeout(function(){el.classList.remove('wrong'); le.classList.remove('wrong','sel'); matchState.leftSel=null;},450);
