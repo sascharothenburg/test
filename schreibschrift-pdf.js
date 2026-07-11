@@ -36,7 +36,7 @@
     band: 5 * MM,                 // Mittelband (x-Höhen-Zone), wie Grundschrift-App
     XHEIGHT_RATIO: 0.2833,
     get vfont() { return this.band / this.XHEIGHT_RATIO; },
-    get oberWord() { return this.band * 0.9; },   // Oberzone Wörter/Sätze (Versalien, Ober­längen)
+    get oberWord() { return this.band * 1.05; },  // Oberzone Wörter/Sätze (Versalien, Ober­längen) - Marge ueber realer Glyphenhoehe, nicht nur ueber der nominalen Ascent-Metrik
     get oberLetter() { return this.band * 1.6; }, // Oberzone Einzelbuchstaben (Italic-Vorlage, höhere Schleifen)
     get unter() { return this.band * 1.05; },     // Unterzone (Unterlängen g,j,y,q - beide Varianten gleich)
     get totalWord() { return this.oberWord + this.band + this.unter; },
@@ -46,6 +46,9 @@
     corner: 5.5 * MM,
     textInset: 6 * MM,
   };
+  const MIN_SHRINK = 0.8;      // ab hier lieber umbrechen statt weiter schrumpfen
+  const SENTENCE_MIN_SCALE = 0.7; // harte Untergrenze, auch nach Umbruch auf 2 Zeilen
+  const LINE_GAP = LIN.band * 0.35; // Abstand zwischen zwei umgebrochenen Satz-Zeilen
 
   // ---- Farben (Deutsch-Rot) ------------------------------------------
   const C = {
@@ -193,16 +196,22 @@
   }
 
   // Einzelner, isoliert stehender Buchstabe (Buchstaben-Übungsmodus):
-  // Kleinbuchstaben -> Font a mit vollem Anstrich (+Verlängerung falls
-  // "oben verbindend"); Großbuchstaben einzeln -> komplett Font b; s -> §.
+  // Kleinbuchstaben -> Font a mit vollem Anstrich; Großbuchstaben einzeln
+  // -> komplett Font b.
+  // WICHTIG: '§' (Schluss-s) ist im Bienchen-SAS-Font NUR ein winziger
+  // Abschluss-Haken (Versionsbreite ~3% em), der eine VORAUSGEHENDE Feder
+  // fortsetzt - er hat keine eigenstaendige Buchstabenform und ist daher
+  // fuer isoliertes Buchstaben-Uben ungeeignet (wird bei Wiederholung durch
+  // die winzige Laufweite zu einem unlesbaren Strich verschmiert). Fuer die
+  // Einzelbuchstaben-Praxis daher immer die normale 's'-Glyphe verwenden.
+  // Ebenso wird die abschliessende '~'-Verlaengerung (Wortende-Bogen) bei
+  // Einzelbuchstaben weggelassen, da nichts folgt, das sie verbindet.
   function composeStandaloneLetter(ch) {
     const lower = ch.toLowerCase();
-    if (lower === 's') return [{ text: '§', italic: false }];
+    if (lower === 's') return [{ text: '\\s', italic: false }];
     if (ch === 'ß') return [{ text: 'ß§', italic: false }];
     if (ch !== lower) return [{ text: ch, italic: true }]; // Versal einzeln -> kursiv
-    let out = '\\' + ch;
-    if (UPPER_CONNECT[lower]) out += '~';
-    return [{ text: out, italic: false }];
+    return [{ text: '\\' + ch, italic: false }];
   }
 
   // Ganzer Text (Wort ODER Satz): an Leerzeichen trennen, Satzzeichen am
@@ -281,6 +290,62 @@
     }
   }
 
+  // Breite einer ganzen Phrase bei gegebener Groesse (ohne ctx, nur Fonts noetig)
+  function measurePhraseWidth(text, fontReg, fontIta, size) {
+    let w = 0;
+    composePhrase(text).forEach(r => {
+      w += (r.italic ? fontIta : fontReg).widthOfTextAtSize(String(r.text), size);
+    });
+    return w;
+  }
+
+  // Plant 1 oder 2 Zeilen fuer einen Satz: erst leicht schrumpfen (bis MIN_SHRINK),
+  // erst danach an einer Wortgrenze umbrechen (statt die Schrift bis zur
+  // Unleserlichkeit zu verkleinern).
+  function planSentenceLines(text, fontReg, fontIta, avail) {
+    const full = LIN.vfont;
+    const w0 = measurePhraseWidth(text, fontReg, fontIta, full);
+    if (w0 <= avail) return { lines: [text], size: full };
+
+    const shrunk = full * (avail / w0);
+    if (shrunk >= full * MIN_SHRINK) return { lines: [text], size: shrunk };
+
+    const words = text.split(/\s+/).filter(Boolean);
+    if (words.length < 2) {
+      return { lines: [text], size: Math.max(shrunk, full * SENTENCE_MIN_SCALE) };
+    }
+    let best = null;
+    for (let i = 1; i < words.length; i++) {
+      const line1 = words.slice(0, i).join(' ');
+      const line2 = words.slice(i).join(' ');
+      const w1 = measurePhraseWidth(line1, fontReg, fontIta, full);
+      const w2 = measurePhraseWidth(line2, fontReg, fontIta, full);
+      const worst = Math.max(w1, w2);
+      if (!best || worst < best.worst) best = { line1, line2, worst };
+    }
+    let size = full;
+    if (best.worst > avail) size = full * (avail / best.worst);
+    size = Math.max(size, full * SENTENCE_MIN_SCALE);
+    return { lines: [best.line1, best.line2], size };
+  }
+
+  // Zeichnet einen Satz als 1 oder 2 gestapelte Lineatur-Zeilen (siehe planSentenceLines).
+  // Gibt die Anzahl gezeichneter Zeilen zurueck.
+  function drawSentenceRows(ctx, xLeft, yTop, width, text, showV, fontReg, fontIta) {
+    const avail = width - LIN.textInset * 2;
+    const plan = (showV && text) ? planSentenceLines(text, fontReg, fontIta, avail) : { lines: [''], size: LIN.vfont };
+    let rowTop = yTop;
+    plan.lines.forEach(line => {
+      const grundY = drawRow4(ctx, xLeft, rowTop, width, LIN.oberWord, LIN.unter);
+      if (showV && line) {
+        const runs = composePhrase(line);
+        drawRuns(ctx, runs, xLeft + LIN.textInset, grundY, plan.size, fontReg, fontIta, C.vtext, 0.40);
+      }
+      rowTop += LIN.totalWord + LINE_GAP;
+    });
+    return plan.lines.length;
+  }
+
   function drawLetterRepeatRow(ctx, xLeft, yTop, width, letter, fontReg, fontIta) {
     const grundY = drawRow4(ctx, xLeft, yTop, width, LIN.oberLetter, LIN.unter);
     const size = LIN.vfont;
@@ -349,8 +414,9 @@
   function letterItemHeight() {
     return LIN.labelH + (LIN.totalLetter * 2) + (LIN.rowGap * 0.4) + LIN.rowGap;
   }
-  function wordItemHeight() {
-    return LIN.labelH + LIN.totalWord + LIN.rowGap;
+  function wordItemHeight(lines) {
+    lines = lines || 1;
+    return LIN.labelH + (LIN.totalWord * lines) + (LINE_GAP * (lines - 1)) + LIN.rowGap;
   }
 
   // =================================================================
@@ -391,10 +457,14 @@
 
     letters = letters || []; words = words || []; sentences = sentences || [];
 
+    const sentenceAvail = PT.contentW - LIN.textInset * 2;
     const sections = [
       { key: 'buchstaben', title: 'Buchstaben üben', items: letters.map(ch => ({ type: 'letter', val: ch, h: letterItemHeight() })) },
       { key: 'woerter',    title: 'Wörter abschreiben', items: words.map(w => ({ type: 'word', val: w, h: wordItemHeight() })) },
-      { key: 'saetze',     title: 'Sätze abschreiben', items: sentences.map(s => ({ type: 'sentence', val: s, h: wordItemHeight() })) },
+      { key: 'saetze',     title: 'Sätze abschreiben', items: sentences.map(s => {
+          const lineCount = showV ? planSentenceLines(s, fonts.bienR, fonts.bienI, sentenceAvail).lines.length : 1;
+          return { type: 'sentence', val: s, h: wordItemHeight(lineCount) };
+        }) },
     ].filter(s => s.items.length);
 
     if (!sections.length) {
@@ -439,6 +509,10 @@
           drawLetterRepeatRow(ctx, PT.marginX, row1Top, PT.contentW, item.val, fonts.bienR, fonts.bienI);
           const row2Top = row1Top + LIN.totalLetter + (LIN.rowGap * 0.4);
           drawLetterModelRow(ctx, PT.marginX, row2Top, PT.contentW, item.val, fonts.bienR, fonts.bienI);
+        } else if (item.type === 'sentence') {
+          ctx.text(item.val, PT.marginX, y, { font: fonts.heavy, size: 10, color: C.red });
+          const rowTop = y + LIN.labelH;
+          drawSentenceRows(ctx, PT.marginX, rowTop, PT.contentW, item.val, showV, fonts.bienR, fonts.bienI);
         } else {
           ctx.text(item.val, PT.marginX, y, { font: fonts.heavy, size: 10, color: C.red });
           const rowTop = y + LIN.labelH;
@@ -456,6 +530,7 @@
     PT, LIN,
     letterItemHeight, wordItemHeight,
     composeWord, composeStandaloneLetter, composePhrase,
+    planSentenceLines,
     buildCombinedWorksheetPDF,
   };
 
