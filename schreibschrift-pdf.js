@@ -110,8 +110,135 @@
   }
 
   // =================================================================
-  //  EINE 4-LINIEN-ZEILE zeichnen (asymmetrisch: oberH / band / unterH)
+  //  BIENCHEN-SAS TRANSLITERATION
+  //  Die Fonts haben KEIN GSUB (keine Ligaturen) - die Verbindungen
+  //  entstehen rein durch manuelles Einfügen von Steuerzeichen und
+  //  Font-Wechsel zwischen Font a (regulär) und Font b (kursiv), exakt
+  //  wie in der offiziellen Bienchen-SAS-Anleitung (Peter Wiegel) beschrieben:
+  //   - \  am Wortanfang vor Kleinbuchstaben: vollständiger Anstrich
+  //   - ~  nach "oben verbindenden" Buchstaben b,o,r,v,w,x: Verlängerung
+  //        auf x-Höhe (am Wortende oder vor u,v,w,y)
+  //   - nach b,o,r,v,w,x (wenn NICHT vor u,v,w,y) sowie nach A,F,H:
+  //        der folgende Buchstabe wird in Font b (kursiv) gesetzt
+  //   - §  ersetzt/ergänzt Schluss-s, ß und die Kombination "st"
+  //   - einzeln stehende Großbuchstaben werden komplett in Font b gesetzt
   // =================================================================
+  const UPPER_CONNECT = { b: 1, o: 1, r: 1, v: 1, w: 1, x: 1 };
+  const TILDE_AFTER   = { u: 1, v: 1, w: 1, y: 1 };
+  const CAP_TRIGGER   = { A: 1, F: 1, H: 1 };
+
+  // Zerlegt EIN Wort (nur Buchstaben, keine Leerzeichen/Satzzeichen) in
+  // Runs {text, italic}. Wendet \-, ~- und §-Regeln + Font-a/b-Wechsel an.
+  function composeWord(word) {
+    const chars = word.split('');
+    const n = chars.length;
+    const runs = [];
+    let curItalic = false;
+    let buf = '';
+    function flush() { if (buf) { runs.push({ text: buf, italic: curItalic }); buf = ''; } }
+    function setItalic(v) { if (v !== curItalic) { flush(); curItalic = v; } }
+
+    let forceItalicNext = false;
+    for (let i = 0; i < n; i++) {
+      const ch = chars[i];
+      const lower = ch.toLowerCase();
+      const isFirst = i === 0;
+      const isLast = i === n - 1;
+      const nextCh = isLast ? null : chars[i + 1];
+      const nextLower = nextCh ? nextCh.toLowerCase() : null;
+
+      // Sonderfall: "st" -> s + § + t (historische Schulausgangsschrift-Regel, nur Kleinbuchstabe s)
+      if (ch === 's' && nextCh === 't' && !isLast) {
+        setItalic(false); buf += ch + '§';
+        continue;
+      }
+      // Sonderfall: "ßi" -> ß + § + i
+      if (ch === 'ß' && nextCh === 'i' && !isLast) {
+        setItalic(false); buf += ch + '§';
+        continue;
+      }
+      // Schluss-s (auch zweites s bei "ss") -> §, nur Kleinbuchstabe
+      if (ch === 's' && isLast) {
+        setItalic(false); buf += '§';
+        continue;
+      }
+      // Schluss-ß -> ß§
+      if (ch === 'ß' && isLast) {
+        setItalic(false); buf += ch + '§';
+        continue;
+      }
+
+      const useItalic = forceItalicNext;
+      forceItalicNext = false;
+      setItalic(useItalic);
+
+      if (isFirst && ch === lower && /[a-zäöü]/.test(lower)) {
+        buf += '\\' + ch; // Wortanfang: voller Anstrich
+      } else {
+        buf += ch;
+      }
+
+      if (ch === lower && UPPER_CONNECT[lower]) {
+        if (isLast || (nextLower && TILDE_AFTER[nextLower])) {
+          buf += '~';
+        } else if (nextCh) {
+          forceItalicNext = true;
+        }
+      } else if (CAP_TRIGGER[ch] && nextCh) {
+        forceItalicNext = true;
+      }
+    }
+    flush();
+    return runs;
+  }
+
+  // Einzelner, isoliert stehender Buchstabe (Buchstaben-Übungsmodus):
+  // Kleinbuchstaben -> Font a mit vollem Anstrich (+Verlängerung falls
+  // "oben verbindend"); Großbuchstaben einzeln -> komplett Font b; s -> §.
+  function composeStandaloneLetter(ch) {
+    const lower = ch.toLowerCase();
+    if (lower === 's') return [{ text: '§', italic: false }];
+    if (ch === 'ß') return [{ text: 'ß§', italic: false }];
+    if (ch !== lower) return [{ text: ch, italic: true }]; // Versal einzeln -> kursiv
+    let out = '\\' + ch;
+    if (UPPER_CONNECT[lower]) out += '~';
+    return [{ text: out, italic: false }];
+  }
+
+  // Ganzer Text (Wort ODER Satz): an Leerzeichen trennen, Satzzeichen am
+  // Wortende abtrennen (bleiben regulär/undekoriert), pro Wort composeWord().
+  function composePhrase(text) {
+    const tokens = String(text).split(/(\s+)/); // Leerzeichen als eigene Tokens behalten
+    const runs = [];
+    tokens.forEach(tok => {
+      if (!tok) return;
+      if (/^\s+$/.test(tok)) { runs.push({ text: tok, italic: false }); return; }
+      const m = tok.match(/^([^\s]*?)([.,!?;:„"']*)$/);
+      const core = m ? m[1] : tok;
+      const trail = m ? m[2] : '';
+      if (core) runs.push(...composeWord(core));
+      if (trail) runs.push({ text: trail, italic: false });
+    });
+    return runs;
+  }
+
+  function measureRuns(ctx, runs, fontReg, fontIta, size) {
+    let w = 0;
+    runs.forEach(r => { w += ctx.textWidth(r.text, r.italic ? fontIta : fontReg, size); });
+    return w;
+  }
+
+  function drawRuns(ctx, runs, x0, baseline, size, fontReg, fontIta, color, opacity) {
+    let x = x0;
+    runs.forEach(r => {
+      const font = r.italic ? fontIta : fontReg;
+      ctx.textBaseline(r.text, x, baseline, { font, size, color, opacity });
+      x += ctx.textWidth(r.text, font, size);
+    });
+    return x - x0;
+  }
+
+
   function drawRow4(ctx, xLeft, yTop, width, oberH, unterH) {
     const band = LIN.band;
     const total = oberH + band + unterH;
@@ -142,39 +269,38 @@
     return grundY;
   }
 
-  function drawWordRow(ctx, xLeft, yTop, width, text, showV, font) {
+  function drawWordRow(ctx, xLeft, yTop, width, text, showV, fontReg, fontIta) {
     const grundY = drawRow4(ctx, xLeft, yTop, width, LIN.oberWord, LIN.unter);
     if (showV && text) {
+      const runs = composePhrase(text);
       let size = LIN.vfont;
       const avail = width - LIN.textInset * 2;
-      const w0 = ctx.textWidth(text, font, size);
+      const w0 = measureRuns(ctx, runs, fontReg, fontIta, size);
       if (w0 > avail) size = size * (avail / w0);
-      ctx.textBaseline(text, xLeft + LIN.textInset, grundY, {
-        font, size, color: C.vtext, opacity: 0.40,
-      });
+      drawRuns(ctx, runs, xLeft + LIN.textInset, grundY, size, fontReg, fontIta, C.vtext, 0.40);
     }
   }
 
-  function drawLetterRepeatRow(ctx, xLeft, yTop, width, letter, font) {
+  function drawLetterRepeatRow(ctx, xLeft, yTop, width, letter, fontReg, fontIta) {
     const grundY = drawRow4(ctx, xLeft, yTop, width, LIN.oberLetter, LIN.unter);
     const size = LIN.vfont;
-    const letterW = ctx.textWidth(letter, font, size);
-    const gap = letterW * 0.7;
-    const step = letterW + gap;
+    const runs = composeStandaloneLetter(letter);
+    const unitW = measureRuns(ctx, runs, fontReg, fontIta, size);
+    const gap = unitW * 0.55;
+    const step = unitW + gap;
     let x = xLeft + LIN.textInset;
     const rightLimit = xLeft + width - LIN.textInset;
-    while (x + letterW <= rightLimit) {
-      ctx.textBaseline(letter, x, grundY, { font, size, color: C.vtext, opacity: 0.40 });
+    while (x + unitW <= rightLimit) {
+      drawRuns(ctx, runs, x, grundY, size, fontReg, fontIta, C.vtext, 0.40);
       x += step;
     }
   }
 
-  function drawLetterModelRow(ctx, xLeft, yTop, width, letter, font) {
+  function drawLetterModelRow(ctx, xLeft, yTop, width, letter, fontReg, fontIta) {
     const grundY = drawRow4(ctx, xLeft, yTop, width, LIN.oberLetter, LIN.unter);
     const size = LIN.vfont;
-    ctx.textBaseline(letter, xLeft + LIN.textInset, grundY, {
-      font, size, color: C.vtext, opacity: 0.40,
-    });
+    const runs = composeStandaloneLetter(letter);
+    drawRuns(ctx, runs, xLeft + LIN.textInset, grundY, size, fontReg, fontIta, C.vtext, 0.40);
   }
 
   // =================================================================
@@ -295,13 +421,13 @@
         if (item.type === 'letter') {
           ctx.text(item.val, PT.marginX, y, { font: fonts.heavy, size: 10, color: C.red });
           const row1Top = y + LIN.labelH;
-          drawLetterRepeatRow(ctx, PT.marginX, row1Top, PT.contentW, item.val, fonts.bienI);
+          drawLetterRepeatRow(ctx, PT.marginX, row1Top, PT.contentW, item.val, fonts.bienR, fonts.bienI);
           const row2Top = row1Top + LIN.totalLetter + (LIN.rowGap * 0.4);
-          drawLetterModelRow(ctx, PT.marginX, row2Top, PT.contentW, item.val, fonts.bienI);
+          drawLetterModelRow(ctx, PT.marginX, row2Top, PT.contentW, item.val, fonts.bienR, fonts.bienI);
         } else {
           ctx.text(item.val, PT.marginX, y, { font: fonts.heavy, size: 10, color: C.red });
           const rowTop = y + LIN.labelH;
-          drawWordRow(ctx, PT.marginX, rowTop, PT.contentW, item.val, showV, fonts.bienR);
+          drawWordRow(ctx, PT.marginX, rowTop, PT.contentW, item.val, showV, fonts.bienR, fonts.bienI);
         }
         y += item.h;
       });
@@ -314,6 +440,7 @@
   global.SchreibschriftPDF = {
     PT, LIN,
     letterItemHeight, wordItemHeight,
+    composeWord, composeStandaloneLetter, composePhrase,
     buildCombinedWorksheetPDF,
   };
 
