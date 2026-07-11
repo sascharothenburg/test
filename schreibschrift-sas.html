@@ -62,18 +62,18 @@ input{-webkit-user-select:text;user-select:text}
 .live-preview{margin-top:12px}
 .live-preview-label{font-size:.7rem;font-weight:800;color:#b91c1c;margin-bottom:6px}
 .lineatur{border-radius:6px;overflow:hidden}
-.lrow{position:relative;height:24mm;background:#fef9c3;border:1.5px solid #444;border-radius:2px;overflow:visible}
+.lrow{position:relative;height:14.75mm;background:#fef9c3;border:1.5px solid #444;border-radius:2px;overflow:visible}
 .ln-ob{position:absolute;left:0;right:0;top:0;border-top:1px solid #60a5fa}
-.ln-hi{position:absolute;left:0;right:0;top:8mm;border-top:1px dashed #93c5fd}
-.ln-gr{position:absolute;left:0;right:0;top:13mm;border-top:2px solid #1d4ed8}
+.ln-hi{position:absolute;left:0;right:0;top:4.5mm;border-top:1px dashed #93c5fd}
+.ln-gr{position:absolute;left:0;right:0;top:9.5mm;border-top:2px solid #1d4ed8}
 .ln-un{position:absolute;left:0;right:0;bottom:0;border-top:1px solid #60a5fa}
-.zone{position:absolute;left:0;right:0;top:8mm;height:5mm;background:rgba(147,197,253,.18)}
+.zone{position:absolute;left:0;right:0;top:4.5mm;height:5mm;background:rgba(147,197,253,.18)}
 .corner{position:absolute;width:5.5mm;height:5.5mm;border-color:#333;border-style:solid;border-width:0}
 .corner.tl{top:0;left:0;border-top-width:2px;border-left-width:2px}
 .corner.tr{top:0;right:0;border-top-width:2px;border-right-width:2px}
 .corner.bl{bottom:0;left:0;border-bottom-width:2px;border-left-width:2px}
 .corner.br{bottom:0;right:0;border-bottom-width:2px;border-right-width:2px}
-.vsvg{position:absolute;top:0;left:0;width:100%;height:24mm;overflow:visible;pointer-events:none;z-index:2}
+.vsvg{position:absolute;top:0;left:0;width:100%;height:14.75mm;overflow:visible;pointer-events:none;z-index:2}
 </style>
 <!-- PDF-Erzeugung: pdf-lib + fontkit (lokal mitliefern fuer Offline/Capacitor) -->
 <script src="pdf-lib.min.js"></script>
@@ -155,8 +155,8 @@ input{-webkit-user-select:text;user-select:text}
           <div class="ln-gr"></div><div class="ln-un"></div>
           <div class="corner tl"></div><div class="corner tr"></div>
           <div class="corner bl"></div><div class="corner br"></div>
-          <svg id="liveSvg" class="vsvg" xmlns="http://www.w3.org/2000/svg" width="100%" height="24mm" overflow="visible">
-            <text id="liveText" x="6.5mm" y="13mm" dominant-baseline="alphabetic" font-family="BienchenReg,sans-serif" font-size="18mm" fill="rgba(75,130,195,0.45)">Schreibschrift</text>
+          <svg id="liveSvg" class="vsvg" xmlns="http://www.w3.org/2000/svg" width="100%" height="14.75mm" overflow="visible">
+            <text id="liveText" x="6mm" y="9.5mm" dominant-baseline="alphabetic" font-family="BienchenReg,sans-serif" font-size="17.65mm" fill="rgba(75,130,195,0.45)">Schreibschrift</text>
           </svg>
         </div>
       </div>
