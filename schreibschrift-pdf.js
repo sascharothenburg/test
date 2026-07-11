@@ -372,11 +372,19 @@
       bienI:   null,
     };
     if (fontRegularBytes && global.fontkit) {
-      try { fonts.bienR = await pdf.embedFont(fontRegularBytes); } catch (e) { fonts.bienR = fonts.heavy; }
-    } else { fonts.bienR = fonts.heavy; }
+      try { fonts.bienR = await pdf.embedFont(fontRegularBytes); }
+      catch (e) { console.error('[Schreibschrift] Bienchen-Regular konnte nicht eingebettet werden, falle auf Helvetica zurueck:', e); fonts.bienR = fonts.heavy; }
+    } else {
+      console.error('[Schreibschrift] Bienchen-Regular-Bytes oder fontkit fehlen (fontRegularBytes=' + !!fontRegularBytes + ', fontkit=' + !!global.fontkit + ') - falle auf Helvetica zurueck.');
+      fonts.bienR = fonts.heavy;
+    }
     if (fontItalicBytes && global.fontkit) {
-      try { fonts.bienI = await pdf.embedFont(fontItalicBytes); } catch (e) { fonts.bienI = fonts.heavy; }
-    } else { fonts.bienI = fonts.bienR; }
+      try { fonts.bienI = await pdf.embedFont(fontItalicBytes); }
+      catch (e) { console.error('[Schreibschrift] Bienchen-Italic konnte nicht eingebettet werden, falle auf Helvetica zurueck:', e); fonts.bienI = fonts.heavy; }
+    } else {
+      console.error('[Schreibschrift] Bienchen-Italic-Bytes oder fontkit fehlen (fontItalicBytes=' + !!fontItalicBytes + ', fontkit=' + !!global.fontkit + ') - falle auf Helvetica zurueck.');
+      fonts.bienI = fonts.bienR;
+    }
 
     opts = opts || {};
     const showV = opts.showV !== false;
@@ -397,9 +405,16 @@
       return await pdf.save();
     }
 
+    const fontFallbackActive = (fonts.bienR === fonts.heavy) || (fonts.bienI === fonts.heavy);
+
     let page = pdf.addPage([PT.pageW, PT.pageH]);
     let ctx = makePageCtx(page, fonts);
     let y = drawHeader(ctx, opts);
+    if (fontFallbackActive) {
+      ctx.text('⚠ Schreibschrift-Font nicht geladen - Ersatzschrift aktiv', PT.marginX, y - 4,
+        { font: fonts.heavy, size: 8, color: C.red });
+      y += 4;
+    }
     const bottomLimit = PT.marginY + PT.contentH;
 
     function newPage() {
