@@ -160,6 +160,117 @@
   }
 
   // =================================================================
+  //  BUCHSTABEN-MODUS: 2 Zeilen pro Buchstabe
+  //  Zeile 1 (Spur): Buchstabe mehrfach hintereinander, komplett blass
+  //                  -> motorische Bahn einüben, im Kurs bleiben
+  //  Zeile 2 (Vorbild+Frei): Buchstabe einmal blass am Anfang, Rest leer
+  //                  -> als Vorbild nachspuren, danach frei weiterüben
+  // =================================================================
+  function drawLetterRepeatRow(ctx, xLeft, yTop, width, letter, font) {
+    const band = LIN.band;
+    drawLineRow(ctx, xLeft, yTop, width, null, false);
+    const baseY = yTop + band * 2;
+    const size = LIN.vfont;
+    const letterW = ctx.textWidth(letter, font, size);
+    const gap = letterW * 0.7;
+    const step = letterW + gap;
+    let x = xLeft + LIN.textInset;
+    const rightLimit = xLeft + width - LIN.textInset;
+    while (x + letterW <= rightLimit) {
+      ctx.textBaseline(letter, x, baseY, { font, size, color: C.vtext, opacity: 0.40 });
+      x += step;
+    }
+  }
+
+  function drawLetterModelRow(ctx, xLeft, yTop, width, letter, font) {
+    const band = LIN.band;
+    drawLineRow(ctx, xLeft, yTop, width, null, false);
+    const baseY = yTop + band * 2;
+    const size = LIN.vfont;
+    ctx.textBaseline(letter, xLeft + LIN.textInset, baseY, {
+      font, size, color: C.vtext, opacity: 0.40,
+    });
+    // Rest der Zeile bleibt frei (leere Lineatur) zum eigenständigen Üben
+  }
+
+  function itemHeightLetter() {
+    return LIN.labelH + (LIN.total * 2) + (LIN.rowGap * 0.4) + LIN.rowGap;
+  }
+
+  function planLayoutLetter() {
+    const itemH = itemHeightLetter();
+    const headerH = 44;
+    const usable1 = PT.contentH - headerH;
+    const usableN = PT.contentH - 6;
+    return {
+      itemH,
+      perPage1: Math.max(1, Math.floor(usable1 / itemH)),
+      perPageN: Math.max(1, Math.floor(usableN / itemH)),
+    };
+  }
+
+  function splitPagesLetter(letters) {
+    const L = planLayoutLetter();
+    const pages = [];
+    let i = 0;
+    pages.push(letters.slice(i, i + L.perPage1)); i += L.perPage1;
+    while (i < letters.length) {
+      pages.push(letters.slice(i, i + L.perPageN)); i += L.perPageN;
+    }
+    return { pages, layout: L };
+  }
+
+  async function buildLetterWorksheetPDF(letters, opts, fontBytes, fontBytesPunkt) {
+    const { PDFDocument, StandardFonts } = global.PDFLib;
+    const pdf = await PDFDocument.create();
+    if ((fontBytes || fontBytesPunkt) && global.fontkit) pdf.registerFontkit(global.fontkit);
+
+    const fonts = {
+      regular: await pdf.embedFont(StandardFonts.Helvetica),
+      heavy:   await pdf.embedFont(StandardFonts.HelveticaBold),
+      grund:   null,
+    };
+    opts = opts || {};
+    const useDotted = !!opts.dotted;
+    const chosenBytes = (useDotted && fontBytesPunkt) ? fontBytesPunkt : fontBytes;
+    if (chosenBytes && global.fontkit) {
+      try { fonts.grund = await pdf.embedFont(chosenBytes); }
+      catch (e) { fonts.grund = fonts.heavy; }
+    } else {
+      fonts.grund = fonts.heavy;
+    }
+
+    if (!letters || !letters.length) {
+      const page = pdf.addPage([PT.pageW, PT.pageH]);
+      const ctx = makePageCtx(page, fonts);
+      ctx.text('Bitte zuerst Buchstaben auswählen.', PT.marginX, PT.pageH / 2,
+               { font: fonts.regular, size: 11, color: C.sub });
+      return await pdf.save();
+    }
+
+    const { pages, layout } = splitPagesLetter(letters);
+
+    pages.forEach((slice, pg) => {
+      const page = pdf.addPage([PT.pageW, PT.pageH]);
+      const ctx = makePageCtx(page, fonts);
+      let y = (pg === 0) ? drawHeader(ctx, Object.assign({}, opts, {
+        title: 'Buchstaben üben', sub: 'Erst die Bahn nachspuren, dann frei weiterüben',
+      })) : PT.marginY + 6;
+
+      slice.forEach(letter => {
+        ctx.text(letter, PT.marginX, y, { font: fonts.heavy, size: 10, color: C.red });
+        const row1Top = y + LIN.labelH;
+        drawLetterRepeatRow(ctx, PT.marginX, row1Top, PT.contentW, letter, fonts.grund);
+        const row2Top = row1Top + LIN.total + (LIN.rowGap * 0.4);
+        drawLetterModelRow(ctx, PT.marginX, row2Top, PT.contentW, letter, fonts.grund);
+        y += layout.itemH;
+      });
+    });
+
+    return await pdf.save();
+  }
+
+  // =================================================================
   //  HEADER (analog Mengen, aber Deutsch-Rot + Stift-freie Variante)
   // =================================================================
   function drawHeader(ctx, opts) {
@@ -167,8 +278,10 @@
     const top = PT.marginY;
 
     // Titel (kein Emoji – Standard-Fonts können das nicht; schlichter Text)
-    ctx.text('Schreibübung', PT.marginX, top, { font: F.heavy, size: 14, color: C.red });
-    ctx.text('Schreibe die Wörter schön in die Zeilen', PT.marginX, top + 18,
+    const title = opts.title || 'Schreibübung';
+    const sub = opts.sub || 'Schreibe die Wörter schön in die Zeilen';
+    ctx.text(title, PT.marginX, top, { font: F.heavy, size: 14, color: C.red });
+    ctx.text(sub, PT.marginX, top + 18,
              { font: F.regular, size: 8, color: C.sub });
 
     // Meta-Felder nebeneinander (leere Schreiblinien)
@@ -288,6 +401,8 @@
     PT, LIN,
     itemHeight, planLayout, capacityForPages, splitPages,
     buildWorksheetPDF,
+    itemHeightLetter, planLayoutLetter, splitPagesLetter,
+    buildLetterWorksheetPDF,
   };
 
 })(typeof window !== 'undefined' ? window : this);

@@ -92,20 +92,26 @@ input{-webkit-user-select:text;user-select:text}
 <div class="app">
 <div class="hdr">
   <h1>&#x270F;&#xFE0F; Schreib&#252;bung</h1>
-  <p>&#169; 2026 Sascha Rothenburg &#183; Grundschrift von Christian Urff</p>
   <div class="hdr-btns">
     <a href="deutsch.html#acc-schreiben-und-lesen" class="hdr-btn">&#x2190; Zur&uuml;ck</a>
     <a href="index.html" class="hdr-btn">&#x1F3E0; Hauptmen&uuml;</a>
   </div>
 </div>
 <div class="tabs">
-  <button class="tab active" id="t-gen"><span class="ti">&#x1F4DD;</span>W&#246;rter</button>
+  <button class="tab active" id="t-gen"><span class="ti">&#x1F4DD;</span>&Uuml;ben</button>
   <button class="tab" id="t-set"><span class="ti">&#x2699;</span>Einst.</button>
   <button class="tab" id="t-pre"><span class="ti">&#x1F441;</span>Vorschau</button>
 </div>
 <div class="screens">
 <div class="screen active" id="s-gen">
   <div class="card">
+    <h2>&#x270F;&#xFE0F; &#220;bungsmodus</h2>
+    <div class="chips" id="modeChips">
+      <div class="chip sel" data-mode="word">&#x1F4DD; W&#246;rter</div>
+      <div class="chip" data-mode="letter">&#x1F524; Buchstaben</div>
+    </div>
+  </div>
+  <div class="card" id="wordPickerCard">
     <h2>&#x1F4DD; W&#246;rter ausw&#228;hlen</h2>
     <div class="chips" id="chips"></div>
     <button class="btn bs btn-sm" style="margin-top:10px" onclick="reshuffle()">&#x1F504; Andere W&#246;rter zeigen</button>
@@ -113,13 +119,27 @@ input{-webkit-user-select:text;user-select:text}
     <button class="btn bs btn-sm" onclick="addEmptyWord()" style="margin-top:8px">+ Eigenes Wort eingeben</button>
     <div class="hint">Tippe W&#246;rter an oder gib eigene ein (max. 10).</div>
   </div>
+  <div class="card" id="letterPickerCard" style="display:none">
+    <h2>&#x1F524; Buchstaben ausw&#228;hlen</h2>
+    <div class="chips" id="caseChips">
+      <div class="chip sel" data-case="lower">Kleinbuchstaben</div>
+      <div class="chip" data-case="upper">Gro&#223;buchstaben</div>
+    </div>
+    <div class="chips" id="letterChips" style="margin-top:10px"></div>
+    <div class="word-list" id="letterList"></div>
+    <div class="hint">Tippe Buchstaben an (max. 12). Jeder Buchstabe bekommt eine Spur-Zeile zum Nachfahren und eine Zeile mit Vorbild + freiem &#220;bungsplatz.</div>
+  </div>
 </div>
 <div class="screen" id="s-set">
   <div class="card">
     <h2>&#x1F524; Vorschrift</h2>
-    <div class="sr">
+    <div class="sr" id="rowShowV">
       <div><div class="sl">Vorschrift anzeigen</div><div class="ss">Wort blass in der Zeile zum Nachfahren</div></div>
       <label class="tgl"><input type="checkbox" id="showV" checked onchange="updateLive()"><span class="tgl-s"></span></label>
+    </div>
+    <div class="sr" id="rowDotted" style="display:none">
+      <div><div class="sl">Gepunktete Grundschrift</div><div class="ss">Punktlinie statt durchgezogener Buchstabenform</div></div>
+      <label class="tgl"><input type="checkbox" id="showDotted" onchange="updateLive()"><span class="tgl-s"></span></label>
     </div>
     <div class="live-preview">
       <div class="live-preview-label">&#x1F50D; Live-Vorschau</div>
@@ -156,6 +176,13 @@ input{-webkit-user-select:text;user-select:text}
 
 /* ===== Wortschatz ===== */
 var GWS=['Mama','Papa','Oma','Opa','Kind','Baby','Schule','Haus','Hof','Ball','Hund','Katze','Sonne','Baum','Auto','Buch','Blume','Vogel','Fisch','Maus','Tisch','Stuhl','Bett','Hand','Fuß','Auge','Nase','Mund','Kopf','Tag','Nacht','Wasser','Milch','Brot','Apfel','Ei','Gras','Weg','Heft','Stift','Tafel','Schuh','Kleid','Topf','Brief','Lampe','Uhr','rot','blau','gelb','groß','klein','alt','neu','gut','lang','kurz','warm','kalt','laut','still','lieb','bunt','ich','du','wir','sie','er','ist','hat','und','mit','Igel','Insel','Affe','Löwe','Tiger','Bär','Wolf','Fuchs','Hase','Frosch','Schnecke','Käfer','Garten','Wald','Wiese','Berg','See','Fluss','Meer','Strand','Wolke','Regen','Schnee','Blitz','Sturm','Wind','Mond','Stern','Frühling','Sommer','Herbst','Winter','Woche','Monat','Jahr','Freund','Familie','Bruder','Schwester','Onkel','Tante','Küche','Zimmer','Fenster','Treppe','Straße','Markt','Bahnhof','Fahrrad','Zug','Bus','Schiff','Traktor','Schere','Lineal','Pinsel','Farbe','Papier','Kuchen','Suppe','Salat','Obst','lustig','traurig','müde','hungrig','durstig','schnell','langsam','hoch','tief','schwer','leicht','sauber','lecker','schön','dunkel','hell','nass','trocken','weich','hart'];
+
+var mode='word'; // 'word' | 'letter'
+var letterCase='lower';
+var LOWER=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','ä','ö','ü'];
+var UPPER=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','Ä','Ö','Ü'];
+var selectedLetters=[];
+var MAX_LETTERS=12;
 
 var selectedWords=[],customWords=[];
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -207,9 +234,71 @@ function addEmptyWord(){
   setTimeout(function(){var inp=document.querySelectorAll('#wordList input:not([readonly])');if(inp.length)inp[inp.length-1].focus();},50);
 }
 
+/* ===== Buchstaben-Modus: Chips ===== */
+function initLetterChips(){
+  var c=document.getElementById('letterChips');c.innerHTML='';
+  var set=letterCase==='lower'?LOWER:UPPER;
+  set.forEach(function(ch){
+    var el=document.createElement('div');
+    el.className='chip'+(selectedLetters.indexOf(ch)>-1?' sel':'');
+    el.textContent=ch;el.onclick=function(){toggleLetterChip(el,ch);};
+    c.appendChild(el);
+  });
+}
+function toggleLetterChip(el,ch){
+  var i=selectedLetters.indexOf(ch);
+  if(i===-1){if(selectedLetters.length>=MAX_LETTERS)return;selectedLetters.push(ch);el.classList.add('sel');}
+  else{selectedLetters.splice(i,1);el.classList.remove('sel');}
+  renderLetterList();updateLive();
+}
+function renderLetterList(){
+  var list=document.getElementById('letterList');list.innerHTML='';
+  selectedLetters.forEach(function(ch,i){
+    var row=document.createElement('div');row.className='word-row';
+    row.innerHTML='<span>'+(i+1)+'.</span><input type="text" value="'+esc(ch)+'" readonly style="color:#b91c1c;font-weight:700"><button class="del" onclick="removeLetter('+i+')">\u2715</button>';
+    list.appendChild(row);
+  });
+}
+function removeLetter(i){
+  var ch=selectedLetters[i];selectedLetters.splice(i,1);
+  document.querySelectorAll('#letterChips .chip').forEach(function(el){if(el.textContent===ch)el.classList.remove('sel');});
+  renderLetterList();updateLive();
+}
+
+/* ===== Modus-Umschaltung ===== */
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('#modeChips .chip').forEach(function(el){
+    el.classList.toggle('sel',el.dataset.mode===m);
+  });
+  document.getElementById('wordPickerCard').style.display=(m==='word')?'':'none';
+  document.getElementById('letterPickerCard').style.display=(m==='letter')?'':'none';
+  document.getElementById('rowShowV').style.display=(m==='word')?'':'none';
+  document.getElementById('rowDotted').style.display=(m==='letter')?'':'none';
+  updateLive();
+}
+function setLetterCase(c){
+  letterCase=c;
+  document.querySelectorAll('#caseChips .chip').forEach(function(el){
+    el.classList.toggle('sel',el.dataset.case===c);
+  });
+  initLetterChips();
+}
+document.getElementById('modeChips').addEventListener('click',function(e){
+  var el=e.target.closest('.chip');if(!el)return;setMode(el.dataset.mode);
+});
+document.getElementById('caseChips').addEventListener('click',function(e){
+  var el=e.target.closest('.chip');if(!el)return;setLetterCase(el.dataset.case);
+});
+
 /* ===== Live-Vorschau ===== */
 function updateLive(){
   var el=document.getElementById('liveText');
+  if(mode==='letter'){
+    el.style.display=selectedLetters.length?'':'none';
+    el.textContent=selectedLetters.length?selectedLetters[0]:'Grundschrift';
+    return;
+  }
   var showV=document.getElementById('showV').checked;
   el.style.display=showV?'':'none';
   var words=getAllWords();
@@ -257,9 +346,19 @@ function getFontBytes(){
   for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
   _fontBytesCache=arr;return arr;
 }
+var _fontBytesPunktCache=null;
+function getFontBytesPunkt(){
+  if(_fontBytesPunktCache)return _fontBytesPunktCache;
+  if(!window.GRUNDSCHRIFT_PUNKT_B64)return null;
+  var bin=atob(window.GRUNDSCHRIFT_PUNKT_B64);
+  var arr=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  _fontBytesPunktCache=arr;return arr;
+}
 function pdfOpts(){
   return {
     showV:document.getElementById('showV').checked,
+    dotted:document.getElementById('showDotted').checked,
     showName:document.getElementById('showName').checked,
     showDate:document.getElementById('showDate').checked,
     showKl:document.getElementById('showKl').checked
@@ -267,6 +366,9 @@ function pdfOpts(){
 }
 async function makePDFBytes(){
   if(!window.fontkit && window.PDFLib && window.PDFLib.fontkit){window.fontkit=window.PDFLib.fontkit;}
+  if(mode==='letter'){
+    return await SchreibenPDF.buildLetterWorksheetPDF(selectedLetters, pdfOpts(), getFontBytes(), getFontBytesPunkt());
+  }
   return await SchreibenPDF.buildWorksheetPDF(getAllWords(), pdfOpts(), getFontBytes());
 }
 
@@ -324,6 +426,8 @@ document.addEventListener('selectstart',function(e){if(e.target.tagName==='INPUT
 /* ===== Init ===== */
 initChips();
 renderWordList();
+initLetterChips();
+renderLetterList();
 updateLive();
 
 /* ===== PWA Manifest ===== */
