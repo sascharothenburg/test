@@ -182,11 +182,14 @@
       }
 
       if (ch === lower && UPPER_CONNECT[lower]) {
-        if (isLast || (nextLower && TILDE_AFTER[nextLower])) {
+        if (nextLower && TILDE_AFTER[nextLower]) {
           buf += '~';
         } else if (nextCh) {
           forceItalicNext = true;
         }
+        // Wortende (isLast): bewusst KEINE '~'-Verlaengerung mehr - sah in der
+        // tatsaechlichen Bienchen-SAS-Wiedergabe wie ein angehaengtes, nicht
+        // verbundenes Sonderzeichen aus statt wie ein sauberer Wortschluss.
       } else if (CAP_TRIGGER[ch] && nextCh) {
         forceItalicNext = true;
       }
