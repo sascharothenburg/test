@@ -129,7 +129,7 @@
   // =================================================================
   const UPPER_CONNECT = { b: 1, o: 1, r: 1, v: 1, w: 1, x: 1 };
   const CAP_TRIGGER   = { A: 1, F: 1, H: 1 };
-  const NO_LEAD_STROKE = { z: 1 }; // Buchstaben ohne Anstrich von unten am Wortanfang/isoliert (eigener Schreibansatz)
+  const NO_LEAD_STROKE = { z: 1, m: 1, n: 1, r: 1 }; // Buchstaben, die am Wortanfang/isoliert die saubere Italic-Form statt Regular nutzen (kein Anstrich-Artefakt)
 
   // Zerlegt EIN Wort (nur Buchstaben, keine Leerzeichen/Satzzeichen) in
   // Runs {text, italic}. Wendet \-, ~- und §-Regeln + Font-a/b-Wechsel an.
