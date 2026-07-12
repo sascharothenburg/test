@@ -151,8 +151,14 @@
       const nextCh = isLast ? null : chars[i + 1];
       const nextLower = nextCh ? nextCh.toLowerCase() : null;
 
-      // Sonderfall: "st" -> s + § + t (historische Schulausgangsschrift-Regel, nur Kleinbuchstabe s)
+      // Sonderfall: "st" -> s + § + t (Bienchen-SAS-Anleitung: bestaetigt durch "ist"->"is§t", "Mustertext"->"Mus§tertext")
       if (ch === 's' && nextCh === 't' && !isLast) {
+        setItalic(false); buf += ch + '§';
+        continue;
+      }
+      // Sonderfall: "sc" (i.d.R. "sch") -> s + § + c (bestaetigt durch "getaeuscht"->"getaeus§cht",
+      // "labyrinthisch"->"labyrinthis§ch", "hinweggeschwunden"->"hinwegges§chwunden")
+      if (ch === 's' && nextCh === 'c' && !isLast) {
         setItalic(false); buf += ch + '§';
         continue;
       }
@@ -161,16 +167,14 @@
         setItalic(false); buf += ch + '§';
         continue;
       }
-      // Schluss-s (auch zweites s bei "ss") -> §, nur Kleinbuchstabe
-      if (ch === 's' && isLast) {
-        setItalic(false); buf += '§';
-        continue;
-      }
-      // Schluss-ß -> ß§
-      if (ch === 'ß' && isLast) {
-        setItalic(false); buf += ch + '§';
-        continue;
-      }
+      // WICHTIG: s/ß am tatsaechlichen Wortende (nichts folgt) bleiben literal!
+      // Die Anleitung zeigt "Das"->"D\as" und "Lebens"->"Lebens" (beides mit
+      // normalem, literalem 's' am Wortende, KEIN §). § ist nur ein
+      // Verbindungszeichen zwischen s/ss und einem folgenden Konsonanten,
+      // kein Ersatz fuer Schluss-s allgemein - die vorherige Regel
+      // ("isLast -> §") beruhte auf einem Fehlschluss und fuehrte dazu, dass
+      // § (LSB -398 von 2100 - fast seine gesamte Breite) fast vollstaendig
+      // unter dem vorherigen Buchstaben verschwand (z.B. bei "Fuchs").
 
       const useItalic = forceItalicNext;
       forceItalicNext = false;
@@ -217,7 +221,7 @@
   function composeStandaloneLetter(ch) {
     const lower = ch.toLowerCase();
     if (lower === 's') return [{ text: '\\s', italic: false }];
-    if (ch === 'ß') return [{ text: 'ß§', italic: false }];
+    if (ch === 'ß') return [{ text: '\\' + ch, italic: false }];
     if (ch !== lower) return [{ text: ch, italic: true }]; // Versal einzeln -> kursiv
     if (NO_LEAD_STROKE[lower]) return [{ text: ch, italic: true }]; // z: ohne Anstrich, saubere Italic-Form statt Regular
     return [{ text: '\\' + ch, italic: false }];
