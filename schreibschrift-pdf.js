@@ -37,7 +37,7 @@
     XHEIGHT_RATIO: 0.2833,
     get vfont() { return this.band / this.XHEIGHT_RATIO; },
     get oberWord() { return this.band * 1.05; },  // Oberzone Wörter/Sätze (Versalien, Ober­längen) - Marge ueber realer Glyphenhoehe, nicht nur ueber der nominalen Ascent-Metrik
-    get oberLetter() { return this.band * 1.6; }, // Oberzone Einzelbuchstaben (Italic-Vorlage, höhere Schleifen)
+    get oberLetter() { return this.oberWord; }, // Oberzone Einzelbuchstaben - identisch zu Woertern/Saetzen (echte Glyphenhoehen sind fuer Italic-Versalien nicht groesser als fuer Regular-Versalien, siehe Kommentar oben)
     get unter() { return this.band * 1.05; },     // Unterzone (Unterlängen g,j,y,q - beide Varianten gleich)
     get totalWord() { return this.oberWord + this.band + this.unter; },
     get totalLetter() { return this.oberLetter + this.band + this.unter; },
@@ -49,6 +49,7 @@
   const MIN_SHRINK = 0.8;      // ab hier lieber umbrechen statt weiter schrumpfen
   const SENTENCE_MIN_SCALE = 0.7; // harte Untergrenze, auch nach Umbruch auf 2 Zeilen
   const LINE_GAP = LIN.band * 0.35; // Abstand zwischen zwei umgebrochenen Satz-Zeilen
+  const LETTER_SINGLE_GAP = 0.85 * MM; // Abstand zwischen Buchstaben im 1-Zeilen-Modus (kompakter als rowGap, damit 12 Buchstaben auf eine Seite passen)
 
   // ---- Farben (Deutsch-Rot) ------------------------------------------
   const C = {
@@ -414,8 +415,12 @@
   // =================================================================
   //  ITEM-HÖHEN
   // =================================================================
-  function letterItemHeight() {
-    return LIN.labelH + (LIN.totalLetter * 2) + (LIN.rowGap * 0.4) + LIN.rowGap;
+  function letterItemHeight(mode) {
+    mode = mode || 'both';
+    if (mode === 'both') {
+      return LIN.labelH + (LIN.totalLetter * 2) + (LIN.rowGap * 0.4) + LIN.rowGap;
+    }
+    return LIN.labelH + LIN.totalLetter + LETTER_SINGLE_GAP;
   }
   function wordItemHeight(lines) {
     lines = lines || 1;
@@ -457,12 +462,13 @@
 
     opts = opts || {};
     const showV = opts.showV !== false;
+    const letterMode = opts.letterMode || 'both'; // 'repeat' | 'model' | 'both'
 
     letters = letters || []; words = words || []; sentences = sentences || [];
 
     const sentenceAvail = PT.contentW - LIN.textInset * 2;
     const sections = [
-      { key: 'buchstaben', title: 'Buchstaben üben', items: letters.map(ch => ({ type: 'letter', val: ch, h: letterItemHeight() })) },
+      { key: 'buchstaben', title: 'Buchstaben üben', items: letters.map(ch => ({ type: 'letter', val: ch, h: letterItemHeight(letterMode) })) },
       { key: 'woerter',    title: 'Wörter abschreiben', items: words.map(w => ({ type: 'word', val: w, h: wordItemHeight() })) },
       { key: 'saetze',     title: 'Sätze abschreiben', items: sentences.map(s => {
           const lineCount = showV ? planSentenceLines(s, fonts.bienR, fonts.bienI, sentenceAvail).lines.length : 1;
@@ -509,9 +515,15 @@
         if (item.type === 'letter') {
           ctx.text(item.val, PT.marginX, y, { font: fonts.heavy, size: 10, color: C.red });
           const row1Top = y + LIN.labelH;
-          drawLetterRepeatRow(ctx, PT.marginX, row1Top, PT.contentW, item.val, fonts.bienR, fonts.bienI);
-          const row2Top = row1Top + LIN.totalLetter + (LIN.rowGap * 0.4);
-          drawLetterModelRow(ctx, PT.marginX, row2Top, PT.contentW, item.val, fonts.bienR, fonts.bienI);
+          if (letterMode === 'both') {
+            drawLetterRepeatRow(ctx, PT.marginX, row1Top, PT.contentW, item.val, fonts.bienR, fonts.bienI);
+            const row2Top = row1Top + LIN.totalLetter + (LIN.rowGap * 0.4);
+            drawLetterModelRow(ctx, PT.marginX, row2Top, PT.contentW, item.val, fonts.bienR, fonts.bienI);
+          } else if (letterMode === 'model') {
+            drawLetterModelRow(ctx, PT.marginX, row1Top, PT.contentW, item.val, fonts.bienR, fonts.bienI);
+          } else {
+            drawLetterRepeatRow(ctx, PT.marginX, row1Top, PT.contentW, item.val, fonts.bienR, fonts.bienI);
+          }
         } else if (item.type === 'sentence') {
           ctx.text(item.val, PT.marginX, y, { font: fonts.heavy, size: 10, color: C.red });
           const rowTop = y + LIN.labelH;

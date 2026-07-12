@@ -164,6 +164,17 @@ input{-webkit-user-select:text;user-select:text}
     </div>
   </div>
   <div class="card">
+    <h2>&#x1F4DD; Buchstaben-&Uuml;bung</h2>
+    <div class="sr">
+      <div><div class="sl">Zeilen pro Buchstabe</div><div class="ss">Weniger Zeilen = mehr Buchstaben passen auf eine Seite</div></div>
+    </div>
+    <div class="chips" id="letterModeChips" style="margin-top:8px">
+      <div class="chip sel" data-mode="repeat">Nur &Uuml;bungszeile (mehrfach)</div>
+      <div class="chip" data-mode="model">Nur Vorschreib-Zeile (einzeln)</div>
+      <div class="chip" data-mode="both">Beide Zeilen</div>
+    </div>
+  </div>
+  <div class="card">
     <h2>&#x1F4D0; Kopfzeile</h2>
     <div class="sr"><div class="sl">Name-Feld</div><label class="tgl"><input type="checkbox" id="showName"><span class="tgl-s"></span></label></div>
     <div class="sr"><div class="sl">Datum-Feld</div><label class="tgl"><input type="checkbox" id="showDate"><span class="tgl-s"></span></label></div>
@@ -245,6 +256,14 @@ function setLetterCase(c){
 }
 document.getElementById('caseChips').addEventListener('click',function(e){
   var el=e.target.closest('.chip');if(!el)return;setLetterCase(el.dataset.case);
+});
+
+/* ===== Buchstaben-Zeilenmodus ===== */
+var letterMode='repeat';
+document.getElementById('letterModeChips').addEventListener('click',function(e){
+  var el=e.target.closest('.chip');if(!el)return;
+  letterMode=el.dataset.mode;
+  document.querySelectorAll('#letterModeChips .chip').forEach(function(c){c.classList.toggle('sel',c===el);});
 });
 
 /* ===== Wort-Chips ===== */
@@ -402,7 +421,8 @@ function pdfOpts(){
     showV:document.getElementById('showV').checked,
     showName:document.getElementById('showName').checked,
     showDate:document.getElementById('showDate').checked,
-    showKl:document.getElementById('showKl').checked
+    showKl:document.getElementById('showKl').checked,
+    letterMode:letterMode
   };
 }
 async function makePDFBytes(){
