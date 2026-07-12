@@ -130,6 +130,7 @@
   const UPPER_CONNECT = { b: 1, o: 1, r: 1, v: 1, w: 1, x: 1 };
   const TILDE_AFTER   = { u: 1, v: 1, w: 1, y: 1 };
   const CAP_TRIGGER   = { A: 1, F: 1, H: 1 };
+  const NO_LEAD_STROKE = { z: 1 }; // Buchstaben ohne Anstrich von unten am Wortanfang/isoliert (eigener Schreibansatz)
 
   // Zerlegt EIN Wort (nur Buchstaben, keine Leerzeichen/Satzzeichen) in
   // Runs {text, italic}. Wendet \-, ~- und §-Regeln + Font-a/b-Wechsel an.
@@ -176,7 +177,7 @@
       forceItalicNext = false;
       setItalic(useItalic);
 
-      if (isFirst && ch === lower && /[a-zäöü]/.test(lower)) {
+      if (isFirst && ch === lower && /[a-zäöü]/.test(lower) && !NO_LEAD_STROKE[lower]) {
         buf += '\\' + ch; // Wortanfang: voller Anstrich
       } else {
         buf += ch;
@@ -215,6 +216,7 @@
     if (lower === 's') return [{ text: '\\s', italic: false }];
     if (ch === 'ß') return [{ text: 'ß§', italic: false }];
     if (ch !== lower) return [{ text: ch, italic: true }]; // Versal einzeln -> kursiv
+    if (NO_LEAD_STROKE[lower]) return [{ text: ch, italic: false }]; // z: ohne Anstrich von unten
     return [{ text: '\\' + ch, italic: false }];
   }
 
