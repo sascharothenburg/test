@@ -128,7 +128,6 @@
   //   - einzeln stehende Großbuchstaben werden komplett in Font b gesetzt
   // =================================================================
   const UPPER_CONNECT = { b: 1, o: 1, r: 1, v: 1, w: 1, x: 1 };
-  const TILDE_AFTER   = { u: 1, v: 1, w: 1, y: 1 };
   const CAP_TRIGGER   = { A: 1, F: 1, H: 1 };
   const NO_LEAD_STROKE = { z: 1 }; // Buchstaben ohne Anstrich von unten am Wortanfang/isoliert (eigener Schreibansatz)
 
@@ -177,21 +176,25 @@
       forceItalicNext = false;
       setItalic(useItalic);
 
-      if (isFirst && ch === lower && /[a-zäöü]/.test(lower) && !NO_LEAD_STROKE[lower]) {
+      if (isFirst && ch === lower && /[a-zäöü]/.test(lower) && NO_LEAD_STROKE[lower]) {
+        // z: kein Anstrich, UND die sauberere Italic-Form statt Regular
+        setItalic(true);
+        buf += ch;
+        setItalic(false);
+      } else if (isFirst && ch === lower && /[a-zäöü]/.test(lower)) {
         buf += '\\' + ch; // Wortanfang: voller Anstrich
       } else {
         buf += ch;
       }
 
       if (ch === lower && UPPER_CONNECT[lower]) {
-        if (nextLower && TILDE_AFTER[nextLower]) {
-          buf += '~';
-        } else if (nextCh) {
+        if (nextCh) {
           forceItalicNext = true;
         }
-        // Wortende (isLast): bewusst KEINE '~'-Verlaengerung mehr - sah in der
-        // tatsaechlichen Bienchen-SAS-Wiedergabe wie ein angehaengtes, nicht
-        // verbundenes Sonderzeichen aus statt wie ein sauberer Wortschluss.
+        // Weder Wortende noch vor u/v/w/y wird noch eine '~'-Verlaengerung
+        // gesetzt: ohne GPOS-Unterstuetzung in pdf-lib sitzt das Zeichen
+        // nicht direkt am Buchstaben-Ende, sondern wirkt wie ein separates,
+        // angeklebtes Sonderzeichen (siehe Wortende-Fix weiter oben).
       } else if (CAP_TRIGGER[ch] && nextCh) {
         forceItalicNext = true;
       }
@@ -216,7 +219,7 @@
     if (lower === 's') return [{ text: '\\s', italic: false }];
     if (ch === 'ß') return [{ text: 'ß§', italic: false }];
     if (ch !== lower) return [{ text: ch, italic: true }]; // Versal einzeln -> kursiv
-    if (NO_LEAD_STROKE[lower]) return [{ text: ch, italic: false }]; // z: ohne Anstrich von unten
+    if (NO_LEAD_STROKE[lower]) return [{ text: ch, italic: true }]; // z: ohne Anstrich, saubere Italic-Form statt Regular
     return [{ text: '\\' + ch, italic: false }];
   }
 
