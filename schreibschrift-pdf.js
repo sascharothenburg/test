@@ -359,16 +359,30 @@
     return plan.lines.length;
   }
 
+  // Bei den meisten Buchstaben ist Tinte-Breite ~ Laufweite (Faktor ~1.05-1.15),
+  // der Standard-Repeat-Abstand (1.55x Laufweite) reicht dann locker. Bei
+  // einigen Italic-Glyphen (a/ae/x/z) ist die Tinte aber 50-61% breiter als
+  // die Laufweite (per fontTools nachgemessen) - Standard-Abstand quetscht
+  // sie dann sichtbar zusammen. Explizite Korrektur je Buchstabe:
+  // Ziel: sichtbare Luecke nach der Tinte soll ~44% der Tinten-Breite betragen
+  // (das Verhaeltnis, das Regular-Buchstaben wie 'b' von Natur aus haben, weil
+  // deren Tinte-Breite nah an der Laufweite liegt). Fuer die Italic-Only-
+  // Buchstaben (siehe NO_LEAD_STROKE) weicht die Tinte-Breite von der
+  // Laufweite ab (per fontTools nachgemessen) - deshalb explizite Multiplikatoren:
+  const LETTER_STEP_MULT = { z: 2.16, m: 1.53, n: 1.58, r: 1.6, a: 2.32, ä: 2.32, u: 1.9, ü: 1.84, v: 1.8, w: 1.73, x: 2.28 };
+  const LETTER_INK_RATIO = { z: 1.5, m: 1.06, n: 1.1, r: 1.11, a: 1.61, ä: 1.61, u: 1.32, ü: 1.28, v: 1.25, w: 1.2, x: 1.58 };
+
   function drawLetterRepeatRow(ctx, xLeft, yTop, width, letter, fontReg, fontIta) {
     const grundY = drawRow4(ctx, xLeft, yTop, width, LIN.oberLetter, LIN.unter);
     const size = LIN.vfont;
     const runs = composeStandaloneLetter(letter);
     const unitW = measureRuns(ctx, runs, fontReg, fontIta, size);
-    const gap = unitW * 0.55;
-    const step = unitW + gap;
+    const mult = LETTER_STEP_MULT[letter.toLowerCase()] || 1.55;
+    const inkW = unitW * (LETTER_INK_RATIO[letter.toLowerCase()] || 1.15);
+    const step = unitW * mult;
     let x = xLeft + LIN.textInset;
     const rightLimit = xLeft + width - LIN.textInset;
-    while (x + unitW <= rightLimit) {
+    while (x + inkW <= rightLimit) {
       drawRuns(ctx, runs, x, grundY, size, fontReg, fontIta, C.vtext, 0.40);
       x += step;
     }
