@@ -114,7 +114,7 @@ input{-webkit-user-select:text;user-select:text}
     </div>
     <div class="chips" id="letterChips" style="margin-top:10px"></div>
     <div class="word-list" id="letterList"></div>
-    <div class="hint">Tippe Buchstaben an (max. 12). Wie viele Zeilen jeder Buchstabe bekommt (nur Übungszeile, nur Vorschreib-Zeile, oder beide), stellst du unter &#x2699; Einstellungen &#x2192; "Zeilen pro Buchstabe" ein &#x2013; das bestimmt auch, wie viele Buchstaben auf eine Seite passen (Anzeige oben).</div>
+    <div class="hint">Tippe Buchstaben an. Wie viel passt, richtet sich danach, wie viele Zeilen jeder Buchstabe bekommt (nur &Uuml;bungszeile, nur Vorschreib-Zeile, oder beide) &#x2013; einstellbar unter &#x2699; Einstellungen &#x2192; "Zeilen pro Buchstabe". Die Anzeige oben zeigt live, ob's noch auf eine Seite passt.</div>
   </div>
 </div>
 
@@ -125,7 +125,7 @@ input{-webkit-user-select:text;user-select:text}
     <button class="btn bs btn-sm" style="margin-top:10px" onclick="reshuffle()">&#x1F504; Andere W&ouml;rter zeigen</button>
     <div class="word-list" id="wordList"></div>
     <button class="btn bs btn-sm" onclick="addEmptyWord()" style="margin-top:8px">+ Eigenes Wort eingeben</button>
-    <div class="hint">Tippe W&ouml;rter an oder gib eigene ein (max. 10). Die Anzeige oben zeigt, ob alles zusammen mit Buchstaben/S&auml;tzen noch auf eine Seite passt.</div>
+    <div class="hint">Tippe W&ouml;rter an oder gib eigene ein. Die Anzeige oben zeigt live, ob alles zusammen mit Buchstaben/S&auml;tzen noch auf eine Seite passt.</div>
   </div>
 </div>
 
@@ -136,7 +136,7 @@ input{-webkit-user-select:text;user-select:text}
     <button class="btn bs btn-sm" style="margin-top:10px" onclick="reshuffleSent()">&#x1F504; Andere S&auml;tze zeigen</button>
     <div class="word-list" id="sentList"></div>
     <button class="btn bs btn-sm" onclick="addEmptySent()" style="margin-top:8px">+ Eigenen Satz eingeben</button>
-    <div class="hint">Tippe S&auml;tze an oder gib eigene ein (max. 6). Lange S&auml;tze werden bei Bedarf leicht verkleinert oder auf 2 Zeilen umgebrochen. Die Anzeige oben zeigt, ob alles zusammen noch auf eine Seite passt.</div>
+    <div class="hint">Tippe S&auml;tze an oder gib eigene ein. Lange S&auml;tze werden bei Bedarf leicht verkleinert oder auf 2 Zeilen umgebrochen &#x2013; deshalb passt mal mehr, mal weniger drauf. Die Anzeige oben zeigt live, ob alles zusammen noch auf eine Seite passt.</div>
   </div>
 </div>
 
@@ -213,12 +213,49 @@ var LOWER=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','
 var UPPER=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','Ä','Ö','Ü'];
 var letterCase='lower';
 var selectedLetters=[];
-var MAX_LETTERS=12;
+var LETTERS_FALLBACK_MAX=12; // nur falls schreibschrift-pdf.js noch nicht geladen ist
 var selectedWords=[],customWords=[];
 var selectedSent=[],customSent=[];
-var MAX_SENT=6;
+var SENT_FALLBACK_MAX=6; // nur falls schreibschrift-pdf.js noch nicht geladen ist
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ===== Gemeinsame, dynamische Platzberechnung (fuer Live-Anzeige UND fuer die Auswahl-Grenzen) ===== */
+function computeUsage(extraLetters,extraWords,extraSentText){
+  var S=window.SchreibschriftPDF;
+  if(!S) return null;
+  var PT=S.PT;
+  var headerH=44, sectionTitleH=16;
+  var letters=selectedLetters.length+(extraLetters||0);
+  var words=totalWords()+(extraWords||0);
+  var sentTexts=(typeof getAllSent==='function')?getAllSent().slice():[];
+  if(extraSentText!==undefined&&extraSentText!==null) sentTexts.push(extraSentText);
+  var used=0;
+  if(letters>0) used+=sectionTitleH+letters*S.letterItemHeight(letterMode);
+  if(words>0) used+=sectionTitleH+words*S.wordItemHeight(1);
+  if(sentTexts.length>0){
+    used+=sectionTitleH;
+    sentTexts.forEach(function(t){ used+=S.wordItemHeight((t&&t.length>28)?2:1); });
+  }
+  var available=PT.contentH-headerH;
+  return {used:used,available:available};
+}
+// Duerfte man noch 1 Buchstabe/Wort/Satz hinzufuegen, ohne die Seite zu sprengen?
+function canAddLetter(){
+  var u=computeUsage(1,0,null);
+  if(!u) return selectedLetters.length<LETTERS_FALLBACK_MAX;
+  return u.used<=u.available;
+}
+function canAddWord(){
+  var u=computeUsage(0,1,null);
+  if(!u) return totalWords()<10;
+  return u.used<=u.available;
+}
+function canAddSent(sentText){
+  var u=computeUsage(0,0,sentText!==undefined?sentText:'');
+  if(!u) return totalSent()<SENT_FALLBACK_MAX;
+  return u.used<=u.available;
+}
 
 /* ===== Buchstaben-Chips ===== */
 function initLetterChips(){
@@ -233,7 +270,7 @@ function initLetterChips(){
 }
 function toggleLetterChip(el,ch){
   var i=selectedLetters.indexOf(ch);
-  if(i===-1){if(selectedLetters.length>=MAX_LETTERS)return;selectedLetters.push(ch);el.classList.add('sel');}
+  if(i===-1){if(!canAddLetter())return;selectedLetters.push(ch);el.classList.add('sel');}
   else{selectedLetters.splice(i,1);el.classList.remove('sel');}
   renderLetterList();
 }
@@ -320,7 +357,7 @@ function initChips(){
 function reshuffle(){initChips();}
 function toggleChip(el,word){
   var i=selectedWords.indexOf(word);
-  if(i===-1){if(totalWords()>=10)return;selectedWords.push(word);el.classList.add('sel');}
+  if(i===-1){if(!canAddWord())return;selectedWords.push(word);el.classList.add('sel');}
   else{selectedWords.splice(i,1);el.classList.remove('sel');}
   renderWordList();updateLive();
 }
@@ -346,7 +383,7 @@ function removeSelected(i){
 }
 function removeCustom(i){customWords.splice(i,1);renderWordList();updateLive();}
 function addEmptyWord(){
-  if(totalWords()>=10)return;customWords.push('');renderWordList();
+  if(!canAddWord())return;customWords.push('');renderWordList();
   setTimeout(function(){var inp=document.querySelectorAll('#wordList input:not([readonly])');if(inp.length)inp[inp.length-1].focus();},50);
 }
 
@@ -366,7 +403,7 @@ function initSentChips(){
 function reshuffleSent(){initSentChips();}
 function toggleSentChip(el,s){
   var i=selectedSent.indexOf(s);
-  if(i===-1){if(totalSent()>=MAX_SENT)return;selectedSent.push(s);el.classList.add('sel');}
+  if(i===-1){if(!canAddSent(s))return;selectedSent.push(s);el.classList.add('sel');}
   else{selectedSent.splice(i,1);el.classList.remove('sel');}
   renderSentList();updateLive();
 }
@@ -392,7 +429,7 @@ function removeSelectedSent(i){
 }
 function removeCustomSent(i){customSent.splice(i,1);renderSentList();updateLive();}
 function addEmptySent(){
-  if(totalSent()>=MAX_SENT)return;customSent.push('');renderSentList();
+  if(!canAddSent(''))return;customSent.push('');renderSentList();
   setTimeout(function(){var inp=document.querySelectorAll('#sentList input:not([readonly])');if(inp.length)inp[inp.length-1].focus();},50);
 }
 
