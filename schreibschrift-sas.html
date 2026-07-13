@@ -102,6 +102,7 @@ input{-webkit-user-select:text;user-select:text}
   <button class="tab" id="t-set"><span class="ti">&#x2699;</span>Einst.</button>
   <button class="tab" id="t-pre"><span class="ti">&#x1F441;</span>Vorsch.</button>
 </div>
+<div id="capBar" style="display:none;padding:6px 14px;font-family:Nunito,sans-serif;font-size:.76rem;font-weight:700;text-align:center;flex-shrink:0"></div>
 <div class="screens">
 
 <div class="screen active" id="s-buch">
@@ -113,7 +114,7 @@ input{-webkit-user-select:text;user-select:text}
     </div>
     <div class="chips" id="letterChips" style="margin-top:10px"></div>
     <div class="word-list" id="letterList"></div>
-    <div class="hint">Tippe Buchstaben an (max. 12). Jeder Buchstabe bekommt eine Spur-Zeile zum Nachfahren und eine Zeile mit Vorbild + freiem &Uuml;bungsplatz.</div>
+    <div class="hint">Tippe Buchstaben an (max. 12). Wie viele Zeilen jeder Buchstabe bekommt (nur Übungszeile, nur Vorschreib-Zeile, oder beide), stellst du unter &#x2699; Einstellungen &#x2192; "Zeilen pro Buchstabe" ein &#x2013; das bestimmt auch, wie viele Buchstaben auf eine Seite passen (Anzeige oben).</div>
   </div>
 </div>
 
@@ -124,7 +125,7 @@ input{-webkit-user-select:text;user-select:text}
     <button class="btn bs btn-sm" style="margin-top:10px" onclick="reshuffle()">&#x1F504; Andere W&ouml;rter zeigen</button>
     <div class="word-list" id="wordList"></div>
     <button class="btn bs btn-sm" onclick="addEmptyWord()" style="margin-top:8px">+ Eigenes Wort eingeben</button>
-    <div class="hint">Tippe W&ouml;rter an oder gib eigene ein (max. 10).</div>
+    <div class="hint">Tippe W&ouml;rter an oder gib eigene ein (max. 10). Die Anzeige oben zeigt, ob alles zusammen mit Buchstaben/S&auml;tzen noch auf eine Seite passt.</div>
   </div>
 </div>
 
@@ -135,7 +136,7 @@ input{-webkit-user-select:text;user-select:text}
     <button class="btn bs btn-sm" style="margin-top:10px" onclick="reshuffleSent()">&#x1F504; Andere S&auml;tze zeigen</button>
     <div class="word-list" id="sentList"></div>
     <button class="btn bs btn-sm" onclick="addEmptySent()" style="margin-top:8px">+ Eigenen Satz eingeben</button>
-    <div class="hint">Tippe S&auml;tze an oder gib eigene ein (max. 6). Lange S&auml;tze werden automatisch etwas verkleinert, damit sie in eine Zeile passen.</div>
+    <div class="hint">Tippe S&auml;tze an oder gib eigene ein (max. 6). Lange S&auml;tze werden bei Bedarf leicht verkleinert oder auf 2 Zeilen umgebrochen. Die Anzeige oben zeigt, ob alles zusammen noch auf eine Seite passt.</div>
   </div>
 </div>
 
@@ -243,6 +244,7 @@ function renderLetterList(){
     row.innerHTML='<span>'+(i+1)+'.</span><input type="text" value="'+esc(ch)+'" readonly style="color:#b91c1c;font-weight:700"><button class="del" onclick="removeLetter('+i+')">\u2715</button>';
     list.appendChild(row);
   });
+  updateCapacity();
 }
 function removeLetter(i){
   var ch=selectedLetters[i];selectedLetters.splice(i,1);
@@ -264,7 +266,43 @@ document.getElementById('letterModeChips').addEventListener('click',function(e){
   var el=e.target.closest('.chip');if(!el)return;
   letterMode=el.dataset.mode;
   document.querySelectorAll('#letterModeChips .chip').forEach(function(c){c.classList.toggle('sel',c===el);});
+  updateCapacity();
 });
+
+/* ===== Live-Platzbedarf-Schaetzung (Buchstaben+Woerter+Saetze zusammen auf 1 Seite?) ===== */
+function updateCapacity(){
+  var bar=document.getElementById('capBar');
+  var S=window.SchreibschriftPDF;
+  if(!S){bar.style.display='none';return;}
+  var PT=S.PT, LIN=S.LIN;
+  var letters=selectedLetters.length;
+  var words=totalWords();
+  var sentTexts=(typeof getAllSent==='function')?getAllSent():[];
+  if(letters+words+sentTexts.length===0){bar.style.display='none';return;}
+
+  var headerH=44, sectionTitleH=16;
+  var used=0;
+  if(letters>0){used+=sectionTitleH+letters*S.letterItemHeight(letterMode);}
+  if(words>0){used+=sectionTitleH+words*S.wordItemHeight(1);}
+  if(sentTexts.length>0){
+    used+=sectionTitleH;
+    sentTexts.forEach(function(t){
+      // grobe Schaetzung ohne echte Font-Messung: ab ~28 Zeichen meist 2 Zeilen noetig
+      var lines=(t.length>28)?2:1;
+      used+=S.wordItemHeight(lines);
+    });
+  }
+  var available=PT.contentH-headerH;
+  var pct=Math.round(used/available*100);
+  bar.style.display='block';
+  if(used<=available){
+    bar.style.background='#dcfce7';bar.style.color='#166534';
+    bar.textContent='\u2713 Passt auf 1 Seite ('+pct+'% belegt)';
+  }else{
+    bar.style.background='#fee2e2';bar.style.color='#991b1b';
+    bar.textContent='\u26A0 Reicht nicht auf 1 Seite (~'+pct+'% - bitte etwas weniger ausw\u00e4hlen oder Buchstaben-Zeilenmodus auf "Nur \u00dcbungszeile" stellen)';
+  }
+}
 
 /* ===== Wort-Chips ===== */
 function totalWords(){return selectedWords.length+customWords.filter(function(w){return w.trim();}).length;}
@@ -296,9 +334,10 @@ function renderWordList(){
   customWords.forEach(function(w,i){
     var n=selectedWords.length+i+1;
     var row=document.createElement('div');row.className='word-row';
-    row.innerHTML='<span>'+n+'.</span><input type="text" id="cw'+i+'" value="'+esc(w)+'" placeholder="Wort eingeben\u2026" maxlength="22" oninput="customWords['+i+']=this.value;updateLive()"><button class="del" onclick="removeCustom('+i+')">\u2715</button>';
+    row.innerHTML='<span>'+n+'.</span><input type="text" id="cw'+i+'" value="'+esc(w)+'" placeholder="Wort eingeben\u2026" maxlength="22" oninput="customWords['+i+']=this.value;updateLive();updateCapacity()"><button class="del" onclick="removeCustom('+i+')">\u2715</button>';
     list.appendChild(row);
   });
+  updateCapacity();
 }
 function removeSelected(i){
   var word=selectedWords[i];selectedWords.splice(i,1);
@@ -341,9 +380,10 @@ function renderSentList(){
   customSent.forEach(function(s,i){
     var n=selectedSent.length+i+1;
     var row=document.createElement('div');row.className='word-row';
-    row.innerHTML='<span>'+n+'.</span><input type="text" id="cs'+i+'" value="'+esc(s)+'" placeholder="Satz eingeben\u2026" maxlength="60" oninput="customSent['+i+']=this.value;updateLive()"><button class="del" onclick="removeCustomSent('+i+')">\u2715</button>';
+    row.innerHTML='<span>'+n+'.</span><input type="text" id="cs'+i+'" value="'+esc(s)+'" placeholder="Satz eingeben\u2026" maxlength="60" oninput="customSent['+i+']=this.value;updateLive();updateCapacity()"><button class="del" onclick="removeCustomSent('+i+')">\u2715</button>';
     list.appendChild(row);
   });
+  updateCapacity();
 }
 function removeSelectedSent(i){
   var s=selectedSent[i];selectedSent.splice(i,1);
