@@ -129,8 +129,7 @@
   // =================================================================
   const UPPER_CONNECT = { b: 1, o: 1, r: 1, v: 1, w: 1, x: 1 };
   const CAP_TRIGGER   = { A: 1, F: 1, H: 1 };
-  const NO_LEAD_STROKE = { z: 1, m: 1, n: 1, r: 1 }; // Buchstaben, die am Wortanfang/isoliert die saubere Italic-Form OHNE Anstrich nutzen
-  const ITALIC_LEAD = { a: 1, ä: 1, u: 1, ü: 1, v: 1, w: 1, x: 1 }; // Buchstaben, die am Wortanfang den normalen Regular-Anstrich (\) BRAUCHEN, aber danach in der Italic-Form weitergeschrieben werden (Regular-Form ist sonst zu klobig/verbindet nicht; die Italic-Form braucht aber den Anstrich vor sich, da ihr LSB stark negativ ist)
+  const NO_LEAD_STROKE = { z: 1, m: 1, n: 1, r: 1, a: 1, ä: 1, u: 1, ü: 1, v: 1, w: 1, x: 1 }; // Buchstaben, die am Wortanfang/isoliert die saubere Italic-Form OHNE Anstrich nutzen. (a/ae/u/ue/v/w/x waren testweise auf Regular-Anstrich+Italic (ITALIC_LEAD) - das erzeugte aber einen sichtbar unverbundenen Strich, da pdf-lib keine GPOS-Positionierung anwendet. Pragmatischer Fix: wie z/m/n/r behandeln.)
 
   // Zerlegt EIN Wort (nur Buchstaben, keine Leerzeichen/Satzzeichen) in
   // Runs {text, italic}. Wendet \-, ~- und §-Regeln + Font-a/b-Wechsel an.
@@ -182,18 +181,10 @@
       setItalic(useItalic);
 
       if (isFirst && ch === lower && /[a-zäöü]/.test(lower) && NO_LEAD_STROKE[lower]) {
-        // z/m/n/r: kein Anstrich, UND die sauberere Italic-Form statt Regular
+        // z/m/n/r/a/ä/u/ü/v/w/x: kein Anstrich, saubere Italic-Form statt Regular
         setItalic(true);
         buf += ch;
         setItalic(false);
-      } else if (isFirst && ch === lower && /[a-zäöü]/.test(lower) && ITALIC_LEAD[lower]) {
-        // a/ä/u/ü/v/w/x: normaler Regular-Anstrich (\), danach Italic-Form
-        // (Beispiel bestaetigt: "viel" -> "vi" italic + "el" regular;
-        // "unter" -> nur "u" italic, Rest regular)
-        setItalic(false);
-        buf += '\\';
-        setItalic(true);
-        buf += ch;
       } else if (isFirst && ch === lower && /[a-zäöü]/.test(lower)) {
         buf += '\\' + ch; // Wortanfang: voller Anstrich
       } else {
@@ -232,8 +223,7 @@
     if (lower === 's') return [{ text: '\\s', italic: false }];
     if (ch === 'ß') return [{ text: '\\' + ch, italic: false }];
     if (ch !== lower) return [{ text: ch, italic: true }]; // Versal einzeln -> kursiv
-    if (NO_LEAD_STROKE[lower]) return [{ text: ch, italic: true }]; // z/m/n/r: ohne Anstrich, saubere Italic-Form statt Regular
-    if (ITALIC_LEAD[lower]) return [{ text: '\\', italic: false }, { text: ch, italic: true }]; // a/ä/u/ü/v/w/x: Regular-Anstrich + Italic-Form
+    if (NO_LEAD_STROKE[lower]) return [{ text: ch, italic: true }]; // z/m/n/r/a/ä/u/ü/v/w/x: ohne Anstrich, saubere Italic-Form statt Regular
     return [{ text: '\\' + ch, italic: false }];
   }
 
