@@ -3,7 +3,7 @@
    © 2026 Sascha Rothenburg
 
    Artikel zuordnen (der/die/das) als PDF -> identisch iOS/Android.
-   Vier Aufgabentypen (jeweils EINER pro Generierung, per Schalter gewählt):
+   Jede Seite mischt automatisch alle vier Aufgabentypen (keine Auswahl mehr):
      gap    – Lücke vor dem Nomen füllen (der/die/das) + Schreiblinien
      sort   – Wortvorrat in drei Artikel-Spalten einsortieren
      check  – Richtigen Artikel ankreuzen
@@ -12,8 +12,7 @@
    Deutsch-Schema rot; Schreiblinien blau.
 
    spec: {
-     taskSets: [ [ {type,...} ], ... ],  // ein Set pro Seite
-     aufgabentyp: 'gap'|'sort'|'check'|'fix',
+     taskSets: [ [ {type,...}, ... ], ... ],  // ein gemischtes Set pro Seite
      diff: '12'|'34',
      showRule, showSol,
      lineStyle: '0'|'1'|'2'|'3'
@@ -208,8 +207,13 @@
     { t: 'der Hund, die Katze, das Kind', b: 1 }, { t: '.' }
   ];
 
-  const TYPELABEL = { gap: 'L\u00fccken', sort: 'Sortieren', check: 'Ankreuzen', fix: 'Fehler finden' };
   const GENDERS = ['der', 'die', 'das'];
+
+  function groupByType(arr) {
+    const g = { gap: [], sort: [], check: [], fix: [] };
+    arr.forEach(t => { if (g[t.type]) g[t.type].push(t); });
+    return g;
+  }
 
   async function buildWorksheetPDF(spec, opts, _unused) {
     const { PDFDocument, StandardFonts } = global.PDFLib;
@@ -220,7 +224,6 @@
       heavy: await pdf.embedFont(StandardFonts.HelveticaBold),
     };
     opts = opts || {}; spec = spec || {};
-    const aufgabentyp = spec.aufgabentyp || 'gap';
     const diff = spec.diff || '12';
     const showRule = !!spec.showRule;
     const showSol = !!spec.showSol;
@@ -229,7 +232,7 @@
     const bottom = PT.pageH - PT.marginY;
     const W = PT.contentW;
 
-    const subTop = (diff === '34' ? 'Klasse 3\u20134' : 'Klasse 1\u20132') + ' \u00b7 ' + TYPELABEL[aufgabentyp];
+    const subTop = (diff === '34' ? 'Klasse 3\u20134' : 'Klasse 1\u20132');
 
     let page = pdf.addPage([PT.pageW, PT.pageH]);
     let ctx = makeCtx(page, fonts);
@@ -243,10 +246,11 @@
 
     function renderTaskSet(setTasks) {
       if (showRule) { ensure(20 * MM); y = drawRuleBox(ctx, y, RULE); y += 1.5 * MM; }
-      if (aufgabentyp === 'gap') renderGap(setTasks, 1);
-      else if (aufgabentyp === 'sort') renderSort(setTasks, 1);
-      else if (aufgabentyp === 'check') renderCheck(setTasks, 1);
-      else renderFix(setTasks, 1);
+      const g = groupByType(setTasks);
+      if (g.gap.length) renderGap(g.gap, 1);
+      if (g.sort.length) renderSort(g.sort, 1);
+      if (g.check.length) renderCheck(g.check, 1);
+      if (g.fix.length) renderFix(g.fix, 1);
     }
 
     taskSets.forEach((setTasks, si) => { if (si > 0) { newPage(); } renderTaskSet(setTasks); });
@@ -255,10 +259,11 @@
       newPage('L\u00f6sung \u2013 Artikel zuordnen');
       const allTasks = [];
       taskSets.forEach(set => set.forEach(t => allTasks.push(t)));
-      if (aufgabentyp === 'gap') solGap(allTasks, 1);
-      else if (aufgabentyp === 'sort') solSort(allTasks, 1);
-      else if (aufgabentyp === 'check') solCheck(allTasks, 1);
-      else solFix(allTasks, 1);
+      const g = groupByType(allTasks);
+      if (g.gap.length) solGap(g.gap, 1);
+      if (g.sort.length) solSort(g.sort, 1);
+      if (g.check.length) solCheck(g.check, 1);
+      if (g.fix.length) solFix(g.fix, 1);
     }
 
     return await pdf.save();

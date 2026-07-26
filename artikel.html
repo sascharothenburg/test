@@ -75,18 +75,6 @@ input{-webkit-user-select:text;user-select:text}
 <div class="screens">
 <div class="screen active" id="s-gen">
   <div class="card">
-    <h2>Aufgabentyp</h2>
-    <div class="seg" id="atSegA">
-      <button class="seg-b active" data-v="gap">L&uuml;cken</button>
-      <button class="seg-b" data-v="sort">Sortieren</button>
-    </div>
-    <div class="seg" id="atSegB">
-      <button class="seg-b" data-v="check">Ankreuzen</button>
-      <button class="seg-b" data-v="fix">Fehler finden</button>
-    </div>
-    <p style="font-size:.7rem;color:#6b7280;margin-top:8px" id="atHint">Schreibe der, die oder das vor das Nomen.</p>
-  </div>
-  <div class="card">
     <h2>Schwierigkeit</h2>
     <div class="seg" id="diffSeg">
       <button class="seg-b active" data-v="12">Klasse 1&ndash;2</button>
@@ -101,7 +89,7 @@ input{-webkit-user-select:text;user-select:text}
       <button class="seg-b active" data-pg="1">1 Seite</button>
       <button class="seg-b" data-pg="2">2 Seiten</button>
     </div>
-    <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Die Aufgabenzahl ist passend zur Seite festgelegt.</p>
+    <p style="font-size:.7rem;color:#6b7280;margin-top:6px">Jede Seite mischt automatisch alle vier &Uuml;bungsformen: L&uuml;cken, Sortieren, Ankreuzen und Fehler finden.</p>
   </div>
 </div>
 <div class="screen" id="s-set">
@@ -112,11 +100,11 @@ input{-webkit-user-select:text;user-select:text}
   <div class="card">
     <h2>Layout</h2>
     <div class="sr"><div class="sl">L&ouml;sungsblatt anh&auml;ngen</div><label class="tgl"><input type="checkbox" id="showSolution"><span class="tgl-s"></span></label></div>
-    <div class="sr"><div><div class="sl">Merksatz drucken</div><div class="ss">Kurze Regel oben auf dem Blatt</div></div><label class="tgl"><input type="checkbox" id="showRule" checked><span class="tgl-s"></span></label></div>
+    <div class="sr"><div><div class="sl">Merksatz drucken</div><div class="ss">Kurze Regel oben auf dem Blatt</div></div><label class="tgl"><input type="checkbox" id="showRule"><span class="tgl-s"></span></label></div>
   </div>
   <div class="card">
     <h2>&#x1F4DD; Schreiblinien</h2>
-    <div class="ss" style="margin-bottom:8px">Lineatur zum Abschreiben (nur bei L&uuml;cken-Aufgaben)</div>
+    <div class="ss" style="margin-bottom:8px">Lineatur zum Abschreiben bei den L&uuml;cken-Aufgaben</div>
     <div class="seg" id="lineSeg">
       <button class="seg-b" data-v="1">Eine Linie</button>
       <button class="seg-b active" data-v="2">Zwei Linien</button>
@@ -166,19 +154,13 @@ var GENDERS=['der','die','das'];
 function rnd(a){return a[Math.floor(Math.random()*a.length)];}
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
 
-var aufgabentyp='gap';
 var diff='12';
 var numPages=1;
 var taskSets=[];
 var tasks=[];
 
-var COUNTS={ gap:{n:10}, sort:{nPer:5}, check:{n:10}, fix:{n:10} };
-var ATHINT={
-  gap:'Schreibe der, die oder das vor das Nomen.',
-  sort:'Sortiere die W\u00f6rter in die richtige Spalte: der, die oder das.',
-  check:'Kreuze bei jedem Wort den richtigen Artikel an.',
-  fix:'Manche Artikel sind falsch. Erkenne und verbessere sie.'
-};
+/* Feste Mengen pro Typ, so kalibriert dass eine gemischte Seite gut ausgefüllt ist */
+var COUNTS={ gap:{n:6}, sort:{nPer:3}, check:{n:6}, fix:{n:4} };
 
 function diffVal(){var b=document.querySelector('#diffSeg .seg-b.active');return b?b.dataset.v:'12';}
 function lineStyle(){var b=document.querySelector('#lineSeg .seg-b.active');return b?b.dataset.v:'2';}
@@ -196,55 +178,55 @@ function uniqWords(arr){
   return uniq;
 }
 
-function buildGapTasks(n){
+/* Baut EIN gemischtes Set (= eine Seite) mit allen vier Aufgabentypen.
+   used[] verhindert, dass dasselbe Wort auf derselben Seite mehrfach auftaucht. */
+function buildMixedSet(){
   var maxK=diff==='34'?2:1;
-  var pool=uniqWords(shuffle(allWordsFlat(maxK)));
-  return pool.slice(0,n).map(function(it){ return {type:'gap', word:it.word, art:it.art}; });
-}
-function buildCheckTasks(n){
-  var maxK=diff==='34'?2:1;
-  var pool=uniqWords(shuffle(allWordsFlat(maxK)));
-  return pool.slice(0,n).map(function(it){ return {type:'check', word:it.word, art:it.art}; });
-}
-function buildSortTask(nPer){
-  var maxK=diff==='34'?2:1;
-  var words=[];
+  var used={};
+
+  var sortWords=[];
   GENDERS.forEach(function(g,ci){
-    var arr=shuffle(NOMEN[g].filter(function(it){return it[1]<=maxK;})).slice(0,nPer);
-    arr.forEach(function(it){ words.push({w:it[0], col:ci}); });
+    var arr=shuffle(NOMEN[g].filter(function(it){return it[1]<=maxK;}));
+    var chosen=[];
+    for(var i=0;i<arr.length && chosen.length<COUNTS.sort.nPer;i++){
+      if(!used[arr[i][0]]){ used[arr[i][0]]=1; chosen.push(arr[i][0]); }
+    }
+    chosen.forEach(function(w){ sortWords.push({w:w, col:ci}); });
   });
-  return {type:'sort', cols:GENDERS.slice(), words:shuffle(words)};
-}
-function buildFixTasks(n){
-  var maxK=diff==='34'?2:1;
+  var sortTask={type:'sort', cols:GENDERS.slice(), words:shuffle(sortWords)};
+
   var pool=uniqWords(shuffle(allWordsFlat(maxK)));
-  var chosen=pool.slice(0,n);
-  var wrongRatio=0.35+Math.random()*0.35;
-  var nWrong=Math.round(chosen.length*wrongRatio);
-  if(nWrong<1)nWrong=1; if(nWrong>chosen.length-1)nWrong=chosen.length-1;
-  var idxs=shuffle(chosen.map(function(_,i){return i;}));
+  function takeUnique(n){
+    var out=[];
+    for(var i=0;i<pool.length && out.length<n;i++){
+      var it=pool[i];
+      if(!used[it.word]){ used[it.word]=1; out.push(it); }
+    }
+    return out;
+  }
+
+  var gapItems=takeUnique(COUNTS.gap.n).map(function(it){ return {type:'gap', word:it.word, art:it.art}; });
+  var checkItems=takeUnique(COUNTS.check.n).map(function(it){ return {type:'check', word:it.word, art:it.art}; });
+
+  var fixChosen=takeUnique(COUNTS.fix.n);
+  var wrongRatio=0.4+Math.random()*0.3;
+  var nWrong=Math.max(1, Math.min(fixChosen.length-1, Math.round(fixChosen.length*wrongRatio)));
+  var idxs=shuffle(fixChosen.map(function(_,i){return i;}));
   var wrongSet={}; idxs.slice(0,nWrong).forEach(function(i){wrongSet[i]=1;});
-  return chosen.map(function(it,i){
+  var fixItems=fixChosen.map(function(it,i){
     var wrong=!!wrongSet[i];
-    var disp=it.art;
-    if(wrong){ disp=rnd(GENDERS.filter(function(g){return g!==it.art;})); }
+    var disp = wrong ? rnd(GENDERS.filter(function(g){return g!==it.art;})) : it.art;
     return {type:'fix', word:it.word, correctArt:it.art, dispArt:disp, wrong:wrong};
   });
+
+  return [].concat([sortTask], gapItems, checkItems, fixItems);
 }
 
 function generate(){
   diff=diffVal();
-  var c=COUNTS[aufgabentyp];
   taskSets=[];
   var nSets = numPages>=2 ? 2 : 1;
-  for(var p=0;p<nSets;p++){
-    var set;
-    if(aufgabentyp==='gap') set=buildGapTasks(c.n);
-    else if(aufgabentyp==='sort') set=[buildSortTask(c.nPer)];
-    else if(aufgabentyp==='check') set=buildCheckTasks(c.n);
-    else set=buildFixTasks(c.n);
-    taskSets.push(set);
-  }
+  for(var p=0;p<nSets;p++){ taskSets.push(buildMixedSet()); }
   tasks=taskSets[0];
 }
 function hasContent(){ return tasks.length>0; }
@@ -252,7 +234,6 @@ function hasContent(){ return tasks.length>0; }
 function pdfSpec(){
   return {
     taskSets: taskSets,
-    aufgabentyp: aufgabentyp,
     diff: diff,
     showRule: document.getElementById('showRule').checked,
     showSol: document.getElementById('showSolution').checked,
@@ -347,21 +328,6 @@ async function doPrint(){
 document.getElementById('t-gen').addEventListener('click',function(){showTab('gen');});
 document.getElementById('t-set').addEventListener('click',function(){showTab('set');});
 document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
-
-function initAtSeg(){
-  var groups=[document.getElementById('atSegA'),document.getElementById('atSegB')];
-  groups.forEach(function(seg){
-    seg.querySelectorAll('.seg-b').forEach(function(b){
-      b.addEventListener('click',function(){
-        groups.forEach(function(g){ g.querySelectorAll('.seg-b').forEach(function(x){x.classList.remove('active');}); });
-        b.classList.add('active');
-        aufgabentyp=b.dataset.v;
-        document.getElementById('atHint').textContent=ATHINT[aufgabentyp];
-      });
-    });
-  });
-}
-initAtSeg();
 
 document.querySelectorAll('#diffSeg .seg-b').forEach(function(b){
   b.addEventListener('click',function(){
