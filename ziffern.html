@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="fonts.css">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ziffern schreiben">
+<meta name="theme-color" content="#0369a1">
+<title>Ziffern schreiben lernen – Arbeitsblätter für die 1. Klasse | Übio</title>
+<meta name="description" content="Ziffern 0 bis 9 schreiben üben: nachspuren im Kästchenraster, mit Startpunkt und Mengenbild. Kostenlose Arbeitsblätter zum Ausdrucken.">
+<style>
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:Nunito,sans-serif;background:#f0f9ff;color:#1e1b4b;-webkit-user-select:none;user-select:none;overscroll-behavior:none}
+input{-webkit-user-select:text;user-select:text}
+.app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;background:#fff;box-shadow:0 0 40px rgba(0,0,0,.1)}
+.hdr{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top,0px) + var(--ad-top,0px));flex-shrink:0}
+.hdr h1{font-size:1.15rem;font-weight:900}
+.hdr p{font-size:.68rem;opacity:.85;margin-top:1px}
+.hdr-btns{display:flex;gap:8px;margin-top:6px;align-items:center}
+.hdr-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;background:rgba(255,255,255,.25);border-radius:20px;color:#fff;font-family:Nunito,sans-serif;font-size:.72rem;font-weight:800;text-decoration:none;cursor:pointer;border:none}
+.tabs{display:flex;background:#fff;border-bottom:2px solid #e2e8f0;flex-shrink:0}
+.tab{flex:1;padding:10px 4px 8px;text-align:center;font-size:.65rem;font-weight:800;color:#6b7280;cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab.active{color:#0369a1;border-bottom-color:#0369a1}
+.ti{display:block;font-size:1.1rem;margin-bottom:1px}
+.screens{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(80px + env(safe-area-inset-bottom,0px));display:none}
+.screen.active{display:block}
+.card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.07);padding:14px;margin-bottom:10px;border:1px solid #e2e8f0}
+.card h2{font-size:.72rem;font-weight:800;color:#0369a1;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.btn{width:100%;padding:12px;border:none;border-radius:12px;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer}
+.bp{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff}
+.bs{background:#f0f4f8;color:#6b7280;border:2px solid #e2e8f0}
+.btn-sm{padding:8px;font-size:.8rem;margin-top:8px}
+.tgl{position:relative;width:44px;height:24px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0}
+.tgl-s{position:absolute;inset:0;background:#ccc;border-radius:24px;cursor:pointer;transition:.2s}
+.tgl-s::before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.tgl input:checked+.tgl-s{background:#0369a1}
+.tgl input:checked+.tgl-s::before{transform:translateX(20px)}
+.sr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e2e8f0}
+.sr:last-child{border-bottom:none}
+.sl{font-size:.88rem;font-weight:600}
+.ss{font-size:.73rem;color:#6b7280;margin-top:1px}
+.sbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(255,255,255,.97);border-top:1px solid #e2e8f0;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;z-index:100}
+@media print{
+  .app,.sbar{display:none!important}
+  .printarea{display:block!important;width:100%!important;margin:0!important;padding:0!important}
+  body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html,body{height:auto;overflow:visible;-webkit-text-size-adjust:100%}
+  @page{size:A4 portrait;margin:12mm 14mm}
+}
+.printarea{display:none}
+/* Ziffern-spezifisch */
+.opt-row{display:flex;gap:6px;flex-wrap:wrap}
+.opt-btn{flex:1;min-width:60px;padding:9px 4px;border-radius:10px;border:2px solid #e2e8f0;background:#f8fafc;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:800;color:#1e1b4b;cursor:pointer}
+.opt-btn.sel{background:#0369a1;color:#fff;border-color:#0369a1}
+.dig-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.dig-btn{padding:12px 0;border-radius:11px;border:2px solid #e2e8f0;background:#f8fafc;font-family:Nunito,sans-serif;font-size:1.25rem;font-weight:900;color:#1e1b4b;cursor:pointer}
+.dig-btn.sel{background:#0369a1;color:#fff;border-color:#0369a1}
+.zf-list{display:flex;flex-direction:column;gap:8px}
+.zf-item{background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:10px}
+.zf-num{font-size:1.5rem;font-weight:900;color:#0369a1;min-width:28px;text-align:center}
+.zf-txt{font-size:.78rem;color:#6b7280;font-weight:700}
+</style>
+<script src="pdf-lib.min.js"></script>
+<script src="fontkit.umd.min.js"></script>
+<script src="pdf.min.js"></script>
+<script>if(window.pdfjsLib){window.pdfjsLib.GlobalWorkerOptions.workerSrc='pdf.worker.min.js';}</script>
+<script src="grundschrift-font.js"></script>
+<script src="ziffern-pdf.js"></script>
+<script src="print-bridge.js"></script>
+<script src="back-button.js"></script>
+</head>
+<body>
+<div class="app">
+<div class="hdr">
+  <h1>&#x270D;&#xFE0F; Ziffern schreiben</h1>
+  <div class="hdr-btns">
+    <a href="mathe.html#acc-zahlverstaendnis" class="hdr-btn">&#x2190; Zur&uuml;ck</a>
+    <a href="index.html" class="hdr-btn">&#x1F3E0; Hauptmen&uuml;</a>
+  </div>
+</div>
+<div class="tabs">
+  <button class="tab active" id="t-gen"><span class="ti">&#x26A1;</span>Generator</button>
+  <button class="tab" id="t-list"><span class="ti">&#x1F522;</span>Zeilen</button>
+  <button class="tab" id="t-set"><span class="ti">&#x2699;</span>Einst.</button>
+  <button class="tab" id="t-pre"><span class="ti">&#x1F441;</span>Vorschau</button>
+</div>
+<div class="screens">
+<div class="screen active" id="s-gen">
+  <div class="card">
+    <h2>Ziffern ausw&auml;hlen</h2>
+    <div class="dig-grid" id="digGrid"></div>
+    <button class="btn bs btn-sm" onclick="selectAllDigits()">Alle Ziffern 0&ndash;9</button>
+    <div class="ss" style="margin-top:6px">Die Seite wird mit den gew&auml;hlten Ziffern der Reihe nach gef&uuml;llt.</div>
+  </div>
+  <div class="card">
+    <h2>Kästchen</h2>
+    <div style="margin-bottom:12px">
+      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Gr&ouml;&szlig;e</label>
+      <div class="opt-row" id="sizeOpts">
+        <button class="opt-btn sel" data-v="12">gro&szlig;<br><span style="font-weight:600;font-size:.66rem">12&nbsp;mm</span></button>
+        <button class="opt-btn" data-v="10">mittel<br><span style="font-weight:600;font-size:.66rem">10&nbsp;mm</span></button>
+        <button class="opt-btn" data-v="8">klein<br><span style="font-weight:600;font-size:.66rem">8&nbsp;mm</span></button>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">K&auml;stchen zum Nachspuren</label>
+      <div class="opt-row" id="traceOpts">
+        <button class="opt-btn" data-v="2">2</button>
+        <button class="opt-btn sel" data-v="4">4</button>
+        <button class="opt-btn" data-v="6">6</button>
+      </div>
+      <div class="ss" style="margin-top:6px">Danach folgen leere K&auml;stchen zum selbst&auml;ndigen Schreiben.</div>
+    </div>
+    <div>
+      <label style="font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:6px">Seitenzahl</label>
+      <div class="opt-row" id="pageChips"></div>
+    </div>
+  </div>
+</div>
+<div class="screen" id="s-list">
+  <div class="card">
+    <h2>Zeilen des Arbeitsblatts</h2>
+    <div class="zf-list" id="zfList"><p style="color:#6b7280;font-size:.85rem">Die Zeilen werden beim &Ouml;ffnen der Vorschau erstellt.</p></div>
+  </div>
+</div>
+<div class="screen" id="s-set">
+  <div class="card">
+    <h2>Darstellung</h2>
+    <div class="sr">
+      <div><div class="sl">Mengenbild</div><div class="ss">so viele Punkte wie die Ziffer</div></div>
+      <label class="tgl"><input type="checkbox" id="showDots" checked><span class="tgl-s"></span></label>
+    </div>
+    <div class="sr">
+      <div><div class="sl">Startpunkt</div><div class="ss">zeigt, wo die Ziffer beginnt</div></div>
+      <label class="tgl"><input type="checkbox" id="showStart" checked><span class="tgl-s"></span></label>
+    </div>
+    <p class="ss" style="margin-top:8px">In den Nachspur-K&auml;stchen ist der Startpunkt als gr&ouml;&szlig;erer Punkt Teil der Schrift und immer sichtbar.</p>
+  </div>
+  <div class="card">
+    <h2>&#x1F4D0; Kopfzeile</h2>
+    <div class="sr"><div class="sl">Name-Feld</div><label class="tgl"><input type="checkbox" id="showName"><span class="tgl-s"></span></label></div>
+    <div class="sr"><div class="sl">Datum-Feld</div><label class="tgl"><input type="checkbox" id="showDate"><span class="tgl-s"></span></label></div>
+    <div class="sr"><div class="sl">Klasse-Feld</div><label class="tgl"><input type="checkbox" id="showKl"><span class="tgl-s"></span></label></div>
+  </div>
+</div>
+<div class="screen" id="s-pre"><div id="previewContent"></div></div>
+</div>
+</div>
+<div class="printarea" id="printArea"></div>
+<div class="sbar" id="sbar">
+  <button class="btn bp" id="btnGoPre">&#x1F441; Vorschau &amp; Drucken</button>
+</div>
+<script>
+/* ===== Plattform-Erkennung (iOS/Safari Druck-Eigenheiten) ===== */
+var IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+var IS_SAFARI = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent);
+
+/* ===== Optionen ===== */
+function setupSingle(id){
+  document.querySelectorAll('#'+id+' .opt-btn').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('#'+id+' .opt-btn').forEach(function(x){x.classList.remove('sel');});
+      b.classList.add('sel');
+      optsDirty=true;
+      if(id==='sizeOpts') initPageChips();
+    });
+  });
+}
+function getSingle(id){var b=document.querySelector('#'+id+' .opt-btn.sel');return b?parseInt(b.dataset.v):null;}
+setupSingle('sizeOpts');setupSingle('traceOpts');
+
+/* ===== Ziffernauswahl ===== */
+var NAMES=ZiffernPDF.NAMES;
+function buildDigitGrid(){
+  var g=document.getElementById('digGrid'); g.innerHTML='';
+  for(var i=0;i<=9;i++){
+    (function(d){
+      var b=document.createElement('button');
+      b.className='dig-btn'+(d<=5?' sel':'');
+      b.dataset.v=d; b.textContent=d;
+      b.addEventListener('click',function(){
+        b.classList.toggle('sel');
+        if(!document.querySelectorAll('#digGrid .dig-btn.sel').length) b.classList.add('sel');
+        optsDirty=true;
+      });
+      g.appendChild(b);
+    })(i);
+  }
+}
+function getDigits(){
+  return Array.from(document.querySelectorAll('#digGrid .dig-btn.sel')).map(function(b){return parseInt(b.dataset.v);});
+}
+function selectAllDigits(){
+  document.querySelectorAll('#digGrid .dig-btn').forEach(function(b){b.classList.add('sel');});
+  optsDirty=true;
+}
+buildDigitGrid();
+
+/* ===== Seitenzahl =====
+   Die Kapazität kommt direkt aus dem PDF-Modul (capacityForPages), damit
+   Anzeige und Seitenumbruch nicht auseinanderlaufen können. */
+var numPages=1;
+function totalCount(){ return ZiffernPDF.capacityForPages(getSingle('sizeOpts')||12, numPages); }
+function initPageChips(){
+  var pc=document.getElementById('pageChips'); if(!pc)return; pc.innerHTML='';
+  [{n:1,l:'1 Seite'},{n:2,l:'2 Seiten'}].forEach(function(o){
+    var el=document.createElement('div');
+    el.className='opt-btn'+(o.n===numPages?' sel':'');
+    var cap=ZiffernPDF.capacityForPages(getSingle('sizeOpts')||12,o.n);
+    el.innerHTML=o.l+'<br><span style="font-weight:600;font-size:.66rem">'+cap+' Zeilen</span>';
+    el.onclick=function(){ numPages=o.n; optsDirty=true; initPageChips(); };
+    pc.appendChild(el);
+  });
+}
+initPageChips();
+
+/* ===== Generator ===== */
+var rows=[];
+var optsDirty=true;
+function generate(){
+  var digits=getDigits(); if(!digits.length)digits=[1];
+  var trace=getSingle('traceOpts')||4;
+  var cnt=totalCount();
+  rows=[];
+  for(var i=0;i<cnt;i++){
+    rows.push({ digit: digits[i % digits.length], traceCells: trace });
+  }
+  renderList();
+  optsDirty=false;
+}
+
+function renderList(){
+  var el=document.getElementById('zfList');
+  el.innerHTML='';
+  if(!rows.length){el.innerHTML='<p style="color:#6b7280;font-size:.85rem">Noch keine Zeilen.</p>';return;}
+  var cells=ZiffernPDF.cellCount(getSingle('sizeOpts')||12);
+  rows.forEach(function(r,i){
+    var d=document.createElement('div');d.className='zf-item';
+    var free=cells-r.traceCells-1-(document.getElementById('showDots').checked?ZiffernPDF.GEO.dotBoxCells:0);
+    d.innerHTML='<div class="zf-num">'+r.digit+'</div><div><div style="font-weight:800;font-size:.85rem">Zeile '+(i+1)+' &middot; '+NAMES[r.digit]+'</div>'+
+                '<div class="zf-txt">1 Vorgabe &middot; '+r.traceCells+' zum Nachspuren &middot; '+Math.max(0,free)+' frei</div></div>';
+    el.appendChild(d);
+  });
+}
+
+/* ===== Tabs + Sbar ===== */
+var sbar=document.getElementById('sbar');
+function showTab(name){
+  var map={gen:'s-gen',list:'s-list',set:'s-set',pre:'s-pre'};
+  var tmap={gen:'t-gen',list:'t-list',set:'t-set',pre:'t-pre'};
+  document.querySelectorAll('.screen').forEach(function(el){el.classList.remove('active');});
+  document.querySelectorAll('.tab').forEach(function(el){el.classList.remove('active');});
+  document.getElementById(map[name]).classList.add('active');
+  document.getElementById(tmap[name]).classList.add('active');
+  if(name==='pre'){
+    if(optsDirty || !rows.length){ generate(); }
+    sbar.innerHTML='';
+    var b1=document.createElement('button'),b2=document.createElement('button');
+    b1.style.cssText='flex:1;padding:13px 0;border-radius:12px;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;background:#f0f4f8;color:#6b7280;border:2px solid #e2e8f0';
+    b2.style.cssText='flex:1;padding:13px 0;border-radius:12px;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;border:none';
+    b1.textContent='\u2190 Zur\u00fcck';b2.textContent='Drucken / PDF';
+    b1.onclick=function(){showTab('list');};b2.onclick=doPrint;
+    sbar.appendChild(b1);sbar.appendChild(b2);
+    setTimeout(buildPreview,50);
+  }else{
+    if(name==='list' && (optsDirty || !rows.length)){ generate(); }
+    sbar.innerHTML='';
+    var btn=document.createElement('button');
+    btn.className='btn bp';btn.textContent='\ud83d\udc41 Vorschau & Drucken';
+    btn.onclick=function(){showTab('pre');};
+    sbar.appendChild(btn);
+  }
+}
+
+/* ===== PDF ===== */
+function getFontBytes(key){
+  var b64=window[key]; if(!b64)return null;
+  var bin=atob(b64), arr=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  return arr;
+}
+function pdfSpec(){
+  return {
+    rows: rows,
+    numPages: numPages,
+    cellMM: getSingle('sizeOpts')||12,
+    showDots: document.getElementById('showDots').checked,
+    showStart: document.getElementById('showStart').checked
+  };
+}
+function pdfHeaderOpts(){
+  return {
+    showName:document.getElementById('showName').checked,
+    showDate:document.getElementById('showDate').checked,
+    showKl:document.getElementById('showKl').checked
+  };
+}
+async function makePDFBytes(){
+  if(!window.fontkit && window.PDFLib && window.PDFLib.fontkit){window.fontkit=window.PDFLib.fontkit;}
+  return await ZiffernPDF.buildWorksheetPDF(
+    pdfSpec(), pdfHeaderOpts(),
+    getFontBytes('GRUNDSCHRIFT_B64'), getFontBytes('GRUNDSCHRIFT_PUNKT_B64'));
+}
+function buildPreview(){
+  var wrap=document.getElementById('previewContent');
+  wrap.innerHTML='<p style="color:#6b7280;padding:16px;font-size:.8rem">Vorschau wird erstellt &hellip;</p>';
+  (async function(){
+    try{
+      if(!rows.length){
+        wrap.innerHTML='<p style="color:#b91c1c;padding:20px;font-family:Nunito,sans-serif">Keine Zeilen erstellt &ndash; bitte Ziffern w&auml;hlen.</p>';
+        return;
+      }
+      var bytes=await makePDFBytes();
+      if(window.pdfjsLib){
+        var pdf=await window.pdfjsLib.getDocument({data:bytes}).promise;
+        wrap.innerHTML='';
+        var sw=Math.min(window.innerWidth,480)-28;
+        for(var p=1;p<=pdf.numPages;p++){
+          var page=await pdf.getPage(p);
+          var vp1=page.getViewport({scale:1});
+          var scale=sw/vp1.width;
+          var vp=page.getViewport({scale:scale*2});
+          var canvas=document.createElement('canvas');
+          canvas.style.cssText='display:block;width:'+sw+'px;border:1px solid #e2e8f0;border-radius:6px;margin-bottom:10px;background:#fff';
+          canvas.width=vp.width;canvas.height=vp.height;
+          await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+          wrap.appendChild(canvas);
+        }
+      }else{
+        var blob=new Blob([bytes],{type:'application/pdf'});
+        wrap.innerHTML='<embed src="'+URL.createObjectURL(blob)+'" type="application/pdf" style="width:100%;height:70vh;border:1px solid #e2e8f0;border-radius:6px">';
+      }
+    }catch(e){
+      wrap.innerHTML='<p style="color:red;padding:20px">'+(e.message||String(e))+'</p>';
+      console.error(e);
+    }
+  })();
+}
+async function doPrint(){
+  try{
+    if(!rows.length){ generate(); }
+    if(!rows.length){alert('Keine Zeilen erstellt \u2013 bitte Ziffern w\u00e4hlen.');return;}
+    var bytes=await makePDFBytes();
+    await PrintBridge.printPDF(bytes,'Ziffern-schreiben.pdf');
+  }catch(e){
+    alert('Druck fehlgeschlagen: '+(e.message||e));
+    console.error(e);
+  }
+}
+
+/* ===== Tab buttons ===== */
+document.getElementById('t-gen').addEventListener('click',function(){showTab('gen');});
+document.getElementById('t-list').addEventListener('click',function(){showTab('list');});
+document.getElementById('t-set').addEventListener('click',function(){showTab('set');});
+document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
+document.getElementById('btnGoPre').addEventListener('click',function(){showTab('pre');});
+document.getElementById('showDots').addEventListener('change',function(){optsDirty=true;});
+document.getElementById('showStart').addEventListener('change',function(){optsDirty=true;});
+
+document.addEventListener('contextmenu',function(e){e.preventDefault();});
+document.addEventListener('selectstart',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;e.preventDefault();});
+
+/* ===== PWA Manifest ===== */
+var manifest={name:'Ziffern schreiben',short_name:'Ziffern',start_url:'.',display:'standalone',background_color:'#f0f9ff',theme_color:'#0369a1',icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%230369a1'/%3E%3Ctext x='256' y='360' text-anchor='middle' font-size='280' font-family='sans-serif' fill='white'%3E123%3C/text%3E%3C/svg%3E",sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]};
+var mblob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+var mlink=document.createElement('link');mlink.rel='manifest';mlink.href=URL.createObjectURL(mblob);document.head.appendChild(mlink);
+</script>
+<script src="app-back.js"></script>
+<script src="ads.js"></script>
+</body>
+</html>
