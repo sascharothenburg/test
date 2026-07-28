@@ -58,9 +58,10 @@ input{-webkit-user-select:text;user-select:text}
 .typ-list{display:flex;flex-direction:column;gap:7px}
 .typ-btn{width:100%;text-align:left;padding:10px 12px;border-radius:11px;border:2px solid #e2e8f0;background:#f8fafc;font-family:Nunito,sans-serif;cursor:pointer;display:flex;align-items:center;gap:10px}
 .typ-btn.sel{background:#e0f2fe;border-color:#0ea5e9}
-.typ-btn .te{font-size:1.25rem;line-height:1}
-.typ-btn .tn{font-weight:800;font-size:.85rem;color:#1e1b4b}
-.typ-btn .td{font-size:.68rem;color:#6b7280;font-weight:700;margin-top:1px}
+.typ-btn .te{font-size:1.25rem;line-height:1;flex-shrink:0}
+.typ-btn .tt{flex:1;min-width:0;display:flex;flex-direction:column}
+.typ-btn .tn{display:block;font-weight:800;font-size:.85rem;color:#1e1b4b}
+.typ-btn .td{display:block;font-size:.68rem;color:#6b7280;font-weight:700;margin-top:2px;line-height:1.3}
 .typ-btn.dis{opacity:.45;cursor:not-allowed}
 .zw-list{display:flex;flex-direction:column;gap:6px}
 .zw-item{background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:9px;padding:7px 10px;font-size:.82rem;display:flex;justify-content:space-between;gap:8px}
@@ -95,11 +96,19 @@ input{-webkit-user-select:text;user-select:text}
 <div class="screens">
 <div class="screen active" id="s-gen">
   <div class="card">
+    <h2>Was soll auf das Blatt?</h2>
+    <div class="opt-row" id="artOpts">
+      <button class="opt-btn sel" data-v="aufgaben">&#x1F4DD; Aufgaben</button>
+      <button class="opt-btn" data-v="merkblatt">&#x1F3DB;&#xFE0F; Merkblatt r&ouml;misch</button>
+    </div>
+    <div class="ss" id="artHint" style="margin-top:6px"></div>
+  </div>
+  <div class="card" id="cardTyp">
     <h2>Aufgabentyp</h2>
     <div class="typ-list" id="typList"></div>
     <div class="ss" style="margin-top:8px">Mehrfachauswahl m&ouml;glich &ndash; die Aufgaben wechseln sich dann ab.</div>
   </div>
-  <div class="card">
+  <div class="card" id="cardRange">
     <h2>Zahlenraum</h2>
     <div class="opt-row" id="rangeOpts">
       <button class="opt-btn" data-v="20">bis 20</button>
@@ -108,7 +117,7 @@ input{-webkit-user-select:text;user-select:text}
     </div>
     <div class="ss" id="rangeHint" style="margin-top:6px"></div>
   </div>
-  <div class="card">
+  <div class="card" id="cardPages">
     <h2>Seitenzahl</h2>
     <div class="opt-row" id="pageChips"></div>
     <p class="ss" id="colHint" style="margin-top:6px"></p>
@@ -142,6 +151,10 @@ input{-webkit-user-select:text;user-select:text}
   <button class="btn bp" id="btnGoPre">&#x1F441; Vorschau &amp; Drucken</button>
 </div>
 <script>
+/* Blattart: normale Aufgaben oder das einseitige Merkblatt */
+var blattArt='aufgaben';
+function istMerkblatt(){ return blattArt==='merkblatt'; }
+
 var IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
 var IS_SAFARI = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent);
 
@@ -163,7 +176,7 @@ function buildTypList(){
     var b=document.createElement('button');
     b.className='typ-btn'+(selTypen[t.k]?' sel':'');
     b.dataset.k=t.k;
-    b.innerHTML='<span class="te">'+t.e+'</span><span><span class="tn">'+t.n+'</span><span class="td">'+t.d+'</span></span>';
+    b.innerHTML='<span class="te">'+t.e+'</span><span class="tt"><span class="tn">'+t.n+'</span><span class="td">'+t.d+'</span></span>';
     b.addEventListener('click',function(){
       if(b.classList.contains('dis'))return;
       selTypen[t.k]=!selTypen[t.k];
@@ -256,7 +269,7 @@ function showTab(name){
   document.getElementById(map[name]).classList.add('active');
   document.getElementById(tmap[name]).classList.add('active');
   if(name==='pre'){
-    if(optsDirty || !tasks.length){ generate(); }
+    if(!istMerkblatt() && (optsDirty || !tasks.length)){ generate(); }
     sbar.innerHTML='';
     var b1=document.createElement('button'),b2=document.createElement('button');
     b1.style.cssText='flex:1;padding:13px 0;border-radius:12px;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;background:#f0f4f8;color:#6b7280;border:2px solid #e2e8f0';
@@ -266,7 +279,12 @@ function showTab(name){
     sbar.appendChild(b1);sbar.appendChild(b2);
     setTimeout(buildPreview,50);
   }else{
-    if(name==='list' && (optsDirty || !tasks.length)){ generate(); }
+    if(name==='list'){
+      if(istMerkblatt()){
+        document.getElementById('zwList').innerHTML='<p style="color:#6b7280;font-size:.85rem">'+
+          'Das Merkblatt enth\u00e4lt keine Aufgaben \u2013 schau es dir in der Vorschau an.</p>';
+      } else if(optsDirty || !tasks.length){ generate(); }
+    }
     sbar.innerHTML='';
     var btn=document.createElement('button');
     btn.className='btn bp';btn.textContent='\ud83d\udc41 Vorschau & Drucken';
@@ -294,14 +312,16 @@ function pdfHeaderOpts(){
 }
 async function makePDFBytes(){
   if(!window.fontkit && window.PDFLib && window.PDFLib.fontkit){window.fontkit=window.PDFLib.fontkit;}
-  return await ZahlwoerterPDF.buildWorksheetPDF(pdfSpec(), pdfHeaderOpts(), getFontBytes('GRUNDSCHRIFT_B64'));
+  var font=getFontBytes('GRUNDSCHRIFT_B64');
+  if(istMerkblatt()) return await ZahlwoerterPDF.buildMerkblattPDF(pdfHeaderOpts(), font);
+  return await ZahlwoerterPDF.buildWorksheetPDF(pdfSpec(), pdfHeaderOpts(), font);
 }
 function buildPreview(){
   var wrap=document.getElementById('previewContent');
   wrap.innerHTML='<p style="color:#6b7280;padding:16px;font-size:.8rem">Vorschau wird erstellt &hellip;</p>';
   (async function(){
     try{
-      if(!tasks.length){
+      if(!istMerkblatt() && !tasks.length){
         wrap.innerHTML='<p style="color:#b91c1c;padding:20px;font-family:Nunito,sans-serif">Keine Aufgaben erstellt &ndash; bitte Aufgabentyp w&auml;hlen.</p>';
         return;
       }
@@ -333,10 +353,12 @@ function buildPreview(){
 }
 async function doPrint(){
   try{
-    if(!tasks.length){ generate(); }
-    if(!tasks.length){alert('Keine Aufgaben erstellt \u2013 bitte Aufgabentyp w\u00e4hlen.');return;}
+    if(!istMerkblatt()){
+      if(!tasks.length){ generate(); }
+      if(!tasks.length){alert('Keine Aufgaben erstellt \u2013 bitte Aufgabentyp w\u00e4hlen.');return;}
+    }
     var bytes=await makePDFBytes();
-    await PrintBridge.printPDF(bytes,'Zahlwoerter.pdf');
+    await PrintBridge.printPDF(bytes, istMerkblatt()?'Roemische-Zahlen-Merkblatt.pdf':'Zahlwoerter.pdf');
   }catch(e){
     alert('Druck fehlgeschlagen: '+(e.message||e));
     console.error(e);
@@ -353,8 +375,28 @@ document.getElementById('btnGoPre').addEventListener('click',function(){showTab(
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 document.addEventListener('selectstart',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;e.preventDefault();});
 
+/* ===== Blattart-Umschalter ===== */
+document.querySelectorAll('#artOpts .opt-btn').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('#artOpts .opt-btn').forEach(function(x){x.classList.remove('sel');});
+    b.classList.add('sel');
+    blattArt=b.dataset.v; optsDirty=true; applyArt();
+  });
+});
+/* Beim Merkblatt sind Aufgabentyp, Zahlenraum und Seitenzahl gegenstandslos */
+function applyArt(){
+  var m=istMerkblatt();
+  ['cardTyp','cardRange','cardPages'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.style.display = m ? 'none' : '';
+  });
+  document.getElementById('artHint').textContent = m
+    ? 'Ein einseitiges Lernblatt zum Anschauen oder Aufh\u00e4ngen \u2013 ohne Aufgaben.'
+    : 'Arbeitsblatt mit Aufgaben zum Ausf\u00fcllen.';
+  if(!m) updateHints();
+}
+
 /* ===== Init ===== */
-buildTypList(); initPageChips(); updateHints();
+buildTypList(); initPageChips(); updateHints(); applyArt();
 
 /* ===== PWA Manifest ===== */
 var manifest={name:'Zahlw\u00f6rter & r\u00f6mische Zahlen',short_name:'Zahlw\u00f6rter',start_url:'.',display:'standalone',background_color:'#f0f9ff',theme_color:'#0369a1',icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%230369a1'/%3E%3Ctext x='256' y='330' text-anchor='middle' font-size='190' font-family='sans-serif' fill='white'%3EXVII%3C/text%3E%3C/svg%3E",sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]};
