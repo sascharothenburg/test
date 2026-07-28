@@ -72,6 +72,7 @@ input{-webkit-user-select:text;user-select:text}
 <script src="fontkit.umd.min.js"></script>
 <script src="pdf.min.js"></script>
 <script>if(window.pdfjsLib){window.pdfjsLib.GlobalWorkerOptions.workerSrc='pdf.worker.min.js';}</script>
+<script src="praepositionen-icons.js"></script>
 <script src="praepositionen-pdf.js"></script>
 <script src="print-bridge.js"></script>
 <script src="back-button.js"></script>
@@ -170,6 +171,18 @@ var RELS=[
   {id:'between',en:'between',de:'zwischen'}
 ];
 
+var ITEMS=[
+  {id:'cat',en:'cat',de:'Katze'},
+  {id:'dog',en:'dog',de:'Hund'},
+  {id:'duck',en:'duck',de:'Ente'},
+  {id:'bird',en:'bird',de:'Vogel'},
+  {id:'frog',en:'frog',de:'Frosch'},
+  {id:'rabbit',en:'rabbit',de:'Hase'},
+  {id:'apple',en:'apple',de:'Apfel'},
+  {id:'banana',en:'banana',de:'Banane'},
+  {id:'book',en:'book',de:'Buch'},
+  {id:'pencil',en:'pencil',de:'Bleistift'}
+];
 function rnd(a){return a[Math.floor(Math.random()*a.length)];}
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -197,7 +210,7 @@ var MODEHINTS={
 });
 
 var numPages=1;
-var PER_PAGE={p1:6,p2:14};
+var PER_PAGE={p1:5,p2:10};
 function totalCount(){ return numPages<=1?PER_PAGE.p1:PER_PAGE.p2; }
 function initPageSeg(){
   var seg=document.getElementById('pageSeg'); if(!seg)return;
@@ -213,12 +226,13 @@ function initPageSeg(){
 
 function buildTask(type){
   var rel=rnd(RELS);
+  var item=rnd(ITEMS);
   if(type==='choice'){
     var others=shuffle(RELS.filter(function(r){return r.id!==rel.id;})).slice(0,2);
     var opts=shuffle([rel].concat(others));
-    return {type:'choice', rel:rel, options:opts};
+    return {type:'choice', rel:rel, item:item, options:opts};
   }
-  return {type:'gap', rel:rel};
+  return {type:'gap', rel:rel, item:item};
 }
 
 function generate(silent){
@@ -242,7 +256,7 @@ function renderList(){
   tasks.forEach(function(t,i){
     var d=document.createElement('div'); d.className='tag-item';
     var sp=document.createElement('span'); sp.style.flex='1';
-    sp.innerHTML='<span class="en">'+esc(t.rel.en)+'</span> &ndash; '+esc(t.rel.de);
+    sp.innerHTML='<span class="en">'+esc(t.item.en)+'</span> &ndash; '+esc(t.rel.en)+' the box &nbsp;('+esc(t.rel.de)+')';
     var meta=document.createElement('span'); meta.className='meta'; meta.textContent=TL[t.type];
     var b=document.createElement('button'); b.innerHTML='\u2715';
     b.addEventListener('click',(function(idx){return function(){tasks.splice(idx,1);renderList();};})(i));
@@ -256,7 +270,8 @@ function pdfSpec(){
     showSol: document.getElementById('showSolution').checked,
     showBank: document.getElementById('showBank').checked,
     lineStyle: (document.querySelector('#lineSeg .seg-b.active')||{}).dataset ? document.querySelector('#lineSeg .seg-b.active').dataset.v : '2',
-    bankRels: RELS
+    bankRels: RELS,
+    icons: (typeof ITEM_ICONS!=='undefined') ? ITEM_ICONS : null
   };
 }
 function pdfHeaderOpts(){

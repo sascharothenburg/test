@@ -55,6 +55,7 @@
       text(str, x, yTop, o) { o = o || {}; const f = o.font || fonts.regular; const size = o.size || 10; const asc = f.heightAtSize(size) * 0.76; page.drawText(String(str), { x, y: PT.pageH - yTop - asc, size, font: f, color: col(o.color) || col(C.ink) }); },
       textCentered(str, cx, yTop, o) { o = o || {}; const f = o.font || fonts.regular; const size = o.size || 10; const w = f.widthOfTextAtSize(String(str), size); this.text(str, cx - w / 2, yTop, o); },
       textWidth(str, font, size) { return (font || fonts.regular).widthOfTextAtSize(String(str), size); },
+      image(img, cx, cyTopCenter, size) { if (!img) return; page.drawImage(img, { x: cx - size / 2, y: PT.pageH - cyTopCenter - size / 2, width: size, height: size }); },
       fonts,
     };
   }
@@ -88,71 +89,87 @@
   function drawLineRow(ctx, x, yTop, w, style) {
     const x2 = x + w;
     if (style === '0' || !style) { ctx.line(x, yTop + BAND1, x2, yTop + BAND1, { color: rgb01(0xaa, 0xaa, 0xaa), w: 1.4 }); return BAND1 + 2.4 * MM; }
-    if (style === '1') { const padTop = BAND1 * 2, padBot = BAND1; ctx.line(x, yTop + padTop, x2, yTop + padTop, { color: C.purple2, w: 2 }); return padTop + padBot; }
-    return BAND1 * 3 + 2.4 * MM;
+    if (style === '1') { const padTop = BAND1 * 2; ctx.line(x, yTop + padTop, x2, yTop + padTop, { color: C.purple2, w: 2 }); return padTop + BAND1; }
+    // style '2' (Standard): Hilfslinie (gestrichelt) + Grundlinie (durchgezogen), 3.5mm Abstand
+    const hilfsY = yTop + BAND1, grundY = hilfsY + BAND1;
+    ctx.line(x, hilfsY, x2, hilfsY, { color: rgb01(0x93, 0xc5, 0xfd), w: 1, dash: [3, 2] });
+    ctx.line(x, grundY, x2, grundY, { color: rgb01(0x1d, 0x4e, 0xd8), w: 2 });
+    return grundY - yTop + 2.4 * MM;
   }
 
-  // ---------- Szene: Kiste (mit Füßchen) + Ball, je nach Präposition ----------
+  // ---------- Szene: Kiste (mit Füßchen) + Gegenstand-Icon, je nach Präposition ----------
   // Frame: quadratisch, S = Kantenlänge in pt. x,yTop = linke obere Ecke.
-  function drawScene(ctx, x, yTop, S, relId, count) {
+  // imgCache: {itemId: PDFImage} bereits eingebettete Icons (siehe embedItemIcons()).
+  function drawScene(ctx, imgCache, x, yTop, S, relId, itemId) {
     const feetW = 0.07 * S, feetH = 0.06 * S;
     const boxW = 0.46 * S, boxH = 0.26 * S;
-    const ballR = 0.095 * S;
+    const IR = 0.13 * S; // halbe Icongröße
     const ground = yTop + 0.88 * S;
     ctx.line(x + 0.03 * S, ground, x + 0.97 * S, ground, { color: C.ground, w: 1 });
 
-    function drawBox(bx, filled) {
+    function drawBox(bx, bw, filled) {
       const by = ground - feetH - boxH;
       if (filled) {
-        ctx.rect(bx, by, boxW, boxH, { fill: C.box, stroke: C.boxBd, strokeWidth: 1.3 });
-        ctx.line(bx, by + boxH * 0.32, bx + boxW, by + boxH * 0.32, { color: C.boxBd, w: 1 }); // Deckelkante
+        ctx.rect(bx, by, bw, boxH, { fill: C.box, stroke: C.boxBd, strokeWidth: 1.3 });
+        ctx.line(bx, by + boxH * 0.32, bx + bw, by + boxH * 0.32, { color: C.boxBd, w: 1 });
       } else {
-        // offene Kiste: nur Umriss (links, rechts, unten) + gestrichelte obere Kante
         ctx.line(bx, by, bx, by + boxH, { color: C.boxBd, w: 1.4 });
-        ctx.line(bx + boxW, by, bx + boxW, by + boxH, { color: C.boxBd, w: 1.4 });
-        ctx.line(bx, by + boxH, bx + boxW, by + boxH, { color: C.boxBd, w: 1.4 });
-        ctx.line(bx, by, bx + boxW, by, { color: C.boxBd, w: 1, dash: [2, 2] });
+        ctx.line(bx + bw, by, bx + bw, by + boxH, { color: C.boxBd, w: 1.4 });
+        ctx.line(bx, by + boxH, bx + bw, by + boxH, { color: C.boxBd, w: 1.4 });
+        ctx.line(bx, by, bx + bw, by, { color: C.boxBd, w: 1, dash: [2, 2] });
       }
-      // Füßchen
-      ctx.rect(bx + 0.05 * boxW, ground - feetH, feetW, feetH, { fill: C.boxBd });
-      ctx.rect(bx + boxW - 0.05 * boxW - feetW, ground - feetH, feetW, feetH, { fill: C.boxBd });
+      ctx.rect(bx + 0.05 * bw, ground - feetH, feetW, feetH, { fill: C.boxBd });
+      ctx.rect(bx + bw - 0.05 * bw - feetW, ground - feetH, feetW, feetH, { fill: C.boxBd });
       return by;
     }
-    function drawBall(cx, cy) {
-      ctx.circle(cx, cy, ballR, { fill: C.ball, stroke: C.ballBd, strokeWidth: 1.2 });
-      ctx.circle(cx - ballR * 0.35, cy - ballR * 0.35, ballR * 0.3, { fill: rgb01(0xff, 0xff, 0xff) });
+    function drawItem(cx, cyCenter, scale) {
+      const img = imgCache && imgCache[itemId];
+      const sz = IR * 2 * (scale || 1);
+      if (img) { ctx.image(img, cx, cyCenter, sz); }
+      else { ctx.circle(cx, cyCenter, sz / 2, { fill: C.ball, stroke: C.ballBd, strokeWidth: 1.2 }); }
     }
 
-    const cx0 = x + 0.5 * S;
-
     if (relId === 'between') {
-      const bx1 = x + 0.04 * S, bx2 = x + 0.96 * S - boxW;
-      drawBox(bx1, true); drawBox(bx2, true);
-      drawBall(cx0, ground - ballR);
+      const bw = 0.382 * S;                 // breite Kisten
+      const itemS = 0.16 * S;               // kleinerer Gegenstand, damit die Lücke eng bleibt
+      const gap = itemS * 1.1;
+      const bx1 = x + (S - (bw * 2 + gap)) / 2, bx2 = bx1 + bw + gap;
+      drawBox(bx1, bw, true); drawBox(bx2, bw, true);
+      drawItem(bx1 + bw + gap / 2, ground - itemS / 2, itemS / (IR * 2));
       return;
     }
 
     let bx = x + 0.27 * S;
-    if (relId === 'next_to') bx = x + 0.16 * S;
+    if (relId === 'next_to') bx = x + 0.14 * S;
 
     if (relId === 'in') {
-      const by = drawBox(bx, false);
-      drawBall(bx + boxW / 2, by + boxH * 0.62);
+      const by = drawBox(bx, boxW, false);
+      drawItem(bx + boxW / 2, by + boxH * 0.6, 0.92);
       return;
     }
 
-    const by = drawBox(bx, true);
+    const by = drawBox(bx, boxW, true);
 
-    if (relId === 'on') { drawBall(bx + boxW / 2, by - ballR * 0.85); return; }
-    if (relId === 'under') { drawBall(bx + boxW / 2, ground - feetH * 0.5); return; }
-    if (relId === 'next_to') { drawBall(bx + boxW + ballR + 0.05 * S, ground - ballR); return; }
-    if (relId === 'behind') { drawBall(bx + boxW - ballR * 0.25, by - ballR * 0.25); drawBox(bx, true); return; }
-    if (relId === 'in_front_of') { drawBall(bx + boxW * 0.32, ground - ballR * 0.95); return; }
+    if (relId === 'on') { drawItem(bx + boxW / 2, by - IR * 0.95, 1); return; }
+    if (relId === 'under') { drawItem(bx + boxW / 2, ground - feetH * 0.5, 0.82); return; }
+    if (relId === 'next_to') { drawItem(bx + boxW + IR * 1.15, ground - IR, 1); return; }
+    if (relId === 'behind') { drawItem(bx + boxW - IR * 0.2, by - IR * 0.15, 0.9); drawBox(bx, boxW, true); return; }
+    if (relId === 'in_front_of') { drawItem(bx + boxW * 0.5, ground - IR * 0.55, 1.2); return; }
   }
 
-  function sentenceFor(rel) {
-    if (rel.id === 'between') return { pre: 'The ball is ', gap: rel.en, post: ' the two boxes.' };
-    return { pre: 'The ball is ', gap: rel.en, post: ' the box.' };
+  async function embedItemIcons(pdf, icons, tasks) {
+    const need = {}; tasks.forEach(t => { if (t.item && t.item.id) need[t.item.id] = 1; });
+    const cache = {};
+    for (const id of Object.keys(need)) {
+      if (icons && icons[id]) { try { cache[id] = await pdf.embedPng(icons[id]); } catch (e) { /* ignore */ } }
+    }
+    return cache;
+  }
+
+  function sentenceFor(rel, item) {
+    const subj = 'The ' + (item ? item.en : 'ball') + ' is ';
+    if (rel.id === 'between') return { pre: subj, gap: rel.en, post: ' the two boxes.' };
+    return { pre: subj, gap: rel.en, post: ' the box.' };
   }
 
   async function buildWorksheetPDF(spec, opts) {
@@ -216,25 +233,27 @@
     }
 
     const S = 32 * MM;
+    const TEXT_Y = 0.60 * S; // fixe Ankerhöhe, an Kistenmitte ausgerichtet -> keine "springende" Zeile mehr
+    const imgCache = await embedItemIcons(pdf, spec.icons, tasks);
 
     function taskChoice(t, n) {
       const blockH = 9.5 * 1.5 + S + 8 * MM;
       ensure(blockH);
       secHead(n, 'Look and circle.', 'Kreise die richtige Pr\u00e4position ein.');
       const sceneX = PT.marginX;
-      drawScene(ctx, sceneX, y, S, t.rel.id);
+      drawScene(ctx, imgCache, sceneX, y, S, t.rel.id, t.item && t.item.id);
       const tx = sceneX + S + 6 * MM;
       const tW = W - S - 6 * MM;
-      const s = sentenceFor(t.rel);
+      const s = sentenceFor(t.rel, t.item);
       let cx = tx;
-      ctx.text(s.pre, cx, y + S * 0.28, { font: fonts.bold, size: fs, color: C.ink });
+      ctx.text(s.pre, cx, y + TEXT_Y, { font: fonts.bold, size: fs, color: C.ink });
       cx += ctx.textWidth(s.pre, fonts.bold, fs);
       const bw = Math.max(30, ctx.textWidth('in front of', fonts.bold, fs) + 6);
-      ctx.line(cx, y + S * 0.28 + fs * 0.95, cx + bw, y + S * 0.28 + fs * 0.95, { color: C.blankLn, w: 1.4, dash: [2, 2] });
+      ctx.line(cx, y + TEXT_Y + fs * 0.95, cx + bw, y + TEXT_Y + fs * 0.95, { color: C.blankLn, w: 1.4, dash: [2, 2] });
       cx += bw + 2;
-      ctx.text(s.post, cx, y + S * 0.28, { font: fonts.bold, size: fs, color: C.ink });
+      ctx.text(s.post, cx, y + TEXT_Y, { font: fonts.bold, size: fs, color: C.ink });
       // Optionen
-      let oy = y + S * 0.55;
+      let oy = y + TEXT_Y + 9 * MM;
       let ox = tx;
       t.options.forEach(opt => {
         const label = opt.en;
@@ -254,18 +273,18 @@
       ensure(blockH);
       secHead(n, 'Fill in the gap.', 'Schreibe die passende Pr\u00e4position.');
       const sceneX = PT.marginX;
-      drawScene(ctx, sceneX, y, S, t.rel.id);
+      drawScene(ctx, imgCache, sceneX, y, S, t.rel.id, t.item && t.item.id);
       const tx = sceneX + S + 6 * MM;
-      const s = sentenceFor(t.rel);
+      const s = sentenceFor(t.rel, t.item);
       let cx = tx;
-      ctx.text(s.pre, cx, y + S * 0.28, { font: fonts.bold, size: fs, color: C.ink });
+      ctx.text(s.pre, cx, y + TEXT_Y, { font: fonts.bold, size: fs, color: C.ink });
       cx += ctx.textWidth(s.pre, fonts.bold, fs);
       const bw = 26 * MM;
-      ctx.line(cx, y + S * 0.28 + fs * 0.95, cx + bw, y + S * 0.28 + fs * 0.95, { color: C.blankLn, w: 1.6 });
+      ctx.line(cx, y + TEXT_Y + fs * 0.95, cx + bw, y + TEXT_Y + fs * 0.95, { color: C.blankLn, w: 1.6 });
       cx += bw + 2;
-      ctx.text(s.post, cx, y + S * 0.28, { font: fonts.bold, size: fs, color: C.ink });
+      ctx.text(s.post, cx, y + TEXT_Y, { font: fonts.bold, size: fs, color: C.ink });
       const lrX = tx, lrW = W - S - 6 * MM;
-      const used = drawLineRow(ctx, lrX, y + S * 0.55, Math.min(lrW, 60 * MM), style);
+      const used = drawLineRow(ctx, lrX, y + TEXT_Y + 9 * MM, Math.min(lrW, 60 * MM), style);
       y += S + 6 * MM;
     }
 
@@ -282,7 +301,7 @@
       tasks.forEach(t => {
         ensure(9.5 * 1.5 + fs * 1.5 + 4 * MM);
         secHead(snr, 'Solution', '');
-        const s = sentenceFor(t.rel);
+        const s = sentenceFor(t.rel, t.item);
         let tx = PT.marginX;
         ctx.text(s.pre, tx, y, { font: fonts.regular, size: fs, color: C.ink });
         tx += ctx.textWidth(s.pre, fonts.regular, fs);

@@ -88,8 +88,11 @@
   function drawLineRow(ctx, x, yTop, w, style) {
     const x2 = x + w;
     if (style === '0' || !style) { ctx.line(x, yTop + BAND1, x2, yTop + BAND1, { color: rgb01(0xaa, 0xaa, 0xaa), w: 1.4 }); return BAND1 + 2.4 * MM; }
-    if (style === '1') { ctx.line(x, yTop + BAND1 * 2, x2, yTop + BAND1 * 2, { color: C.purple2, w: 2 }); return BAND1 * 3; }
-    return BAND1 * 3 + 2.4 * MM;
+    if (style === '1') { const padTop = BAND1 * 2; ctx.line(x, yTop + padTop, x2, yTop + padTop, { color: C.purple2, w: 2 }); return padTop + BAND1; }
+    const hilfsY = yTop + BAND1, grundY = hilfsY + BAND1;
+    ctx.line(x, hilfsY, x2, hilfsY, { color: rgb01(0x93, 0xc5, 0xfd), w: 1, dash: [3, 2] });
+    ctx.line(x, grundY, x2, grundY, { color: rgb01(0x1d, 0x4e, 0xd8), w: 2 });
+    return grundY - yTop + 2.4 * MM;
   }
 
   // ---------- Analoguhr ----------
