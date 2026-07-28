@@ -111,19 +111,40 @@
     return cache;
   }
 
-  // Kompakte "this/that"-Mini-Szene: Auge links (Betrachter), Gegenstand(e) nah/fern
+  // Kompakte "this/that"-Mini-Szene: Kind links (Betrachter), Gegenstand(e) nah/fern
   function drawThisThatScene(ctx, imgCache, x, yTop, W, H, near, plural, itemId) {
-    const midY = yTop + H * 0.62;
-    ctx.line(x, midY, x + W, midY, { color: C.ground, w: 1 });
-    ctx.circle(x + H * 0.28, midY, H * 0.16, { stroke: C.eyeBd, strokeWidth: 1.3 });
-    ctx.circle(x + H * 0.28, midY, H * 0.05, { fill: C.eyeBd });
-    const itemSize = near ? H * 0.62 : H * 0.30;
-    const baseX = near ? x + W * 0.34 : x + W * 0.72;
+    const ground = yTop + 0.90 * H;
+    ctx.line(x, ground, x + W, ground, { color: C.ground, w: 1 });
+
+    // Strichfigur (Betrachter) - klar als Person erkennbar, kein Kreis-Symbol
+    const figH = 0.52 * H;
+    const fx = x + 0.11 * W;
+    const headR = figH * 0.15;
+    const headY = ground - figH + headR;
+    const neckY = headY + headR;
+    const hipY = ground - figH * 0.34;
+    ctx.circle(fx, headY, headR, { stroke: C.eyeBd, strokeWidth: 1.2 });
+    ctx.line(fx, neckY, fx, hipY, { color: C.eyeBd, w: 1.2 });
+    const armY = neckY + figH * 0.13;
+    ctx.line(fx - figH * 0.16, armY + figH * 0.06, fx, armY, { color: C.eyeBd, w: 1.2 });
+    ctx.line(fx, armY, fx + figH * 0.18, armY - figH * 0.02, { color: C.eyeBd, w: 1.2 });
+    ctx.line(fx, hipY, fx - figH * 0.13, ground, { color: C.eyeBd, w: 1.2 });
+    ctx.line(fx, hipY, fx + figH * 0.13, ground, { color: C.eyeBd, w: 1.2 });
+
+    // Gegenstand/Gegenstände: nah = groß & dicht, fern = kleiner & weit rechts
+    let itemSize = near ? 0.66 * H : 0.44 * H;
+    if (plural) itemSize *= 0.74;
+    const cxItem = near ? x + 0.48 * W : x + 0.78 * W;
     if (plural) {
-      drawTinyItem(ctx, imgCache, itemId, baseX, midY - itemSize * 0.5, itemSize);
-      drawTinyItem(ctx, imgCache, itemId, baseX + itemSize * 0.85, midY - itemSize * 0.5, itemSize);
+      const gap = itemSize * 0.94;
+      let left = cxItem - gap / 2, right = cxItem + gap / 2;
+      const maxR = x + W - itemSize * 0.5;
+      if (right > maxR) { const shift = right - maxR; left -= shift; right -= shift; }
+      drawTinyItem(ctx, imgCache, itemId, left, ground - itemSize * 0.5, itemSize);
+      drawTinyItem(ctx, imgCache, itemId, right, ground - itemSize * 0.5, itemSize);
     } else {
-      drawTinyItem(ctx, imgCache, itemId, baseX + itemSize * 0.4, midY - itemSize * 0.5, itemSize);
+      const cx = Math.min(cxItem, x + W - itemSize * 0.5);
+      drawTinyItem(ctx, imgCache, itemId, cx, ground - itemSize * 0.5, itemSize);
     }
   }
 
@@ -177,8 +198,8 @@
       y += boxH + 4 * MM;
     }
 
-    const ROWH = 24 * MM;      // einheitliche Zeilenhöhe für ALLE Aufgabentypen
-    const SCENE_W = 26 * MM;   // Breite der Mini-Szene bei this/that
+    const ROWH = 28 * MM;      // einheitliche Zeilenhöhe für ALLE Aufgabentypen
+    const SCENE_W = 34 * MM;   // Breite der Mini-Szene bei this/that
     const PILL_H = 7.2 * MM, PILL_FS = 10.3;
     const imgCache = await embedItemIcons(pdf, spec.icons, tasks);
 
