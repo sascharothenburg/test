@@ -70,6 +70,7 @@ input{-webkit-user-select:text;user-select:text}
 <script src="fontkit.umd.min.js"></script>
 <script src="pdf.min.js"></script>
 <script>if(window.pdfjsLib){window.pdfjsLib.GlobalWorkerOptions.workerSrc='pdf.worker.min.js';}</script>
+<script src="grammatik-icons.js"></script>
 <script src="grammatik-pdf.js"></script>
 <script src="print-bridge.js"></script>
 <script src="back-button.js"></script>
@@ -197,8 +198,8 @@ var WH_ITEMS=[
   ['', ' is the cat?','Where']
 ];
 var WH_WORDS=['What','Where','Who','When','How'];
-var THISTHAT_ITEMS=['ball','apple','star'];
-var THISTHAT_NOUNS={ball:{s:'ball',p:'balls'},apple:{s:'apple',p:'apples'},star:{s:'star',p:'stars'}};
+var THISTHAT_ITEMS=['apple','banana','cat','dog','book','hat','egg','cake'];
+function article(word){ return /^[aeiou]/i.test(word) ? 'an' : 'a'; }
 
 function buildTask(mode){
   if(mode==='tobe'){
@@ -223,11 +224,10 @@ function buildTask(mode){
   var near = Math.random()<0.5;
   var plural = Math.random()<0.5;
   var itemId = rnd(THISTHAT_ITEMS);
-  var noun = THISTHAT_NOUNS[itemId];
   var correct = plural ? (near?'these':'those') : (near?'this':'that');
   var pre = '', post;
-  if(plural){ post = ' are '+(itemId==='star'?'two stars.':(itemId==='apple'?'two apples.':'two balls.')); }
-  else { post = ' is a '+noun.s+'.'; }
+  if(plural){ post = ' are two '+itemId+'s.'; }
+  else { post = ' is '+article(itemId)+' '+itemId+'.'; }
   return {type:'thisthat', pre:pre, post:post, correct:correct, options:['this','that','these','those'], near:near, plural:plural, itemId:itemId};
 }
 
@@ -293,7 +293,8 @@ function pdfSpec(){
   return {
     tasks: tasks,
     showSol: document.getElementById('showSolution').checked,
-    showBank: document.getElementById('showBank').checked
+    showBank: document.getElementById('showBank').checked,
+    icons: (typeof THISTHAT_ICONS!=='undefined') ? THISTHAT_ICONS : null
   };
 }
 function pdfHeaderOpts(){

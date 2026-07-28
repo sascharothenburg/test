@@ -56,6 +56,7 @@
       text(str, x, yTop, o) { o = o || {}; const f = o.font || fonts.regular; const size = o.size || 10; const asc = f.heightAtSize(size) * 0.76; page.drawText(String(str), { x, y: PT.pageH - yTop - asc, size, font: f, color: col(o.color) || col(C.ink) }); },
       textCentered(str, cx, yTop, o) { o = o || {}; const f = o.font || fonts.regular; const size = o.size || 10; const w = f.widthOfTextAtSize(String(str), size); this.text(str, cx - w / 2, yTop, o); },
       textWidth(str, font, size) { return (font || fonts.regular).widthOfTextAtSize(String(str), size); },
+      image(img, cx, cyTopCenter, size) { if (!img) return; page.drawImage(img, { x: cx - size / 2, y: PT.pageH - cyTopCenter - size / 2, width: size, height: size }); },
       path(pathData, cx, cyTop, o) { o = o || {}; page.drawSvgPath(pathData, { x: cx, y: PT.pageH - cyTop, scale: o.scale || 1, color: col(o.fill), borderColor: col(o.stroke), borderWidth: o.strokeWidth || 0 }); },
       fonts,
     };
@@ -87,7 +88,9 @@
   }
 
   const STAR_PATH = 'M 0,-20 L 5.9,-6.2 L 20,-6.2 L 8.9,2.4 L 12.9,17.6 L 0,8 L -12.9,17.6 L -8.9,2.4 L -20,-6.2 L -5.9,-6.2 Z';
-  function drawTinyItem(ctx, itemId, cx, cyCenter, size) {
+  function drawTinyItem(ctx, imgCache, itemId, cx, cyCenter, size) {
+    const img = imgCache && imgCache[itemId];
+    if (img) { ctx.image(img, cx, cyCenter, size); return; }
     const r = size / 2;
     if (itemId === 'apple') {
       ctx.circle(cx, cyCenter + r * 0.1, r * 0.82, { fill: C.apple, stroke: C.appleBd, strokeWidth: 1 });
@@ -99,8 +102,17 @@
     ctx.circle(cx - r * 0.35, cyCenter - r * 0.35, r * 0.28, { fill: rgb01(0xff, 0xff, 0xff) });
   }
 
+  async function embedItemIcons(pdf, icons, tasks) {
+    const need = {}; tasks.forEach(t => { if (t.type === 'thisthat' && t.itemId) need[t.itemId] = 1; });
+    const cache = {};
+    for (const id of Object.keys(need)) {
+      if (icons && icons[id]) { try { cache[id] = await pdf.embedPng(icons[id]); } catch (e) { /* ignore, fallback to vector */ } }
+    }
+    return cache;
+  }
+
   // Kompakte "this/that"-Mini-Szene: Auge links (Betrachter), Gegenstand(e) nah/fern
-  function drawThisThatScene(ctx, x, yTop, W, H, near, plural, itemId) {
+  function drawThisThatScene(ctx, imgCache, x, yTop, W, H, near, plural, itemId) {
     const midY = yTop + H * 0.62;
     ctx.line(x, midY, x + W, midY, { color: C.ground, w: 1 });
     ctx.circle(x + H * 0.28, midY, H * 0.16, { stroke: C.eyeBd, strokeWidth: 1.3 });
@@ -108,10 +120,10 @@
     const itemSize = near ? H * 0.62 : H * 0.30;
     const baseX = near ? x + W * 0.34 : x + W * 0.72;
     if (plural) {
-      drawTinyItem(ctx, itemId, baseX, midY - itemSize * 0.5, itemSize);
-      drawTinyItem(ctx, itemId, baseX + itemSize * 0.85, midY - itemSize * 0.5, itemSize);
+      drawTinyItem(ctx, imgCache, itemId, baseX, midY - itemSize * 0.5, itemSize);
+      drawTinyItem(ctx, imgCache, itemId, baseX + itemSize * 0.85, midY - itemSize * 0.5, itemSize);
     } else {
-      drawTinyItem(ctx, itemId, baseX + itemSize * 0.4, midY - itemSize * 0.5, itemSize);
+      drawTinyItem(ctx, imgCache, itemId, baseX + itemSize * 0.4, midY - itemSize * 0.5, itemSize);
     }
   }
 
@@ -168,6 +180,7 @@
     const ROWH = 24 * MM;      // einheitliche Zeilenhöhe für ALLE Aufgabentypen
     const SCENE_W = 26 * MM;   // Breite der Mini-Szene bei this/that
     const PILL_H = 7.2 * MM, PILL_FS = 10.3;
+    const imgCache = await embedItemIcons(pdf, spec.icons, tasks);
 
     function drawPills(options, tx, tW, oy) {
       let ox = tx;
@@ -189,7 +202,7 @@
       let tx = bodyX, tW = W - 6 * MM;
 
       if (t.type === 'thisthat') {
-        drawThisThatScene(ctx, bodyX, topY - 2, SCENE_W, ROWH - 2 * MM, t.near, t.plural, t.itemId);
+        drawThisThatScene(ctx, imgCache, bodyX, topY - 2, SCENE_W, ROWH - 2 * MM, t.near, t.plural, t.itemId);
         tx = bodyX + SCENE_W + 5 * MM; tW = W - 6 * MM - SCENE_W - 5 * MM;
       }
 
