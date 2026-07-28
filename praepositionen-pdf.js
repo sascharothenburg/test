@@ -215,7 +215,7 @@
     const tasks = spec.tasks || [];
     const showSol = !!spec.showSol;
     const showBank = spec.showBank !== false;
-    const style = spec.lineStyle || '2';
+    const style = spec.lineStyle || '1';
     const bottom = PT.pageH - PT.marginY;
     const W = PT.contentW;
     const fs = 12;

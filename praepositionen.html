@@ -139,8 +139,8 @@ input{-webkit-user-select:text;user-select:text}
   <div class="card">
     <h2>&#x1F4DD; Schreiblinie (nur L&uuml;ckensatz)</h2>
     <div class="seg" id="lineSeg">
-      <button class="seg-b" data-v="1">Eine Linie</button>
-      <button class="seg-b active" data-v="2">Zwei Linien</button>
+      <button class="seg-b active" data-v="1">Eine Linie</button>
+      <button class="seg-b" data-v="2">Zwei Linien</button>
       <button class="seg-b" data-v="0">Einfach</button>
     </div>
   </div>
@@ -263,7 +263,7 @@ function pdfSpec(){
     tasks: tasks,
     showSol: document.getElementById('showSolution').checked,
     showBank: document.getElementById('showBank').checked,
-    lineStyle: (document.querySelector('#lineSeg .seg-b.active')||{}).dataset ? document.querySelector('#lineSeg .seg-b.active').dataset.v : '2',
+    lineStyle: (document.querySelector('#lineSeg .seg-b.active')||{}).dataset ? document.querySelector('#lineSeg .seg-b.active').dataset.v : '1',
     bankRels: RELS
   };
 }
