@@ -187,6 +187,7 @@
     const S = 32 * MM;
     const R = S * 0.46;
 
+    const TEXT_Y = 0.42 * S;
     function taskRead(t, n) {
       const blockH = 9.5 * 1.5 + S + 8 * MM;
       ensure(blockH);
@@ -195,8 +196,9 @@
       drawClock(ctx, cx, cyC, R, t.hour, t.minute, false);
       const tx = PT.marginX + S + 8 * MM;
       const tW = W - S - 8 * MM;
-      ctx.text('It\u2019s', tx, y + S * 0.42, { font: fonts.bold, size: fs, color: C.ink });
-      const used = drawLineRow(ctx, tx + ctx.textWidth('It\u2019s ', fonts.bold, fs), y + S * 0.42 - fs * 0.15, Math.min(tW - 30, 68 * MM), style);
+      ctx.text('It\u2019s', tx, y + TEXT_Y, { font: fonts.bold, size: fs, color: C.ink });
+      const lrW = Math.min(tW - 10, 68 * MM);
+      drawLineRow(ctx, tx, y + TEXT_Y + 9 * MM, lrW, style);
       y += S + 8 * MM;
     }
 
@@ -205,7 +207,7 @@
       ensure(blockH);
       secHead(n, 'Read and draw the hands.', 'Zeichne Stunden- und Minutenzeiger ein.');
       const tx = PT.marginX;
-      ctx.text('\u201c' + t.phrase + '\u201d', tx, y + S * 0.42, { font: fonts.bold, size: fs, color: C.ink });
+      ctx.text('\u201c' + t.phrase + '\u201d', tx, y + TEXT_Y, { font: fonts.bold, size: fs, color: C.ink });
       const cx = PT.marginX + W - S / 2, cyC = y + S / 2;
       drawClock(ctx, cx, cyC, R, t.hour, t.minute, true);
       y += S + 6 * MM;

@@ -72,7 +72,6 @@ input{-webkit-user-select:text;user-select:text}
 <script src="fontkit.umd.min.js"></script>
 <script src="pdf.min.js"></script>
 <script>if(window.pdfjsLib){window.pdfjsLib.GlobalWorkerOptions.workerSrc='pdf.worker.min.js';}</script>
-<script src="praepositionen-icons.js"></script>
 <script src="praepositionen-pdf.js"></script>
 <script src="print-bridge.js"></script>
 <script src="back-button.js"></script>
@@ -172,16 +171,11 @@ var RELS=[
 ];
 
 var ITEMS=[
-  {id:'cat',en:'cat',de:'Katze'},
-  {id:'dog',en:'dog',de:'Hund'},
-  {id:'duck',en:'duck',de:'Ente'},
-  {id:'bird',en:'bird',de:'Vogel'},
-  {id:'frog',en:'frog',de:'Frosch'},
-  {id:'rabbit',en:'rabbit',de:'Hase'},
+  {id:'ball',en:'ball',de:'Ball'},
   {id:'apple',en:'apple',de:'Apfel'},
-  {id:'banana',en:'banana',de:'Banane'},
+  {id:'star',en:'star',de:'Stern'},
   {id:'book',en:'book',de:'Buch'},
-  {id:'pencil',en:'pencil',de:'Bleistift'}
+  {id:'block',en:'block',de:'Bauklotz'}
 ];
 function rnd(a){return a[Math.floor(Math.random()*a.length)];}
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
@@ -270,8 +264,7 @@ function pdfSpec(){
     showSol: document.getElementById('showSolution').checked,
     showBank: document.getElementById('showBank').checked,
     lineStyle: (document.querySelector('#lineSeg .seg-b.active')||{}).dataset ? document.querySelector('#lineSeg .seg-b.active').dataset.v : '2',
-    bankRels: RELS,
-    icons: (typeof ITEM_ICONS!=='undefined') ? ITEM_ICONS : null
+    bankRels: RELS
   };
 }
 function pdfHeaderOpts(){

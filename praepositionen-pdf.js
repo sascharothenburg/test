@@ -40,6 +40,16 @@
     boxBd:    rgb01(0x92, 0x40, 0x0e),
     ball:     rgb01(0x38, 0xbd, 0xf8),
     ballBd:   rgb01(0x03, 0x69, 0xa1),
+    apple:    rgb01(0xdc, 0x26, 0x26),
+    appleBd:  rgb01(0x99, 0x1b, 0x1b),
+    leaf:     rgb01(0x16, 0xa3, 0x4a),
+    stem:     rgb01(0x78, 0x35, 0x0f),
+    star:     rgb01(0xf4, 0x72, 0xb6),
+    starBd:   rgb01(0xbe, 0x18, 0x5d),
+    book:     rgb01(0x0d, 0x94, 0x88),
+    bookBd:   rgb01(0x0f, 0x5c, 0x54),
+    block:    rgb01(0x7c, 0x3a, 0xed),
+    blockBd:  rgb01(0x5b, 0x21, 0xb6),
     ground:   rgb01(0xb0, 0xb0, 0xb0),
     solGreen: rgb01(0x16, 0xa3, 0x4a),
   };
@@ -55,7 +65,7 @@
       text(str, x, yTop, o) { o = o || {}; const f = o.font || fonts.regular; const size = o.size || 10; const asc = f.heightAtSize(size) * 0.76; page.drawText(String(str), { x, y: PT.pageH - yTop - asc, size, font: f, color: col(o.color) || col(C.ink) }); },
       textCentered(str, cx, yTop, o) { o = o || {}; const f = o.font || fonts.regular; const size = o.size || 10; const w = f.widthOfTextAtSize(String(str), size); this.text(str, cx - w / 2, yTop, o); },
       textWidth(str, font, size) { return (font || fonts.regular).widthOfTextAtSize(String(str), size); },
-      image(img, cx, cyTopCenter, size) { if (!img) return; page.drawImage(img, { x: cx - size / 2, y: PT.pageH - cyTopCenter - size / 2, width: size, height: size }); },
+      path(pathData, cx, cyTop, o) { o = o || {}; page.drawSvgPath(pathData, { x: cx, y: PT.pageH - cyTop, scale: o.scale || 1, color: col(o.fill), borderColor: col(o.stroke), borderWidth: o.strokeWidth || 0 }); },
       fonts,
     };
   }
@@ -97,13 +107,46 @@
     return grundY - yTop + 2.4 * MM;
   }
 
-  // ---------- Szene: Kiste (mit Füßchen) + Gegenstand-Icon, je nach Präposition ----------
+  const STAR_PATH = 'M 0,-20 L 5.9,-6.2 L 20,-6.2 L 8.9,2.4 L 12.9,17.6 L 0,8 L -12.9,17.6 L -8.9,2.4 L -20,-6.2 L -5.9,-6.2 Z';
+
+  function drawItem(ctx, itemId, cx, cyCenter, size) {
+    const r = size / 2;
+    if (itemId === 'apple') {
+      ctx.circle(cx, cyCenter + r * 0.1, r * 0.82, { fill: C.apple, stroke: C.appleBd, strokeWidth: 1.2 });
+      ctx.rect(cx - r * 0.07, cyCenter - r * 0.95, r * 0.14, r * 0.35, { fill: C.stem });
+      ctx.circle(cx + r * 0.32, cyCenter - r * 0.72, r * 0.26, { fill: C.leaf, stroke: C.appleBd, strokeWidth: 0.6 });
+      return;
+    }
+    if (itemId === 'star') {
+      ctx.path(STAR_PATH, cx, cyCenter, { scale: size / 40, fill: C.star, stroke: C.starBd, strokeWidth: 1 });
+      return;
+    }
+    if (itemId === 'book') {
+      ctx.rect(cx - r * 0.85, cyCenter - r * 0.68, r * 1.7, r * 1.36, { fill: C.book, stroke: C.bookBd, strokeWidth: 1.3 });
+      ctx.line(cx, cyCenter - r * 0.68, cx, cyCenter + r * 0.68, { color: C.bookBd, w: 1.4 });
+      ctx.line(cx - r * 0.55, cyCenter - r * 0.28, cx - r * 0.15, cyCenter - r * 0.28, { color: rgb01(0xff, 0xff, 0xff), w: 1 });
+      ctx.line(cx - r * 0.55, cyCenter + r * 0.02, cx - r * 0.15, cyCenter + r * 0.02, { color: rgb01(0xff, 0xff, 0xff), w: 1 });
+      ctx.line(cx + r * 0.15, cyCenter - r * 0.28, cx + r * 0.55, cyCenter - r * 0.28, { color: rgb01(0xff, 0xff, 0xff), w: 1 });
+      ctx.line(cx + r * 0.15, cyCenter + r * 0.02, cx + r * 0.55, cyCenter + r * 0.02, { color: rgb01(0xff, 0xff, 0xff), w: 1 });
+      return;
+    }
+    if (itemId === 'block') {
+      ctx.rect(cx - r * 0.75, cyCenter - r * 0.75, r * 1.5, r * 1.5, { fill: C.block, stroke: C.blockBd, strokeWidth: 1.3 });
+      ctx.line(cx - r * 0.75, cyCenter - r * 0.15, cx + r * 0.75, cyCenter - r * 0.15, { color: C.blockBd, w: 1 });
+      ctx.line(cx - r * 0.15, cyCenter - r * 0.75, cx - r * 0.15, cyCenter + r * 0.75, { color: C.blockBd, w: 1 });
+      return;
+    }
+    // Standard: Ball
+    ctx.circle(cx, cyCenter, r, { fill: C.ball, stroke: C.ballBd, strokeWidth: 1.2 });
+    ctx.circle(cx - r * 0.35, cyCenter - r * 0.35, r * 0.3, { fill: rgb01(0xff, 0xff, 0xff) });
+  }
+
+  // ---------- Szene: Kiste (mit Füßchen) + Gegenstand, je nach Präposition ----------
   // Frame: quadratisch, S = Kantenlänge in pt. x,yTop = linke obere Ecke.
-  // imgCache: {itemId: PDFImage} bereits eingebettete Icons (siehe embedItemIcons()).
-  function drawScene(ctx, imgCache, x, yTop, S, relId, itemId) {
+  function drawScene(ctx, x, yTop, S, relId, itemId) {
     const feetW = 0.07 * S, feetH = 0.06 * S;
     const boxW = 0.46 * S, boxH = 0.26 * S;
-    const IR = 0.13 * S; // halbe Icongröße
+    const IR = 0.13 * S; // halbe Gegenstandsgröße
     const ground = yTop + 0.88 * S;
     ctx.line(x + 0.03 * S, ground, x + 0.97 * S, ground, { color: C.ground, w: 1 });
 
@@ -122,11 +165,8 @@
       ctx.rect(bx + bw - 0.05 * bw - feetW, ground - feetH, feetW, feetH, { fill: C.boxBd });
       return by;
     }
-    function drawItem(cx, cyCenter, scale) {
-      const img = imgCache && imgCache[itemId];
-      const sz = IR * 2 * (scale || 1);
-      if (img) { ctx.image(img, cx, cyCenter, sz); }
-      else { ctx.circle(cx, cyCenter, sz / 2, { fill: C.ball, stroke: C.ballBd, strokeWidth: 1.2 }); }
+    function drawItemAt(cx, cyCenter, scale) {
+      drawItem(ctx, itemId, cx, cyCenter, IR * 2 * (scale || 1));
     }
 
     if (relId === 'between') {
@@ -135,7 +175,7 @@
       const gap = itemS * 1.1;
       const bx1 = x + (S - (bw * 2 + gap)) / 2, bx2 = bx1 + bw + gap;
       drawBox(bx1, bw, true); drawBox(bx2, bw, true);
-      drawItem(bx1 + bw + gap / 2, ground - itemS / 2, itemS / (IR * 2));
+      drawItemAt(bx1 + bw + gap / 2, ground - itemS / 2, itemS / (IR * 2));
       return;
     }
 
@@ -144,26 +184,17 @@
 
     if (relId === 'in') {
       const by = drawBox(bx, boxW, false);
-      drawItem(bx + boxW / 2, by + boxH * 0.6, 0.92);
+      drawItemAt(bx + boxW / 2, by + boxH * 0.6, 0.92);
       return;
     }
 
     const by = drawBox(bx, boxW, true);
 
-    if (relId === 'on') { drawItem(bx + boxW / 2, by - IR * 0.95, 1); return; }
-    if (relId === 'under') { drawItem(bx + boxW / 2, ground - feetH * 0.5, 0.82); return; }
-    if (relId === 'next_to') { drawItem(bx + boxW + IR * 1.15, ground - IR, 1); return; }
-    if (relId === 'behind') { drawItem(bx + boxW - IR * 0.2, by - IR * 0.15, 0.9); drawBox(bx, boxW, true); return; }
-    if (relId === 'in_front_of') { drawItem(bx + boxW * 0.5, ground - IR * 0.55, 1.2); return; }
-  }
-
-  async function embedItemIcons(pdf, icons, tasks) {
-    const need = {}; tasks.forEach(t => { if (t.item && t.item.id) need[t.item.id] = 1; });
-    const cache = {};
-    for (const id of Object.keys(need)) {
-      if (icons && icons[id]) { try { cache[id] = await pdf.embedPng(icons[id]); } catch (e) { /* ignore */ } }
-    }
-    return cache;
+    if (relId === 'on') { drawItemAt(bx + boxW / 2, by - IR * 0.95, 1); return; }
+    if (relId === 'under') { drawItemAt(bx + boxW / 2, ground - feetH * 0.5, 0.82); return; }
+    if (relId === 'next_to') { drawItemAt(bx + boxW + IR * 1.15, ground - IR, 1); return; }
+    if (relId === 'behind') { drawItemAt(bx + boxW - IR * 0.2, by - IR * 0.15, 0.9); drawBox(bx, boxW, true); return; }
+    if (relId === 'in_front_of') { drawItemAt(bx + boxW * 0.5, ground - IR * 0.55, 1.2); return; }
   }
 
   function sentenceFor(rel, item) {
@@ -234,14 +265,12 @@
 
     const S = 32 * MM;
     const TEXT_Y = 0.60 * S; // fixe Ankerhöhe, an Kistenmitte ausgerichtet -> keine "springende" Zeile mehr
-    const imgCache = await embedItemIcons(pdf, spec.icons, tasks);
-
     function taskChoice(t, n) {
       const blockH = 9.5 * 1.5 + S + 8 * MM;
       ensure(blockH);
       secHead(n, 'Look and circle.', 'Kreise die richtige Pr\u00e4position ein.');
       const sceneX = PT.marginX;
-      drawScene(ctx, imgCache, sceneX, y, S, t.rel.id, t.item && t.item.id);
+      drawScene(ctx, sceneX, y, S, t.rel.id, t.item && t.item.id);
       const tx = sceneX + S + 6 * MM;
       const tW = W - S - 6 * MM;
       const s = sentenceFor(t.rel, t.item);
@@ -255,14 +284,15 @@
       // Optionen
       let oy = y + TEXT_Y + 9 * MM;
       let ox = tx;
+      const pillH = 7.5 * MM, pillFs = 10.5;
       t.options.forEach(opt => {
         const label = opt.en;
-        const lw = ctx.textWidth(label, fonts.bold, 10.5);
-        const pillW = lw + 6 * MM;
-        ctx.rect(ox, oy, pillW, 6.5 * MM, { stroke: C.purpleBd, strokeWidth: 1.3 });
-        ctx.textCentered(label, ox + pillW / 2, oy + 1.6, { font: fonts.bold, size: 10.5, color: C.ink });
+        const lw = ctx.textWidth(label, fonts.bold, pillFs);
+        const pillW = lw + 7 * MM;
+        ctx.rect(ox, oy, pillW, pillH, { stroke: C.purpleBd, strokeWidth: 1.3 });
+        ctx.textCentered(label, ox + pillW / 2, oy + (pillH - pillFs * 0.703) / 2, { font: fonts.bold, size: pillFs, color: C.ink });
         ox += pillW + 4 * MM;
-        if (ox > tx + tW - 20 * MM) { ox = tx; oy += 9 * MM; }
+        if (ox > tx + tW - 20 * MM) { ox = tx; oy += pillH + 2.5 * MM; }
       });
       y += S + 8 * MM;
     }
@@ -273,7 +303,7 @@
       ensure(blockH);
       secHead(n, 'Fill in the gap.', 'Schreibe die passende Pr\u00e4position.');
       const sceneX = PT.marginX;
-      drawScene(ctx, imgCache, sceneX, y, S, t.rel.id, t.item && t.item.id);
+      drawScene(ctx, sceneX, y, S, t.rel.id, t.item && t.item.id);
       const tx = sceneX + S + 6 * MM;
       const s = sentenceFor(t.rel, t.item);
       let cx = tx;
