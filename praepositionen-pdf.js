@@ -215,7 +215,6 @@
     const tasks = spec.tasks || [];
     const showSol = !!spec.showSol;
     const showBank = spec.showBank !== false;
-    const style = spec.lineStyle || '1';
     const bottom = PT.pageH - PT.marginY;
     const W = PT.contentW;
     const fs = 12;
@@ -298,8 +297,7 @@
     }
 
     function taskGap(t, n) {
-      const lineH = (style === '3' ? BAND1 * 3 + 4 * MM : (style === '0' ? BAND1 + 2.4 * MM : BAND1 * 3));
-      const blockH = 9.5 * 1.5 + S + lineH + 6 * MM;
+      const blockH = 9.5 * 1.5 + S + 8 * MM;
       ensure(blockH);
       secHead(n, 'Fill in the gap.', 'Schreibe die passende Pr\u00e4position.');
       const sceneX = PT.marginX;
@@ -313,9 +311,7 @@
       ctx.line(cx, y + TEXT_Y + fs * 0.95, cx + bw, y + TEXT_Y + fs * 0.95, { color: C.blankLn, w: 1.6 });
       cx += bw + 2;
       ctx.text(s.post, cx, y + TEXT_Y, { font: fonts.bold, size: fs, color: C.ink });
-      const lrX = tx, lrW = W - S - 6 * MM;
-      const used = drawLineRow(ctx, lrX, y + TEXT_Y + 9 * MM, Math.min(lrW, 60 * MM), style);
-      y += S + 6 * MM;
+      y += S + 8 * MM;
     }
 
     let nr = 1;

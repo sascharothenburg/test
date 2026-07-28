@@ -137,14 +137,6 @@ input{-webkit-user-select:text;user-select:text}
     <div class="sr"><div class="sl">L&ouml;sungsblatt anh&auml;ngen</div><label class="tgl"><input type="checkbox" id="showSolution"><span class="tgl-s"></span></label></div>
   </div>
   <div class="card">
-    <h2>&#x1F4DD; Schreiblinie (nur L&uuml;ckensatz)</h2>
-    <div class="seg" id="lineSeg">
-      <button class="seg-b active" data-v="1">Eine Linie</button>
-      <button class="seg-b" data-v="2">Zwei Linien</button>
-      <button class="seg-b" data-v="0">Einfach</button>
-    </div>
-  </div>
-  <div class="card">
     <h2>&#x1F4D0; Kopfzeile</h2>
     <div class="sr"><div class="sl">Name-Feld</div><label class="tgl"><input type="checkbox" id="showName"><span class="tgl-s"></span></label></div>
     <div class="sr"><div class="sl">Datum-Feld</div><label class="tgl"><input type="checkbox" id="showDate"><span class="tgl-s"></span></label></div>
@@ -263,7 +255,6 @@ function pdfSpec(){
     tasks: tasks,
     showSol: document.getElementById('showSolution').checked,
     showBank: document.getElementById('showBank').checked,
-    lineStyle: (document.querySelector('#lineSeg .seg-b.active')||{}).dataset ? document.querySelector('#lineSeg .seg-b.active').dataset.v : '1',
     bankRels: RELS
   };
 }
@@ -365,12 +356,6 @@ document.getElementById('t-gen').addEventListener('click',function(){showTab('ge
 document.getElementById('t-list').addEventListener('click',function(){showTab('list');});
 document.getElementById('t-set').addEventListener('click',function(){showTab('set');});
 document.getElementById('t-pre').addEventListener('click',function(){showTab('pre');});
-document.querySelectorAll('#lineSeg .seg-b').forEach(function(b){
-  b.addEventListener('click',function(){
-    document.querySelectorAll('#lineSeg .seg-b').forEach(function(x){x.classList.remove('active');});
-    b.classList.add('active');
-  });
-});
 initPageSeg();
 document.getElementById('btnGoPre').addEventListener('click',function(){showTab('pre');});
 
