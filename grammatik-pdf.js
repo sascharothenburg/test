@@ -167,7 +167,9 @@
         lines[lines.length - 1].push(it); lw += wd;
       });
       const lh = wfs * 1.5;
-      const boxH = padY * 2 + lines.length * lh - (lh - wfs);
+      const mfs = 8.2;
+      const merk = 'Merke:  this / these = hier  (i, e)   \u00b7   that / those = da dr\u00fcben  (a, o)   \u00b7   Mehrzahl = ein Buchstabe mehr';
+      const boxH = padY * 2 + lines.length * lh + mfs * 1.5 - (lh - wfs);
       ctx.rect(PT.marginX, y, W, boxH, { fill: C.purpleBg, stroke: C.purpleBd, strokeWidth: 1.2 });
       let wy = y + padY;
       lines.forEach(ln => {
@@ -179,6 +181,7 @@
         });
         wy += lh;
       });
+      ctx.text(merk, PT.marginX + padX, wy + 1, { font: fonts.regular, size: mfs, color: C.sub });
       y += boxH + 4 * MM;
     }
 
