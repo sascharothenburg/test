@@ -117,6 +117,7 @@ input{-webkit-user-select:text;user-select:text}
   <div class="card">
     <h2 id="listTitle">Generierte Aufgaben</h2>
     <div class="tag-list" id="tagList"><p style="color:#6b7280;font-size:.85rem">Bitte im Generator mindestens einen Aufgabentyp w&auml;hlen.</p></div>
+    <button class="btn bp" style="margin-top:12px" onclick="regenerate()">&#x1F3B2; Neue Aufgaben w&uuml;rfeln</button>
   </div>
 </div>
 <div class="screen" id="s-set">
@@ -269,25 +270,34 @@ function buildTasks(mode, n){
   if(mode==='tobe')   return sampleUnique(BE_ITEMS.concat(HAVE_ITEMS), n).map(makeTobe);
   if(mode==='plural') return sampleUnique(PLURAL_ITEMS, n).map(makePlural);
   if(mode==='wh')     return sampleUnique(WH_ITEMS, n).map(makeWh);
-  /* this/that: erst jedes Motiv einmal (in zufaelliger Variante), dann erst
-     Wiederholungen - und diese dann mit einer ANDEREN Variante. So erscheint
-     derselbe Satz auf einem Blatt moeglichst nur einmal. */
-  var out=[], used={};
-  while(out.length<n){
-    shuffle(THISTHAT_ITEMS).forEach(function(id){
-      if(out.length>=n) return;
-      var all=[];
-      [true,false].forEach(function(near){
-        [true,false].forEach(function(pl){ all.push({itemId:id, near:near, plural:pl}); });
-      });
-      var frei=all.filter(function(c){ return !used[id+'|'+c.near+'|'+c.plural]; });
-      if(!frei.length) return;
-      var pick=rnd(frei);
-      used[id+'|'+pick.near+'|'+pick.plural]=1;
-      out.push(pick);
-    });
-  }
-  return out.slice(0,n).map(makeThisthat);
+  /* this/that: alle vier Formen (this/that/these/those) moeglichst gleich oft
+     aufs Blatt bringen - nicht dem Zufall ueberlassen, sonst kommt z.B. die
+     Mehrzahl auf einem Blatt kaum vor. Danach je Form ein noch unbenutztes
+     Motiv zuordnen. */
+  var formen=[{near:true,plural:false},{near:false,plural:false},
+              {near:true,plural:true},{near:false,plural:true}];
+  var quote=[];
+  var proForm=Math.floor(n/4), rest=n-proForm*4;
+  formen.forEach(function(f){ for(var i=0;i<proForm;i++) quote.push(f); });
+  shuffle(formen).slice(0,rest).forEach(function(f){ quote.push(f); });
+  quote=shuffle(quote);
+
+  var out=[], used={}, vorrat=[];
+  quote.forEach(function(f){
+    var kandidat=null;
+    for(var versuch=0; versuch<2 && !kandidat; versuch++){
+      if(!vorrat.length) vorrat=shuffle(THISTHAT_ITEMS);
+      for(var i=vorrat.length-1;i>=0;i--){
+        var id=vorrat[i];
+        if(!used[id+'|'+f.near+'|'+f.plural]){ kandidat=id; vorrat.splice(i,1); break; }
+      }
+      if(!kandidat) vorrat=[];
+    }
+    if(!kandidat) kandidat=rnd(THISTHAT_ITEMS);
+    used[kandidat+'|'+f.near+'|'+f.plural]=1;
+    out.push({itemId:kandidat, near:f.near, plural:f.plural});
+  });
+  return out.map(makeThisthat);
 }
 
 var currentMode='tobe';
@@ -329,8 +339,18 @@ function generate(silent){
   tasks=buildTasks(currentMode, totalCount());
   optsDirty=false;
   renderList();
-  showTab('list');
   return true;
+}
+
+/* Bewusstes Neu-Wuerfeln per Knopf. Nicht automatisch bei jedem Vorschau-
+   Aufruf, weil sonst in der Liste geloeschte Aufgaben unbemerkt
+   zurueckkaemen und man Einstellungen nicht vergleichen koennte. */
+function regenerate(){
+  tasks=buildTasks(currentMode, totalCount());
+  optsDirty=false;
+  renderList();
+  var pre=document.getElementById('s-pre');
+  if(pre && pre.classList.contains('active')) buildPreview();
 }
 
 function renderList(){
@@ -377,13 +397,7 @@ function hasContent(){ return tasks.length>0; }
 var sbar=document.getElementById('sbar');
 function showTab(name){
   if((name==='list'||name==='pre') && (optsDirty || tasks.length===0)){
-    var ok=generate(true);
-    if(!ok){
-      if(name==='pre'){ alert('Bitte zuerst mindestens einen Aufgabentyp ausw\u00e4hlen.'); }
-      name='gen';
-    } else if(name==='list'){
-      return;
-    }
+    generate(true);
   }
   var map={gen:'s-gen',list:'s-list',set:'s-set',pre:'s-pre'};
   var tmap={gen:'t-gen',list:'t-list',set:'t-set',pre:'t-pre'};
@@ -393,12 +407,17 @@ function showTab(name){
   document.getElementById(tmap[name]).classList.add('active');
   if(name==='pre'){
     sbar.innerHTML='';
-    var b1=document.createElement('button'),b2=document.createElement('button');
+    var b1=document.createElement('button'),bR=document.createElement('button'),b2=document.createElement('button');
     b1.style.cssText='flex:1;padding:13px 0;border-radius:12px;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;background:#f0f4f8;color:#6b7280;border:2px solid #e2e8f0';
+    bR.style.cssText='flex:0 0 auto;padding:13px 14px;border-radius:12px;font-family:Nunito,sans-serif;font-size:1.05rem;font-weight:800;cursor:pointer;background:#f5f3ff;color:#6d28d9;border:2px solid #ddd6fe';
     b2.style.cssText='flex:1;padding:13px 0;border-radius:12px;font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;border:none';
-    b1.textContent='\u2190 Zur\u00fcck';b2.textContent='Drucken / PDF';
-    b1.onclick=function(){showTab('list');};b2.onclick=doPrint;
-    sbar.appendChild(b1);sbar.appendChild(b2);
+    b1.textContent='\u2190 Zur\u00fcck';
+    bR.textContent='\ud83c\udfb2'; bR.title='Neue Aufgaben w\u00fcrfeln';
+    b2.textContent='Drucken / PDF';
+    b1.onclick=function(){showTab('list');};
+    bR.onclick=regenerate;
+    b2.onclick=doPrint;
+    sbar.appendChild(b1);sbar.appendChild(bR);sbar.appendChild(b2);
     setTimeout(buildPreview,50);
   }else{
     sbar.innerHTML='';
