@@ -111,41 +111,25 @@
     return cache;
   }
 
-  // Kompakte "this/that"-Mini-Szene: Kind links (Betrachter), Gegenstand(e) nah/fern
+  // "this/that"-Mini-Szene: nur Gegenstand/Gegenstände, einheitliche Größe.
+  // Nah/Fern wird per Beschriftung (here / over there) unterschieden - nicht per Größe,
+  // damit die Icons in allen Aufgaben konsistent gleich groß erscheinen.
   function drawThisThatScene(ctx, imgCache, x, yTop, W, H, near, plural, itemId) {
-    const ground = yTop + 0.90 * H;
-    ctx.line(x, ground, x + W, ground, { color: C.ground, w: 1 });
+    const ICON = 16 * MM;              // feste Icongröße für ALLE Fälle
+    const capFs = 8.4;
+    const cxMid = x + W / 2;
+    const iconCy = yTop + 1 * MM + ICON / 2;
 
-    // Strichfigur (Betrachter) - klar als Person erkennbar, kein Kreis-Symbol
-    const figH = 0.52 * H;
-    const fx = x + 0.11 * W;
-    const headR = figH * 0.15;
-    const headY = ground - figH + headR;
-    const neckY = headY + headR;
-    const hipY = ground - figH * 0.34;
-    ctx.circle(fx, headY, headR, { stroke: C.eyeBd, strokeWidth: 1.2 });
-    ctx.line(fx, neckY, fx, hipY, { color: C.eyeBd, w: 1.2 });
-    const armY = neckY + figH * 0.13;
-    ctx.line(fx - figH * 0.16, armY + figH * 0.06, fx, armY, { color: C.eyeBd, w: 1.2 });
-    ctx.line(fx, armY, fx + figH * 0.18, armY - figH * 0.02, { color: C.eyeBd, w: 1.2 });
-    ctx.line(fx, hipY, fx - figH * 0.13, ground, { color: C.eyeBd, w: 1.2 });
-    ctx.line(fx, hipY, fx + figH * 0.13, ground, { color: C.eyeBd, w: 1.2 });
-
-    // Gegenstand/Gegenstände: nah = groß & dicht, fern = kleiner & weit rechts
-    let itemSize = near ? 0.66 * H : 0.44 * H;
-    if (plural) itemSize *= 0.74;
-    const cxItem = near ? x + 0.48 * W : x + 0.78 * W;
     if (plural) {
-      const gap = itemSize * 0.94;
-      let left = cxItem - gap / 2, right = cxItem + gap / 2;
-      const maxR = x + W - itemSize * 0.5;
-      if (right > maxR) { const shift = right - maxR; left -= shift; right -= shift; }
-      drawTinyItem(ctx, imgCache, itemId, left, ground - itemSize * 0.5, itemSize);
-      drawTinyItem(ctx, imgCache, itemId, right, ground - itemSize * 0.5, itemSize);
+      const gap = ICON * 1.0;
+      drawTinyItem(ctx, imgCache, itemId, cxMid - gap / 2, iconCy, ICON);
+      drawTinyItem(ctx, imgCache, itemId, cxMid + gap / 2, iconCy, ICON);
     } else {
-      const cx = Math.min(cxItem, x + W - itemSize * 0.5);
-      drawTinyItem(ctx, imgCache, itemId, cx, ground - itemSize * 0.5, itemSize);
+      drawTinyItem(ctx, imgCache, itemId, cxMid, iconCy, ICON);
     }
+
+    const caption = near ? 'here' : 'over there';
+    ctx.textCentered(caption, cxMid, iconCy + ICON / 2 + 1.6 * MM, { font: ctx.fonts.bold, size: capFs, color: C.purple2 });
   }
 
   async function buildWorksheetPDF(spec, opts) {
