@@ -155,8 +155,20 @@
     function newPage(sub) { page = pdf.addPage([PT.pageW, PT.pageH]); ctx = makeCtx(page, fonts); y = drawHeader(ctx, opts, sub != null ? sub : subTop); }
     function ensure(h) { if (y + h > bottom) newPage(); }
 
+    const BANKS = {
+      tobe:     { items: ['am / is / are', 'have got / has got'],
+                  merk: 'Merke:  I -> am   \u00b7   he / she / it und 1 Person oder Ding -> is   \u00b7   you / we / they und mehrere -> are   \u00b7   he / she / it -> has got, sonst have got' },
+      plural:   { items: ['cat -> cats', 'box -> boxes', 'baby -> babies', 'child -> children'],
+                  merk: 'Merke:  meist + s   \u00b7   nach s, x, ch, sh, o + es   \u00b7   Mitlaut + y wird zu ies   \u00b7   Ausnahmen einfach merken: child, mouse, foot, man, woman, tooth' },
+      thisthat: { items: ['this / that / these / those'],
+                  merk: 'Merke:  hier = this (1 Ding) / these (mehrere)   \u00b7   da dr\u00fcben = that (1 Ding) / those (mehrere)   \u00b7   i, e = nah   a, o = fern' },
+      wh:       { items: ['what \u00b7 where \u00b7 who \u00b7 when \u00b7 how'],
+                  merk: 'Merke:  What = Was   \u00b7   Where = Wo   \u00b7   Who = Wer   \u00b7   When = Wann   \u00b7   How = Wie' },
+    };
+
     if (showBank) {
-      const items = ['am / is / are', 'have got / has got', 'cat -> cats, box -> boxes', 'this / that / these / those', 'what \u00b7 where \u00b7 who \u00b7 when \u00b7 how'];
+      const bank = BANKS[spec.mode] || BANKS.tobe;
+      const items = bank.items;
       const wfs = 8.6, padX = 3 * MM, padY = 2.2 * MM;
       const sep = '     \u00b7     ';
       const innerW = W - padX * 2;
@@ -168,8 +180,18 @@
       });
       const lh = wfs * 1.5;
       const mfs = 8.2;
-      const merk = 'Merke:  hier = this (1 Ding) / these (mehrere)   \u00b7   da dr\u00fcben = that (1 Ding) / those (mehrere)   \u00b7   i, e = nah   a, o = fern';
-      const boxH = padY * 2 + lines.length * lh + mfs * 1.5 - (lh - wfs);
+      const merkLines = [];
+      {
+        const words = bank.merk.split(' ');
+        let cur = '';
+        words.forEach(wd => {
+          const test = cur ? cur + ' ' + wd : wd;
+          if (ctx.textWidth(test, fonts.regular, mfs) > innerW && cur) { merkLines.push(cur); cur = wd; }
+          else cur = test;
+        });
+        if (cur) merkLines.push(cur);
+      }
+      const boxH = padY * 2 + lines.length * lh + merkLines.length * (mfs * 1.5) - (lh - wfs);
       ctx.rect(PT.marginX, y, W, boxH, { fill: C.purpleBg, stroke: C.purpleBd, strokeWidth: 1.2 });
       let wy = y + padY;
       lines.forEach(ln => {
@@ -181,7 +203,7 @@
         });
         wy += lh;
       });
-      ctx.text(merk, PT.marginX + padX, wy + 1, { font: fonts.regular, size: mfs, color: C.sub });
+      merkLines.forEach(ml => { ctx.text(ml, PT.marginX + padX, wy + 1, { font: fonts.regular, size: mfs, color: C.sub }); wy += mfs * 1.5; });
       y += boxH + 4 * MM;
     }
 
@@ -237,10 +259,11 @@
         ensure(fs * 1.5 + 3 * MM);
         ctx.text(snr + '.', PT.marginX, y, { font: fonts.heavy, size: 9, color: C.purple2 });
         let tx = PT.marginX + 6 * MM;
+        const sol = (!t.pre || !t.pre.trim()) ? t.correct.charAt(0).toUpperCase() + t.correct.slice(1) : t.correct;
         ctx.text(t.pre, tx, y, { font: fonts.regular, size: fs, color: C.ink });
         tx += ctx.textWidth(t.pre, fonts.regular, fs);
-        ctx.text(t.correct, tx, y, { font: fonts.heavy, size: fs, color: C.solGreen });
-        tx += ctx.textWidth(t.correct, fonts.heavy, fs);
+        ctx.text(sol, tx, y, { font: fonts.heavy, size: fs, color: C.solGreen });
+        tx += ctx.textWidth(sol, fonts.heavy, fs);
         if (t.post) ctx.text(t.post, tx, y, { font: fonts.regular, size: fs, color: C.ink });
         y += fs * 1.5 + 3 * MM;
         snr++;

@@ -96,11 +96,12 @@ input{-webkit-user-select:text;user-select:text}
   <div class="card">
     <h2>Aufgabentyp (Task type)</h2>
     <div class="ph-grid">
-      <button class="ph-btn on" id="modeTobe" onclick="togglePh(this)">to be / have got</button>
-      <button class="ph-btn on" id="modePlural" onclick="togglePh(this)">Plural</button>
-      <button class="ph-btn on" id="modeThisthat" onclick="togglePh(this)">this/that/these/those</button>
-      <button class="ph-btn on" id="modeWh" onclick="togglePh(this)">Wh-Fragen</button>
+      <button class="ph-btn on" id="modeTobe" onclick="pickMode(this)">to be / have got</button>
+      <button class="ph-btn" id="modePlural" onclick="pickMode(this)">Plural</button>
+      <button class="ph-btn" id="modeThisthat" onclick="pickMode(this)">this/that/these/those</button>
+      <button class="ph-btn" id="modeWh" onclick="pickMode(this)">Wh-Fragen</button>
     </div>
+    <div class="ss" id="modeHint" style="margin-top:8px">am / is / are und have got / has got in kurzen S&auml;tzen einsetzen.</div>
   </div>
   <div class="card">
     <h2>Seitenzahl</h2>
@@ -148,102 +149,166 @@ function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(M
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 /* ===== Aufgaben-Pools ===== */
+/* [Satzanfang, Satzende, richtige Loesung] */
 var BE_ITEMS=[
-  ['I ','', ' Tom.','am'],
-  ['You ','', ' my friend.','are'],
-  ['He ','', ' my brother.','is'],
-  ['She ','', ' happy.','is'],
-  ['It ','', ' a big cat.','is'],
-  ['We ','', ' at school.','are'],
-  ['They ','', ' funny.','are'],
-  ['My mum ','', ' a teacher.','is'],
-  ['The children ','', ' tired.','are'],
-  ['I ','', ' seven years old.','am']
+  ['I ',' seven years old.','am'],['I ',' from Germany.','am'],['I ',' happy today.','am'],
+  ['I ',' in class 4a.','am'],['I ',' ready now.','am'],['I ',' very hungry.','am'],
+  ['I ',' at home.','am'],['I ',' your friend.','am'],
+  ['He ',' my brother.','is'],['She ',' my sister.','is'],['It ',' a big dog.','is'],
+  ['My mum ',' a nurse.','is'],['My dad ',' at work.','is'],['Tom ',' my best friend.','is'],
+  ['Anna ',' eight years old.','is'],['The cat ',' on the sofa.','is'],['The book ',' on my desk.','is'],
+  ['My teacher ',' very nice.','is'],['This apple ',' green.','is'],['The weather ',' sunny today.','is'],
+  ['My bike ',' new.','is'],['Our school ',' very big.','is'],['The dog ',' in the garden.','is'],
+  ['My room ',' small.','is'],['The ball ',' under the chair.','is'],['Her name ',' Emma.','is'],
+  ['You ',' my friend.','are'],['We ',' in the classroom.','are'],['They ',' very funny.','are'],
+  ['The children ',' at school.','are'],['My friends ',' outside.','are'],['The cats ',' hungry.','are'],
+  ['Tom and Anna ',' brother and sister.','are'],['You and I ',' a good team.','are'],
+  ['These books ',' new.','are'],['The flowers ',' beautiful.','are'],['My shoes ',' too small.','are'],
+  ['We ',' ready for the test.','are'],['They ',' from England.','are'],['The apples ',' red.','are'],
+  ['The boys ',' in the gym.','are'],['My parents ',' at home.','are']
 ];
 var HAVE_ITEMS=[
-  ['I ','', ' a dog.','have got'],
-  ['She ','', ' a cat.','has got'],
-  ['They ','', ' two sisters.','have got'],
-  ['He ','', ' a red bike.','has got'],
-  ['We ','', ' a big garden.','have got'],
-  ['My dad ','', ' a car.','has got']
+  ['I ',' a new bike.','have got'],['We ',' a big garden.','have got'],['They ',' two cats.','have got'],
+  ['You ',' a nice room.','have got'],['My friends ',' a football.','have got'],
+  ['The children ',' new books.','have got'],['Tom and Anna ',' a dog.','have got'],
+  ['I ',' a little sister.','have got'],['We ',' English today.','have got'],
+  ['He ',' a red car.','has got'],['She ',' long hair.','has got'],['It ',' four legs.','has got'],
+  ['My dad ',' a blue jacket.','has got'],['My sister ',' a doll.','has got'],
+  ['The teacher ',' a big desk.','has got'],['Our school ',' a new gym.','has got'],
+  ['Anna ',' brown eyes.','has got'],['The dog ',' a ball.','has got'],
+  ['My brother ',' a skateboard.','has got'],['Tom ',' a green pen.','has got']
 ];
+/* [Einzahl, Mehrzahl] - Falschantworten werden automatisch erzeugt */
 var PLURAL_ITEMS=[
-  ['cat','cats',['cates','cat']],
-  ['dog','dogs',['doges','dog']],
-  ['box','boxes',['boxs','boxies']],
-  ['bus','buses',['buss','busies']],
-  ['apple','apples',['applies','apple']],
-  ['book','books',['bookes','book']],
-  ['child','children',['childs','childes']],
-  ['mouse','mice',['mouses','mices']],
-  ['foot','feet',['foots','footes']],
-  ['man','men',['mans','manes']],
-  ['woman','women',['womans','womanes']],
-  ['baby','babies',['babys','babyes']],
-  ['family','families',['familys','familyes']],
-  ['fish','fish',['fishes','fishs']],
-  ['sheep','sheep',['sheeps','sheepes']]
+  ['cat','cats'],['dog','dogs'],['book','books'],['pen','pens'],['apple','apples'],
+  ['ball','balls'],['bird','birds'],['table','tables'],['chair','chairs'],['girl','girls'],
+  ['boy','boys'],['house','houses'],['tree','trees'],['car','cars'],['hand','hands'],
+  ['school','schools'],['friend','friends'],['window','windows'],['flower','flowers'],['banana','bananas'],
+  ['box','boxes'],['bus','buses'],['glass','glasses'],['watch','watches'],['brush','brushes'],
+  ['dish','dishes'],['fox','foxes'],['dress','dresses'],['sandwich','sandwiches'],['tomato','tomatoes'],
+  ['potato','potatoes'],['beach','beaches'],['class','classes'],['church','churches'],['bench','benches'],
+  ['baby','babies'],['family','families'],['city','cities'],['party','parties'],['story','stories'],
+  ['lady','ladies'],['puppy','puppies'],['hobby','hobbies'],['country','countries'],['candy','candies'],
+  ['child','children'],['mouse','mice'],['foot','feet'],['man','men'],['woman','women'],
+  ['tooth','teeth'],['person','people'],['sheep','sheep'],['fish','fish']
 ];
+/* [Satzanfang, Satzende, richtig, erlaubte Falschantworten] - Falschantworten
+   sind je Satz handverlesen, damit nie eine zweite Antwort ebenfalls passt. */
 var WH_ITEMS=[
-  ['', ' is your name?','What'],
-  ['', ' do you live?','Where'],
-  ['', ' is that boy?','Who'],
-  ['', ' is your birthday?','When'],
-  ['', ' are you today?','How'],
-  ['', ' is the weather like?','What'],
-  ['', ' is your teacher?','Who'],
-  ['', ' is your English lesson?','When'],
-  ['', ' do you go to school?','How'],
-  ['', ' is the cat?','Where']
+  ['',' is your name?','What',['Where','Who','When','How']],
+  ['',' is your favourite colour?','What',['Where','Who','When','How']],
+  ['',' is your favourite food?','What',['Where','Who','When','How']],
+  ['',' is in your schoolbag?','What',['Who','When','How']],
+  ['',' is this?','What',['Where','When','How']],
+  ['',' time is it?','What',['Where','Who','How']],
+  ['',' is your hobby?','What',['Where','Who','When']],
+  ['',' colour is the ball?','What',['Where','Who','When']],
+  ['',' do you live?','Where',['What','Who','When']],
+  ['',' is my pencil case?','Where',['What','Who','When']],
+  ['',' is the cat?','Where',['What','Who','When']],
+  ['',' are the children?','Where',['What','Who','When']],
+  ['',' is the station?','Where',['What','Who','When']],
+  ['',' are my shoes?','Where',['What','Who','When']],
+  ['',' is your teacher?','Who',['What','When','How']],
+  ['',' is that boy?','Who',['What','When','How']],
+  ['',' is your best friend?','Who',['What','When','How']],
+  ['',' has got a dog?','Who',['What','When','Where']],
+  ['',' is your birthday?','When',['What','Who','How']],
+  ['',' is the party?','When',['What','Who','How']],
+  ['',' do we have English?','When',['What','Who','How']],
+  ['',' does school start?','When',['What','Who','How']],
+  ['',' old are you?','How',['What','Where','Who','When']],
+  ['',' many cats have you got?','How',['What','Where','Who','When']],
+  ['',' many pens are on the desk?','How',['What','Where','Who','When']],
+  ['',' are you today?','How',['What','Where','When']]
 ];
-var WH_WORDS=['What','Where','Who','When','How'];
-var THISTHAT_ITEMS=['apple','banana','cat','dog','book','hat','egg','cake'];
+var THISTHAT_ITEMS=['apple','banana','cake','egg','book','hat','cat','dog','bird','frog','duck','pen','pencil','ruler'];
 function article(word){ return /^[aeiou]/i.test(word) ? 'an' : 'a'; }
 
-function buildTask(mode){
-  if(mode==='tobe'){
-    var useHave = Math.random()<0.4;
-    var pool = useHave ? HAVE_ITEMS : BE_ITEMS;
-    var it = rnd(pool);
-    var opts = useHave ? shuffle(['have got','has got']) : shuffle(['am','is','are']);
-    return {type:'tobe', pre:it[0], post:it[2], correct:it[3], options:opts};
-  }
-  if(mode==='plural'){
-    var it = rnd(PLURAL_ITEMS);
-    var opts = shuffle([it[1]].concat(it[2]));
-    return {type:'plural', pre: it[0]+' -> ', post:'', correct:it[1], options:opts};
-  }
-  if(mode==='wh'){
-    var it = rnd(WH_ITEMS);
-    var others = shuffle(WH_WORDS.filter(function(w){return w!==it[2];})).slice(0,2);
-    var opts = shuffle([it[2]].concat(others));
-    return {type:'wh', pre:it[0], post:it[1], correct:it[2], options:opts};
-  }
-  // thisthat
-  var near = Math.random()<0.5;
-  var plural = Math.random()<0.5;
-  var itemId = rnd(THISTHAT_ITEMS);
-  var correct = plural ? (near?'these':'those') : (near?'this':'that');
-  var pre = '', post;
-  if(plural){ post = ' are two '+itemId+'s.'; }
-  else { post = ' is '+article(itemId)+' '+itemId+'.'; }
-  return {type:'thisthat', pre:pre, post:post, correct:correct, options:['this','that','these','those'], near:near, plural:plural, itemId:itemId};
+/* Plausible Falschformen automatisch bilden (falsche Regel angewendet) */
+function pluralDistractors(sing, correct){
+  var cands=[sing+'es', sing, sing+'s', sing.replace(/y$/,'ies'), sing+'ies'];
+  var out=[], seen={};
+  cands.forEach(function(c){ if(c!==correct && !seen[c]){ seen[c]=1; out.push(c); } });
+  return out.slice(0,2);
 }
 
-var modes=[];
+/* Ziehen OHNE Zuruecklegen: erst mischen, dann abarbeiten. Erst wenn der
+   Vorrat leer ist, wird neu gemischt -> auf einem Blatt keine Dubletten,
+   solange der Pool gross genug ist. */
+function sampleUnique(pool, n){
+  var out=[], bag=[];
+  while(out.length<n){
+    if(!bag.length) bag=shuffle(pool);
+    out.push(bag.pop());
+  }
+  return out;
+}
+
+function makeTobe(it){
+  var opts = (it[2]==='have got'||it[2]==='has got') ? shuffle(['have got','has got']) : shuffle(['am','is','are']);
+  return {type:'tobe', pre:it[0], post:it[1], correct:it[2], options:opts};
+}
+function makePlural(it){
+  return {type:'plural', pre:it[0]+' -> ', post:'', correct:it[1],
+          options:shuffle([it[1]].concat(pluralDistractors(it[0],it[1])))};
+}
+function makeWh(it){
+  var wrong = shuffle(it[3]).slice(0,2);
+  return {type:'wh', pre:it[0], post:it[1], correct:it[2], options:shuffle([it[2]].concat(wrong))};
+}
+function makeThisthat(combo){
+  var itemId=combo.itemId, near=combo.near, plural=combo.plural;
+  var correct = plural ? (near?'these':'those') : (near?'this':'that');
+  var post = plural ? (' are two '+itemId+'s.') : (' is '+article(itemId)+' '+itemId+'.');
+  return {type:'thisthat', pre:'', post:post, correct:correct,
+          options:['this','that','these','those'], near:near, plural:plural, itemId:itemId};
+}
+
+function buildTasks(mode, n){
+  if(mode==='tobe')   return sampleUnique(BE_ITEMS.concat(HAVE_ITEMS), n).map(makeTobe);
+  if(mode==='plural') return sampleUnique(PLURAL_ITEMS, n).map(makePlural);
+  if(mode==='wh')     return sampleUnique(WH_ITEMS, n).map(makeWh);
+  /* this/that: erst jedes Motiv einmal (in zufaelliger Variante), dann erst
+     Wiederholungen - und diese dann mit einer ANDEREN Variante. So erscheint
+     derselbe Satz auf einem Blatt moeglichst nur einmal. */
+  var out=[], used={};
+  while(out.length<n){
+    shuffle(THISTHAT_ITEMS).forEach(function(id){
+      if(out.length>=n) return;
+      var all=[];
+      [true,false].forEach(function(near){
+        [true,false].forEach(function(pl){ all.push({itemId:id, near:near, plural:pl}); });
+      });
+      var frei=all.filter(function(c){ return !used[id+'|'+c.near+'|'+c.plural]; });
+      if(!frei.length) return;
+      var pick=rnd(frei);
+      used[id+'|'+pick.near+'|'+pick.plural]=1;
+      out.push(pick);
+    });
+  }
+  return out.slice(0,n).map(makeThisthat);
+}
+
+var currentMode='tobe';
 var tasks=[];
 var optsDirty=true;
-function togglePh(btn){ btn.classList.toggle('on'); optsDirty=true; }
-function isOn(id){ var e=document.getElementById(id); return e && e.classList.contains('on'); }
-function activeModes(){
-  var m=[];
-  if(isOn('modeTobe')) m.push('tobe');
-  if(isOn('modePlural')) m.push('plural');
-  if(isOn('modeThisthat')) m.push('thisthat');
-  if(isOn('modeWh')) m.push('wh');
-  return m;
+
+var MODE_IDS={tobe:'modeTobe', plural:'modePlural', thisthat:'modeThisthat', wh:'modeWh'};
+function pickMode(btn){
+  document.querySelectorAll('.ph-btn').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  for(var k in MODE_IDS){ if(MODE_IDS[k]===btn.id) currentMode=k; }
+  document.getElementById('modeHint').textContent = MODEHINTS[currentMode];
+  optsDirty=true;
 }
+
+var MODEHINTS={
+  tobe:'am / is / are und have got / has got in kurzen S\u00e4tzen einsetzen.',
+  plural:'Die richtige Mehrzahlform w\u00e4hlen \u2013 auch unregelm\u00e4\u00dfige.',
+  thisthat:'this / that / these / those \u2013 nah oder weit weg, Einzahl oder Mehrzahl.',
+  wh:'Das passende Fragewort einsetzen: What, Where, Who, When, How.'
+};
 
 var numPages=1;
 var PER_PAGE={p1:8,p2:17};
@@ -261,11 +326,7 @@ function initPageSeg(){
 }
 
 function generate(silent){
-  modes=activeModes();
-  if(!modes.length){ if(!silent)alert('Bitte mindestens einen Aufgabentyp ausw\u00e4hlen.'); return false; }
-  var n=totalCount();
-  tasks=[];
-  for(var i=0;i<n;i++){ tasks.push(buildTask(modes[i%modes.length])); }
+  tasks=buildTasks(currentMode, totalCount());
   optsDirty=false;
   renderList();
   showTab('list');
@@ -292,6 +353,7 @@ function renderList(){
 function pdfSpec(){
   return {
     tasks: tasks,
+    mode: currentMode,
     showSol: document.getElementById('showSolution').checked,
     showBank: document.getElementById('showBank').checked,
     icons: (typeof THISTHAT_ICONS!=='undefined') ? THISTHAT_ICONS : null
