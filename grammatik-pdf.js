@@ -168,7 +168,7 @@
       });
       const lh = wfs * 1.5;
       const mfs = 8.2;
-      const merk = 'Merke:  this / these = hier  (i, e)   \u00b7   that / those = da dr\u00fcben  (a, o)   \u00b7   Mehrzahl = ein Buchstabe mehr';
+      const merk = 'Merke:  hier = this (1 Ding) / these (mehrere)   \u00b7   da dr\u00fcben = that (1 Ding) / those (mehrere)   \u00b7   i, e = nah   a, o = fern';
       const boxH = padY * 2 + lines.length * lh + mfs * 1.5 - (lh - wfs);
       ctx.rect(PT.marginX, y, W, boxH, { fill: C.purpleBg, stroke: C.purpleBd, strokeWidth: 1.2 });
       let wy = y + padY;
