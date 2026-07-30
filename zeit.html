@@ -190,7 +190,6 @@ function genZeit(){
       function(){return{q:'1 Tag = '+BL+' Stunden',s:'24 Stunden'};},
       function(){return{q:'1 Woche = '+BL+' Tage',s:'7 Tage'};},
       function(){return{q:'Wie viele Wochen hat ein Jahr? '+BL,s:'52 Wochen'};},
-      function(){var mo=Math.floor(Math.random()*12);return{q:'Wie viele Tage hat der '+MONTHS[mo]+'? '+BL,s:String(MDAYS[mo])+' Tage'};},
     ];
     return Object.assign(pool[Math.floor(Math.random()*pool.length)](),{type:'Umrechnen'});
   } else {
@@ -198,6 +197,7 @@ function genZeit(){
       function(){var mo=Math.floor(Math.random()*11);var d=Math.floor(Math.random()*(MDAYS[mo]-7))+1;return{q:'7 Tage nach dem '+d+'. '+MONTHS[mo]+': '+BL,s:String(d+7)+'. '+MONTHS[mo]};},
       function(){var mo=Math.floor(Math.random()*12);return{q:'Nach dem '+MONTHS[mo]+' kommt: '+BL,s:MONTHS[(mo+1)%12]};},
       function(){return{q:'Wie viele Monate hat ein Jahr? '+BL,s:'12 Monate'};},
+      function(){var mo=Math.floor(Math.random()*12);return{q:'Wie viele Tage hat der '+MONTHS[mo]+'? '+BL,s:String(MDAYS[mo])+' Tage'};},
     ];
     return Object.assign(pool[Math.floor(Math.random()*pool.length)](),{type:'Kalender'});
   }
