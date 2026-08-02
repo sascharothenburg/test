@@ -803,7 +803,14 @@ async function makePDFBytes(){
   var fontGS=null;
   var gsBytes=getFontBytes();
   if(gsBytes){
-    try{ fontGS=await pdf.embedFont(gsBytes, {subset:true}); }
+    /* WICHTIG: subset:false.
+       Mit {subset:true} baut fontkit einen CFF-Subset. Wird im fertigen PDF kein
+       einziges Zeichen mit der Grundschrift gesetzt (z.B. Modus "Vergleichen",
+       oder "Anzahl bestimmen" ohne Loesungen), enthaelt der Subset nur .notdef
+       und CFFSubset.encode wirft einen RangeError. Der fliegt aus einem internen
+       Callback und ist NICHT fangbar - pdf.save() wird nie erfuellt und die
+       Vorschau haengt endlos. Ohne Subsetting tritt das Problem nicht auf. */
+    try{ fontGS=await pdf.embedFont(gsBytes, {subset:false}); }
     catch(e){ console.warn('Grundschrift konnte nicht eingebettet werden, falle zurueck auf Helvetica.', e); }
   }
   var iconMap=await embedAllIcons(pdf);
@@ -864,6 +871,14 @@ async function makePDFBytes(){
 function hasContent(){ return tasks.length>0; }
 
 /* ===== Vorschau (pdf.js -> Canvas) ===== */
+/* Notbremse: ein nie erfuelltes Promise (z.B. defekter Font) darf die Vorschau
+   nicht endlos blockieren - lieber eine sichtbare Fehlermeldung. */
+function withTimeout(promise, ms, label){
+  return Promise.race([promise, new Promise(function(_,rej){
+    setTimeout(function(){ rej(new Error(label+' dauert zu lange - bitte Einstellungen pruefen.')); }, ms);
+  })]);
+}
+
 /* Schutz gegen Mehrfachstart: mehrmaliges Tippen auf "Vorschau" wuerde sonst
    mehrere PDF-Erzeugungen parallel starten und das Geraet blockieren. */
 var _previewBusy=false, _previewPending=false;
@@ -885,7 +900,7 @@ async function _buildPreviewInner(){
       wrap.innerHTML='<p style="color:#0369a1;padding:20px;font-family:Nunito,sans-serif">Keine Aufgaben erstellt – bitte Einstellungen prüfen.</p>';
       return;
     }
-    var bytes=await makePDFBytes();
+    var bytes=await withTimeout(makePDFBytes(), 20000, 'PDF-Erzeugung');
     if(window.pdfjsLib){
       var loadingTask=window.pdfjsLib.getDocument({data:bytes.slice(0)});
       var pdfDoc=await loadingTask.promise;
