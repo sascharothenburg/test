@@ -483,9 +483,24 @@ function makeCtx(page, font, fontB, fontGS){
 }
 function topY(ctx,yTop){ return ctx.H - yTop; } // PDF y von unten
 
+/* Nur die Icons einbetten, die in den Aufgaben wirklich vorkommen.
+   Sonst landen ALLE 19 PNGs (38 Bild-Streams, ~140 KB) in jedem PDF –
+   das laesst die Vorschau auf dem Geraet minutenlang haengen. */
+function usedIconKeys(){
+  var need={};
+  for(var i=0;i<tasks.length;i++){
+    var t=tasks[i];
+    if(t.k && COUNT_ICONS[t.k])   need[t.k]=1;
+    if(t.ka && COUNT_ICONS[t.ka]) need[t.ka]=1;
+    if(t.kb && COUNT_ICONS[t.kb]) need[t.kb]=1;
+  }
+  var ks=Object.keys(need);
+  return ks.length?ks:['apple'];
+}
+
 async function embedAllIcons(pdf){
   var map={};
-  var keys=Object.keys(COUNT_ICONS);
+  var keys=usedIconKeys();
   for(var i=0;i<keys.length;i++){
     var k=keys[i];
     try{
@@ -679,7 +694,7 @@ function renderTask(ctx, t, iconMap, xTL, yTL, colW, opts, showSol){
     P.drawText(numTxt, {x:xTL+mm(8), y:topY(ctx,yTL+11), size:13, font:FN, color:numColor});
     var nw=FN.widthOfTextAtSize(numTxt,13);
     var objde=COUNT_ICONS[t.k]?COUNT_ICONS[t.k].de:'';
-    P.drawText(esc(objde)+':', {x:xTL+mm(8)+nw+mm(2), y:topY(ctx,yTL+9), size:8.5, font:F, color:PDFLib.rgb(0.42,0.45,0.5)});
+    P.drawText(objde+':', {x:xTL+mm(8)+nw+mm(2), y:topY(ctx,yTL+9), size:8.5, font:F, color:PDFLib.rgb(0.42,0.45,0.5)});
     // kleines Referenz-Icon
     drawIcon(ctx, iconMap[t.k], xTL+colW-mm(10), yTL, mm(8.5));
     var ftop=yTL+15;
@@ -849,7 +864,20 @@ async function makePDFBytes(){
 function hasContent(){ return tasks.length>0; }
 
 /* ===== Vorschau (pdf.js -> Canvas) ===== */
+/* Schutz gegen Mehrfachstart: mehrmaliges Tippen auf "Vorschau" wuerde sonst
+   mehrere PDF-Erzeugungen parallel starten und das Geraet blockieren. */
+var _previewBusy=false, _previewPending=false;
 async function buildPreview(){
+  if(_previewBusy){ _previewPending=true; return; }
+  _previewBusy=true;
+  try{ await _buildPreviewInner(); }
+  finally{
+    _previewBusy=false;
+    if(_previewPending){ _previewPending=false; buildPreview(); }
+  }
+}
+
+async function _buildPreviewInner(){
   var wrap=document.getElementById('previewContent');
   wrap.innerHTML='<p style="color:#6b7280;padding:16px;font-size:.8rem">Vorschau wird erstellt &hellip;</p>';
   try{
