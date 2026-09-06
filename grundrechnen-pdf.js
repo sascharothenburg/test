@@ -363,6 +363,8 @@
     return (parseFloat(p.result) - rest) / signs[boxIdx];
   }
 
-  global.GrundrechnenPDF = { PT, GEO, capacityForPages, buildWorksheetPDF };
+  // API 2 = versteht Kettenaufgaben ({terms,ops,result}). Die HTML prueft das,
+  // damit ein veraltet gecachtes Modul nicht stillschweigend "undefined" druckt.
+  global.GrundrechnenPDF = { API: 2, PT, GEO, capacityForPages, buildWorksheetPDF };
 
 })(typeof window !== 'undefined' ? window : this);

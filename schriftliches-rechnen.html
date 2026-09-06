@@ -76,7 +76,7 @@ input{-webkit-user-select:text;user-select:text}
 <script src="fontkit.umd.min.js"></script>
 <script src="pdf.min.js"></script>
 <script>if(window.pdfjsLib){window.pdfjsLib.GlobalWorkerOptions.workerSrc='pdf.worker.min.js';}</script>
-<script src="schriftliches-rechnen-pdf.js"></script>
+<script src="schriftliches-rechnen-pdf.js?v=2"></script>
 <script src="print-bridge.js"></script>
 <script src="back-button.js"></script>
 </head>
@@ -614,7 +614,15 @@ function pdfHeaderOpts(){
     showKl:document.getElementById('showKl').checked
   };
 }
+/* Sicherung gegen ein veraltetes PDF-Modul (Browser-Cache, Teil-Deployment):
+   ohne diese Pruefung druckt das alte Modul bei mehrgliedrigen Aufgaben Muell. */
+function checkPDFModule(){
+  if(!window.SchriftlichesRechnenPDF || !(SchriftlichesRechnenPDF.API>=2)){
+    throw new Error('Veraltetes schriftliches-rechnen-pdf.js geladen. Bitte die aktuelle Datei deployen und den Cache leeren.');
+  }
+}
 async function makePDFBytes(){
+  checkPDFModule();
   if(!window.fontkit && window.PDFLib && window.PDFLib.fontkit){window.fontkit=window.PDFLib.fontkit;}
   return await SchriftlichesRechnenPDF.buildWorksheetPDF(pdfSpec(), pdfHeaderOpts(), null);
 }

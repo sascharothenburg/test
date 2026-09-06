@@ -263,6 +263,7 @@
     return await pdf.save();
   }
 
-  global.SchriftlichesRechnenPDF = { PT, GEO, buildWorksheetPDF };
+  // API 2 = versteht mehrgliedrige Plus-/Minus-Aufgaben (t.terms).
+  global.SchriftlichesRechnenPDF = { API: 2, PT, GEO, buildWorksheetPDF };
 
 })(typeof window !== 'undefined' ? window : this);
