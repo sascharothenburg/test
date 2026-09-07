@@ -1,0 +1,308 @@
+/* ===========================================================================
+   ÜBIO · app-shell.css  ·  gemeinsames Layout für alle Seiten und Apps
+   © 2026 Sascha Rothenburg
+
+   Einbinden im <head>, IMMER nach fonts.css:
+       <link rel="stylesheet" href="fonts.css">
+       <link rel="stylesheet" href="app-shell.css">
+
+   Fachfarbe über eine Klasse am <body> setzen:
+       <body class="s-mathe">      blau
+       <body class="s-deutsch">    rot
+       <body class="s-englisch">   violett
+       <body class="s-sachkunde">  grün
+       <body class="s-interaktiv"> Verlauf orange→pink→violett
+       <body class="s-uebio">      Startseite (blau→grün)
+
+   Zwei Seitentypen:
+   A) NAVIGATIONSSEITE  (index.html, Fachseiten)
+      .wrap > .hero|.hdr + .body
+   B) ARBEITSBLATT-APP  (alle Generatoren)
+      .app > header.app-hdr + .tabbar + .screens > .screen  ... + .sbar
+
+   Breiten: --shell (Standard 760px). Auf dem Handy füllt die Shell die
+   volle Breite, ab 640px wird zusätzlich zweispaltig umbrochen.
+   =========================================================================== */
+
+/* --------------------------------------------------------------- 1 Basis */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --acc:#0369a1; --acc2:#0ea5e9;
+  --acc-soft:#e0f2fe; --acc-line:#7dd3fc;
+  --hdr:linear-gradient(140deg,var(--acc),var(--acc2));
+  --ink:#1e293b; --muted:#64748b; --faint:#94a3b8;
+  --bg:#f1f5f9; --card:#fff; --line:#e2e8f0; --line-soft:#eef2f7;
+  --radius:16px;
+  --shell:760px;
+  --ad-top:0px;
+}
+body.s-mathe     {--acc:#0369a1;--acc2:#0ea5e9;--acc-soft:#e0f2fe;--acc-line:#7dd3fc;--bg:#f0f9ff}
+body.s-deutsch   {--acc:#b91c1c;--acc2:#dc2626;--acc-soft:#fee2e2;--acc-line:#fca5a5;--bg:#fef2f2}
+body.s-englisch  {--acc:#6d28d9;--acc2:#7c3aed;--acc-soft:#ede9fe;--acc-line:#c4b5fd;--bg:#f5f3ff}
+body.s-sachkunde {--acc:#15803d;--acc2:#22c55e;--acc-soft:#dcfce7;--acc-line:#86efac;--bg:#f4faf6}
+body.s-interaktiv{--acc:#d97706;--acc2:#ec4899;--acc-soft:#ffe4e6;--acc-line:#fbcfe8;--bg:#fff7ed;
+                  --hdr:linear-gradient(140deg,#f59e0b,#ec4899 55%,#8b5cf6)}
+body.s-uebio     {--acc:#0369a1;--acc2:#0ea5e9;--bg:#f1f5f9;
+                  --hdr:linear-gradient(150deg,#0369a1 0%,#0ea5e9 45%,#22c55e 100%)}
+
+html,body{height:100%}
+body{
+  font-family:Nunito,system-ui,-apple-system,'Segoe UI',sans-serif;
+  background:var(--bg); color:var(--ink);
+  -webkit-text-size-adjust:100%;
+  -webkit-user-select:none; user-select:none;
+  overscroll-behavior:none;
+}
+input,textarea{-webkit-user-select:text;user-select:text}
+
+/* ---------------------------------------------- 2 Shell (beide Seitentypen)
+   .wrap  = Navigationsseite (Inhalt scrollt in .body)
+   .app   = Arbeitsblatt-App (Inhalt scrollt je Screen)                     */
+.wrap,.app{
+  height:100%;max-width:var(--shell);margin:0 auto;
+  background:var(--bg);box-shadow:0 0 40px rgba(0,0,0,.08);
+  display:flex;flex-direction:column;
+}
+.wrap.grow{height:auto;min-height:100%}   /* Startseite: darf mitwachsen */
+
+/* Kopfbereiche. --ad-top wird von ads.js auf <html> gesetzt und hält
+   den Platz für das AdMob-Banner frei; im Browser bleibt der Wert 0. */
+.hdr,header.app-hdr{
+  background:var(--hdr);color:#fff;flex-shrink:0;position:relative;z-index:10;
+  padding:14px 18px 16px;
+  padding-top:calc(14px + env(safe-area-inset-top,0px) + var(--ad-top,0px));
+}
+.hero{
+  background:var(--hdr);color:#fff;flex-shrink:0;position:relative;overflow:hidden;
+  padding:26px 22px;
+  padding-top:calc(26px + env(safe-area-inset-top,0px) + var(--ad-top,0px));
+}
+.hero::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;
+  border-radius:50%;background:rgba(255,255,255,.12)}
+.hero::before{content:"";position:absolute;left:-30px;bottom:-50px;width:120px;height:120px;
+  border-radius:50%;background:rgba(255,255,255,.10)}
+.hero h1{font-size:1.7rem;font-weight:900;letter-spacing:-.5px;position:relative;z-index:1}
+.hero h1 .sub{font-size:1.15rem;font-weight:600;letter-spacing:0;opacity:.85}
+.hero p{font-size:.86rem;opacity:.9;margin-top:5px;position:relative;z-index:1}
+
+.hdr h1,header.app-hdr h1{font-size:1.5rem;font-weight:900;display:flex;align-items:center;gap:10px}
+.hdr .ic{font-size:1.6rem}
+.hdr .title-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hdr .brand{font-size:1.5rem;font-weight:900;letter-spacing:-.3px;opacity:.85;flex-shrink:0}
+header.app-hdr .sub{margin:3px 0 0;font-size:.82rem;opacity:.94;font-weight:600}
+
+.hdr-btns{display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap}
+.back,.hdr-btn{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 13px;
+  background:rgba(255,255,255,.22);border-radius:20px;color:#fff;
+  font:inherit;font-size:.76rem;font-weight:800;text-decoration:none;border:0;cursor:pointer;
+}
+.back:active,.hdr-btn:active{background:rgba(255,255,255,.34)}
+
+/* Scrollbereich Navigationsseite */
+.body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  padding:6px 16px calc(24px + env(safe-area-inset-bottom,0px))}
+
+/* Tabs + Screens (Arbeitsblatt-App) */
+.tabbar{flex-shrink:0;padding:10px 14px 0;background:var(--bg)}
+nav.tabs{display:flex;gap:6px;background:#fff;padding:5px;border-radius:14px;border:1px solid var(--line)}
+nav.tabs button{flex:1;border:0;background:transparent;color:var(--muted);
+  font:inherit;font-weight:800;font-size:.88rem;padding:9px 4px;border-radius:10px;cursor:pointer}
+nav.tabs button.on{background:var(--acc);color:#fff}
+
+.screens{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  padding:12px 14px calc(88px + env(safe-area-inset-bottom,0px));display:none}
+.screen.active{display:block}
+
+/* Fixierte Aktionsleiste unten */
+.sbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:var(--shell);background:rgba(255,255,255,.97);
+  border-top:1px solid var(--line);z-index:100;display:flex;gap:8px;
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px))}
+.sbar .btn{flex:1}
+.sbar .btn.narrow{flex:0 0 auto}
+
+/* ------------------------------------------------------- 3 Bedienelemente */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 4px;font-size:.94rem;font-weight:900;color:var(--acc)}
+.card p.hint{margin:0 0 10px;font-size:.78rem;color:var(--muted);font-weight:600;line-height:1.45}
+
+/* Auswahlkacheln (Themen, Aufgabentypen …) */
+.picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px}
+.pick{display:flex;align-items:center;gap:8px;text-align:left;
+  border:2px solid var(--line);background:#fff;border-radius:12px;padding:9px 10px;
+  font:inherit;font-weight:800;font-size:.84rem;color:var(--ink);cursor:pointer;line-height:1.2}
+.pick .em{font-size:1.2rem;line-height:1}
+.pick small{display:block;font-weight:700;font-size:.69rem;color:var(--muted);margin-top:2px}
+.pick.on{border-color:var(--acc);background:var(--acc-soft)}
+
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:2px solid var(--line);background:#fff;border-radius:999px;padding:7px 13px;
+  font:inherit;font-weight:800;font-size:.84rem;color:var(--ink);cursor:pointer}
+.chip.on{border-color:var(--acc);background:var(--acc);color:#fff}
+
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row .lbl{font-weight:800;font-size:.88rem}
+.row .lbl small{display:block;font-weight:700;font-size:.72rem;color:var(--muted);margin-top:2px}
+
+/* Schalter */
+.sw{position:relative;width:50px;height:29px;flex:0 0 auto}
+.sw input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2}
+.sw span{position:absolute;inset:0;background:#cbd5e1;border-radius:999px;transition:background .15s}
+.sw span::after{content:"";position:absolute;top:3px;left:3px;width:23px;height:23px;
+  background:#fff;border-radius:50%;transition:transform .15s}
+.sw input:checked + span{background:var(--acc)}
+.sw input:checked + span::after{transform:translateX(21px)}
+
+input[type=range]{width:100%;accent-color:var(--acc);margin:6px 0 0}
+.rangeval{font-weight:900;color:var(--acc);font-size:.88rem}
+
+.btn{border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:900;font-size:.94rem;
+  background:var(--acc);color:#fff;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:active{filter:brightness(.94)}
+.btn.ghost{background:#fff;color:var(--acc);border:2px solid var(--acc-line)}
+.btn.narrow{padding:12px 15px;font-size:1.1rem;line-height:1}
+
+/* --------------------------------------------- 4 Navigationsseiten-Bausteine */
+.lead{padding:22px 22px 6px;font-size:.78rem;font-weight:800;letter-spacing:.6px;
+  text-transform:uppercase;color:var(--muted)}
+
+/* Fach-Kacheln der Startseite */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;padding:12px 18px 18px}
+.tile{position:relative;border:none;border-radius:20px;padding:18px 16px 16px;text-align:left;
+  color:#fff;cursor:pointer;text-decoration:none;display:flex;flex-direction:column;gap:6px;
+  min-height:142px;overflow:hidden;font-family:inherit;box-shadow:0 6px 18px rgba(0,0,0,.13);
+  transition:transform .12s ease,box-shadow .12s ease}
+.tile:active{transform:scale(.97);box-shadow:0 3px 10px rgba(0,0,0,.16)}
+.tile .ic{font-size:2.3rem;line-height:1}
+.tile .nm{font-size:1.18rem;font-weight:900;letter-spacing:-.3px}
+.tile .ct{font-size:.74rem;font-weight:700;opacity:.92;margin-top:auto}
+.tile .bubble{position:absolute;right:-22px;top:-22px;width:84px;height:84px;
+  border-radius:50%;background:rgba(255,255,255,.16)}
+.tile.mathe     {background:linear-gradient(140deg,#0369a1,#0ea5e9)}
+.tile.deutsch   {background:linear-gradient(140deg,#b91c1c,#ef4444)}
+.tile.englisch  {background:linear-gradient(140deg,#6d28d9,#8b5cf6)}
+.tile.sachkunde {background:linear-gradient(140deg,#15803d,#22c55e)}
+.tile.interaktiv{background:linear-gradient(140deg,#f59e0b,#ec4899 55%,#8b5cf6)}
+.tile.schulmaterial{background:linear-gradient(140deg,#ea580c,#f59e0b);order:99}
+/* breite Kacheln über die volle Zeile */
+.tile.wide{grid-column:1 / -1;min-height:0;flex-direction:row;align-items:center;gap:14px;padding:16px 18px}
+.tile.wide .ic{font-size:2rem}
+.tile.wide .txt{display:flex;flex-direction:column;gap:3px}
+.tile.wide .ct{margin-top:0;opacity:.92;display:flex;align-items:center;gap:6px}
+.tile.wide .bubble{width:96px;height:96px;right:-26px;top:-26px}
+.ad-tag{display:inline-block;background:rgba(255,255,255,.28);font-size:.62rem;font-weight:800;
+  letter-spacing:.3px;text-transform:uppercase;padding:2px 7px;border-radius:5px}
+
+/* App-Listenzeilen der Fachseiten */
+.group{margin-top:14px}
+.group h2{font-size:.74rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--faint);padding:0 4px 8px}
+.app-row{display:flex;align-items:center;gap:13px;padding:13px 14px;background:#fff;
+  border:1.5px solid var(--line-soft);border-radius:14px;margin-bottom:9px;text-decoration:none;
+  color:inherit;box-shadow:0 1px 4px rgba(0,0,0,.04);
+  transition:transform .1s ease,box-shadow .1s ease,border-color .1s ease}
+.app-row:active{transform:scale(.985);box-shadow:0 1px 3px rgba(0,0,0,.08);border-color:var(--acc2)}
+.app-row .ai{width:42px;height:42px;flex-shrink:0;border-radius:11px;background:var(--acc-soft);
+  display:flex;align-items:center;justify-content:center;font-size:1.35rem}
+.app-row .at{flex:1;min-width:0;display:flex;flex-direction:column}
+.app-row .an{display:block;font-size:.98rem;font-weight:800;color:var(--ink)}
+.app-row .ad{display:block;font-size:.76rem;color:var(--muted);margin-top:1px}
+.app-row .ar{color:var(--acc2);font-size:1.1rem;font-weight:900;flex-shrink:0}
+.empty{text-align:center;color:var(--faint);font-size:.85rem;padding:40px 20px;line-height:1.7}
+
+/* Akkordeon */
+.acc-head{display:flex;align-items:center;gap:10px;width:100%;background:#fff;cursor:pointer;
+  font-family:inherit;padding:13px 14px;border:1.5px solid var(--line-soft);border-radius:14px;
+  box-shadow:0 1px 4px rgba(0,0,0,.04);transition:border-color .12s ease,box-shadow .12s ease}
+.acc-head:active{transform:scale(.99)}
+.acc-head .ht{flex:1;text-align:left;font-size:.92rem;font-weight:900;color:var(--ink)}
+.acc-head .hc{font-size:.72rem;font-weight:800;color:var(--faint);background:#f1f5f9;
+  border-radius:20px;padding:2px 9px}
+.acc-head .hv{color:var(--acc2);font-size:1rem;font-weight:900;transition:transform .18s ease;flex-shrink:0}
+.acc-head[aria-expanded="true"]{border-color:var(--acc2)}
+.acc-head[aria-expanded="true"] .hv{transform:rotate(90deg)}
+.acc-panel{overflow:hidden;max-height:0;transition:max-height .26s ease}
+.acc-panel.open{max-height:3000px}
+.acc-inner{padding:9px 0 2px}
+.acc-inner .app-row:last-child{margin-bottom:2px}
+
+/* Play-Store-Karte (nur Web) */
+.playcard{margin:4px 18px;padding:16px;border-radius:20px;
+  background:linear-gradient(140deg,#0f172a,#1e293b);display:flex;align-items:center;gap:14px;
+  text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.13)}
+.playcard:active{transform:scale(.98)}
+.playcard .pc-txt{flex:1;color:#fff}
+.playcard .pc-txt .pt1{font-size:.98rem;font-weight:900;letter-spacing:-.2px}
+.playcard .pc-txt .pt2{font-size:.74rem;opacity:.75;margin-top:2px}
+.playcard img{height:40px;width:auto;display:block;flex-shrink:0}
+
+/* Fuß */
+.foot{padding:18px 22px calc(20px + env(safe-area-inset-bottom,0px));text-align:center;
+  color:var(--faint);font-size:.72rem;line-height:1.6}
+.foot a{color:var(--muted);text-decoration:none;font-weight:700}
+
+/* Kaffeekasse */
+.coffee-wrap{position:relative;display:inline-block}
+.hdr-btns .coffee-wrap{margin-left:auto}
+.coffee{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:#fff;
+  border:1.5px solid var(--line);border-radius:22px;color:#475569;font-size:.8rem;font-weight:800;
+  cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.hdr-btns .coffee{padding:5px 13px;background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.4);color:#fff;font-size:.76rem;box-shadow:none}
+.coffee:active{transform:scale(.97)}
+.coffee-pop{position:absolute;width:236px;background:#fff;border-radius:16px;
+  box-shadow:0 12px 32px rgba(0,0,0,.22);padding:14px;z-index:50;display:none;
+  color:var(--ink);text-align:left;
+  left:50%;transform:translateX(-50%);bottom:calc(100% + 10px)}
+.hdr-btns .coffee-pop{left:auto;right:0;transform:none;bottom:auto;top:calc(100% + 8px)}
+.coffee-pop.open{display:block}
+.coffee-pop .ct{font-size:.84rem;font-weight:900;margin-bottom:2px}
+.coffee-pop .cs{font-size:.72rem;color:var(--muted);margin-bottom:11px;line-height:1.4}
+.coffee-pop .amts{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px}
+.coffee-pop .amt{padding:9px 0;border:1.5px solid var(--line);border-radius:11px;background:#fff;
+  font-size:.92rem;font-weight:800;color:var(--ink);cursor:pointer;font-family:inherit;
+  text-align:center;transition:border-color .1s,background .1s}
+.coffee-pop .amt:active{transform:scale(.97)}
+.coffee-pop .amt.sel{border-color:var(--acc2);background:var(--acc2);color:#fff}
+.coffee-pop .custom{display:flex;align-items:center;gap:7px;margin-bottom:11px;
+  border:1.5px solid var(--line);border-radius:11px;padding:7px 11px}
+.coffee-pop .custom:focus-within{border-color:var(--acc2)}
+.coffee-pop .custom span{font-size:.95rem;font-weight:800;color:var(--faint)}
+.coffee-pop .custom input{flex:1;min-width:0;border:none;outline:none;font-family:inherit;
+  font-size:.95rem;font-weight:800;color:var(--ink);background:transparent}
+.coffee-pop .go{display:block;width:100%;padding:11px 0;border:none;border-radius:12px;
+  background:var(--acc2);color:#fff;font-size:.9rem;font-weight:900;cursor:pointer;
+  font-family:inherit;text-align:center;text-decoration:none}
+.coffee-pop .go:active{filter:brightness(.93)}
+
+/* ----------------------------------------------- 5 Breite Darstellung ab 640px
+   Auf dem Handy bleibt alles einspaltig; erst wenn wirklich Platz da ist,
+   werden Listen zweispaltig, damit die Zeilen nicht auseinandergezogen
+   aussehen.                                                                */
+@media (min-width:640px){
+  .body{padding-left:22px;padding-right:22px}
+  .acc-inner,.group .app-row-list{display:grid;grid-template-columns:1fr 1fr;
+    gap:9px;align-items:start}
+  .acc-inner .app-row,.group .app-row-list .app-row{margin-bottom:0}
+  .picker{grid-template-columns:repeat(auto-fill,minmax(172px,1fr))}
+  .hero{padding-left:28px;padding-right:28px}
+  .lead{padding-left:28px;padding-right:28px}
+  .grid{padding-left:24px;padding-right:24px}
+}
+
+/* ------------------------------------------------------------------ 6 Druck */
+@media print{
+  .wrap,.app,.sbar,.tabbar,.hdr,.hero,header.app-hdr{display:none!important}
+  html,body{height:auto;overflow:visible;background:#fff}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{size:A4 portrait;margin:12mm 14mm}
+}
