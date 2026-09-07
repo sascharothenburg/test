@@ -46,9 +46,9 @@ body.s-mathe     {--acc:#0369a1;--acc2:#0ea5e9;--acc-soft:#e0f2fe;--acc-line:#7d
 body.s-deutsch   {--acc:#b91c1c;--acc2:#dc2626;--acc-soft:#fee2e2;--acc-line:#fca5a5;--bg:#fef2f2}
 body.s-englisch  {--acc:#6d28d9;--acc2:#7c3aed;--acc-soft:#ede9fe;--acc-line:#c4b5fd;--bg:#f5f3ff}
 body.s-sachkunde {--acc:#15803d;--acc2:#22c55e;--acc-soft:#dcfce7;--acc-line:#86efac;--bg:#f4faf6}
-body.s-interaktiv{--acc:#d97706;--acc2:#ec4899;--acc-soft:#ffe4e6;--acc-line:#fbcfe8;--bg:#fff7ed;
-                  --hdr:linear-gradient(140deg,#f59e0b,#ec4899 55%,#8b5cf6)}
-body.s-uebio     {--acc:#0369a1;--acc2:#0ea5e9;--bg:#f1f5f9;
+body.s-interaktiv{--acc:#7c3aed;--acc2:#a78bfa;--acc-soft:#f3e8ff;--acc-line:#c4b5fd;--bg:#faf5ff;
+                  --hdr:linear-gradient(135deg,#f59e0b 0%,#ec4899 45%,#8b5cf6 100%)}
+body.s-uebio     {--acc:#0369a1;--acc2:#0ea5e9;--acc-soft:#e0f2fe;--acc-line:#7dd3fc;--bg:#f1f5f9;
                   --hdr:linear-gradient(150deg,#0369a1 0%,#0ea5e9 45%,#22c55e 100%)}
 
 html,body{height:100%}
@@ -96,6 +96,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .hdr .title-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .hdr .brand{font-size:1.5rem;font-weight:900;letter-spacing:-.3px;opacity:.85;flex-shrink:0}
 header.app-hdr .sub{margin:3px 0 0;font-size:.82rem;opacity:.94;font-weight:600}
+.hdr .sub{font-size:.78rem;opacity:.9;margin-top:4px;font-weight:600}
 
 .hdr-btns{display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap}
 .back,.hdr-btn{
@@ -181,7 +182,7 @@ input[type=range]{width:100%;accent-color:var(--acc);margin:6px 0 0}
   text-transform:uppercase;color:var(--muted)}
 
 /* Fach-Kacheln der Startseite */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;padding:12px 18px 18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:12px 18px 18px}
 .tile{position:relative;border:none;border-radius:20px;padding:18px 16px 16px;text-align:left;
   color:#fff;cursor:pointer;text-decoration:none;display:flex;flex-direction:column;gap:6px;
   min-height:142px;overflow:hidden;font-family:inherit;box-shadow:0 6px 18px rgba(0,0,0,.13);
@@ -199,11 +200,12 @@ input[type=range]{width:100%;accent-color:var(--acc);margin:6px 0 0}
 .tile.interaktiv{background:linear-gradient(140deg,#f59e0b,#ec4899 55%,#8b5cf6)}
 .tile.schulmaterial{background:linear-gradient(140deg,#ea580c,#f59e0b);order:99}
 /* breite Kacheln über die volle Zeile */
-.tile.wide{grid-column:1 / -1;min-height:0;flex-direction:row;align-items:center;gap:14px;padding:16px 18px}
-.tile.wide .ic{font-size:2rem}
-.tile.wide .txt{display:flex;flex-direction:column;gap:3px}
-.tile.wide .ct{margin-top:0;opacity:.92;display:flex;align-items:center;gap:6px}
-.tile.wide .bubble{width:96px;height:96px;right:-26px;top:-26px}
+.tile.wide,.tile.interaktiv,.tile.schulmaterial{grid-column:1 / -1;min-height:0;flex-direction:row;align-items:center;gap:14px;padding:16px 18px}
+.tile.wide .ic,.tile.interaktiv .ic,.tile.schulmaterial .ic{font-size:2rem}
+.tile.wide .txt,.tile.interaktiv .txt,.tile.schulmaterial .txt{display:flex;flex-direction:column;gap:3px}
+.tile.wide .nm,.tile.interaktiv .nm,.tile.schulmaterial .nm{font-size:1.18rem}
+.tile.wide .ct,.tile.interaktiv .ct,.tile.schulmaterial .ct{margin-top:0;opacity:.92;display:flex;align-items:center;gap:6px}
+.tile.wide .bubble,.tile.interaktiv .bubble,.tile.schulmaterial .bubble{width:96px;height:96px;right:-26px;top:-26px}
 .ad-tag{display:inline-block;background:rgba(255,255,255,.28);font-size:.62rem;font-weight:800;
   letter-spacing:.3px;text-transform:uppercase;padding:2px 7px;border-radius:5px}
 
@@ -222,6 +224,14 @@ input[type=range]{width:100%;accent-color:var(--acc);margin:6px 0 0}
 .app-row .an{display:block;font-size:.98rem;font-weight:800;color:var(--ink)}
 .app-row .ad{display:block;font-size:.76rem;color:var(--muted);margin-top:1px}
 .app-row .ar{color:var(--acc2);font-size:1.1rem;font-weight:900;flex-shrink:0}
+.acc-head .hi{width:34px;height:34px;flex-shrink:0;border-radius:9px;display:flex;
+  align-items:center;justify-content:center;font-size:1.15rem;background:var(--acc-soft)}
+/* feste Fachfarben, wenn eine Seite mehrere Fächer mischt (Interaktiv) */
+.app-row .ai.m,.acc-head .hi.m{background:#e0f2fe}
+.app-row .ai.d,.acc-head .hi.d{background:#fee2e2}
+.app-row .ai.e,.acc-head .hi.e{background:#ede9fe}
+.app-row .ai.s,.acc-head .hi.s{background:#dcfce7}
+.app-row .ai.m,.app-row .ai.d,.app-row .ai.e,.app-row .ai.s{filter:saturate(.75)}
 .empty{text-align:center;color:var(--faint);font-size:.85rem;padding:40px 20px;line-height:1.7}
 
 /* Akkordeon */
@@ -256,7 +266,8 @@ input[type=range]{width:100%;accent-color:var(--acc);margin:6px 0 0}
 .foot a{color:var(--muted);text-decoration:none;font-weight:700}
 
 /* Kaffeekasse */
-.coffee-wrap{position:relative;display:inline-block}
+.coffee-wrap{position:relative;display:inline-block;margin-bottom:14px}
+.hdr-btns .coffee-wrap{margin-bottom:0}
 .hdr-btns .coffee-wrap{margin-left:auto}
 .coffee{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:#fff;
   border:1.5px solid var(--line);border-radius:22px;color:#475569;font-size:.8rem;font-weight:800;
@@ -264,12 +275,18 @@ input[type=range]{width:100%;accent-color:var(--acc);margin:6px 0 0}
 .hdr-btns .coffee{padding:5px 13px;background:rgba(255,255,255,.18);
   border:1px solid rgba(255,255,255,.4);color:#fff;font-size:.76rem;box-shadow:none}
 .coffee:active{transform:scale(.97)}
+.hdr-btns .coffee:active{background:rgba(255,255,255,.3)}
 .coffee-pop{position:absolute;width:236px;background:#fff;border-radius:16px;
   box-shadow:0 12px 32px rgba(0,0,0,.22);padding:14px;z-index:50;display:none;
   color:var(--ink);text-align:left;
   left:50%;transform:translateX(-50%);bottom:calc(100% + 10px)}
 .hdr-btns .coffee-pop{left:auto;right:0;transform:none;bottom:auto;top:calc(100% + 8px)}
 .coffee-pop.open{display:block}
+.coffee-pop::after{content:"";position:absolute;left:50%;bottom:-7px;width:14px;height:14px;
+  background:#fff;transform:translateX(-50%) rotate(45deg)}
+.hdr-btns .coffee-pop::after{content:none}
+.hdr-btns .coffee-pop::before{content:"";position:absolute;right:18px;top:-7px;width:14px;height:14px;
+  background:#fff;transform:rotate(45deg)}
 .coffee-pop .ct{font-size:.84rem;font-weight:900;margin-bottom:2px}
 .coffee-pop .cs{font-size:.72rem;color:var(--muted);margin-bottom:11px;line-height:1.4}
 .coffee-pop .amts{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px}
