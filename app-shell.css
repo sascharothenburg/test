@@ -14,6 +14,12 @@
        <body class="s-interaktiv"> Verlauf orange→pink→violett
        <body class="s-uebio">      Startseite (blau→grün)
 
+   Der Kopfverlauf wird aus --acc/--acc2 gebildet. Nur wo ein mehrfarbiger
+   Verlauf nötig ist (Interaktiv, Startseite), setzt die Fachklasse --hdr
+   direkt mit festen Farben. WICHTIG: --hdr niemals in :root mit var(--acc)
+   definieren - Custom Properties werden dort ersetzt, wo sie deklariert
+   sind, der Wert wäre dann auf die Standardfarbe eingefroren.
+
    Zwei Seitentypen:
    A) NAVIGATIONSSEITE  (index.html, Fachseiten)
       .wrap > .hero|.hdr + .body
@@ -30,7 +36,6 @@
 :root{
   --acc:#0369a1; --acc2:#0ea5e9;
   --acc-soft:#e0f2fe; --acc-line:#7dd3fc;
-  --hdr:linear-gradient(140deg,var(--acc),var(--acc2));
   --ink:#1e293b; --muted:#64748b; --faint:#94a3b8;
   --bg:#f1f5f9; --card:#fff; --line:#e2e8f0; --line-soft:#eef2f7;
   --radius:16px;
@@ -69,12 +74,12 @@ input,textarea{-webkit-user-select:text;user-select:text}
 /* Kopfbereiche. --ad-top wird von ads.js auf <html> gesetzt und hält
    den Platz für das AdMob-Banner frei; im Browser bleibt der Wert 0. */
 .hdr,header.app-hdr{
-  background:var(--hdr);color:#fff;flex-shrink:0;position:relative;z-index:10;
+  background:var(--hdr,linear-gradient(140deg,var(--acc),var(--acc2)));color:#fff;flex-shrink:0;position:relative;z-index:10;
   padding:14px 18px 16px;
   padding-top:calc(14px + env(safe-area-inset-top,0px) + var(--ad-top,0px));
 }
 .hero{
-  background:var(--hdr);color:#fff;flex-shrink:0;position:relative;overflow:hidden;
+  background:var(--hdr,linear-gradient(140deg,var(--acc),var(--acc2)));color:#fff;flex-shrink:0;position:relative;overflow:hidden;
   padding:26px 22px;
   padding-top:calc(26px + env(safe-area-inset-top,0px) + var(--ad-top,0px));
 }
