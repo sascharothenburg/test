@@ -24,7 +24,7 @@
    A) NAVIGATIONSSEITE  (index.html, Fachseiten)
       .wrap > .hero|.hdr + .body
    B) ARBEITSBLATT-APP  (alle Generatoren)
-      .app > header.app-hdr + .tabbar + .screens > .screen  ... + .sbar
+      .app > .hdr + .tabs + .screens > .screen  ...  + .sbar
 
    Breiten: --shell (Standard 760px). Auf dem Handy füllt die Shell die
    volle Breite, ab 640px wird zusätzlich zweispaltig umbrochen.
@@ -45,7 +45,7 @@
 body.s-mathe     {--acc:#0369a1;--acc2:#0ea5e9;--acc-soft:#e0f2fe;--acc-line:#7dd3fc;--bg:#f0f9ff}
 body.s-deutsch   {--acc:#b91c1c;--acc2:#dc2626;--acc-soft:#fee2e2;--acc-line:#fca5a5;--bg:#fef2f2}
 body.s-englisch  {--acc:#6d28d9;--acc2:#7c3aed;--acc-soft:#ede9fe;--acc-line:#c4b5fd;--bg:#f5f3ff}
-body.s-sachkunde {--acc:#15803d;--acc2:#22c55e;--acc-soft:#dcfce7;--acc-line:#86efac;--bg:#f4faf6}
+body.s-sachkunde {--acc:#15803d;--acc2:#22c55e;--acc-soft:#dcfce7;--acc-line:#86efac;--bg:#f0fdf4}
 body.s-interaktiv{--acc:#7c3aed;--acc2:#a78bfa;--acc-soft:#f3e8ff;--acc-line:#c4b5fd;--bg:#faf5ff;
                   --hdr:linear-gradient(135deg,#f59e0b 0%,#ec4899 45%,#8b5cf6 100%)}
 body.s-uebio     {--acc:#0369a1;--acc2:#0ea5e9;--acc-soft:#e0f2fe;--acc-line:#7dd3fc;--bg:#f1f5f9;
@@ -66,14 +66,14 @@ input,textarea{-webkit-user-select:text;user-select:text}
    .app   = Arbeitsblatt-App (Inhalt scrollt je Screen)                     */
 .wrap,.app{
   height:100%;max-width:var(--shell);margin:0 auto;
-  background:var(--bg);box-shadow:0 0 40px rgba(0,0,0,.08);
+  background:#fff;box-shadow:0 0 40px rgba(0,0,0,.1);
   display:flex;flex-direction:column;
 }
 .wrap.grow{height:auto;min-height:100%}   /* Startseite: darf mitwachsen */
 
 /* Kopfbereiche. --ad-top wird von ads.js auf <html> gesetzt und hält
    den Platz für das AdMob-Banner frei; im Browser bleibt der Wert 0. */
-.hdr,header.app-hdr{
+.wrap .hdr{
   background:var(--hdr,linear-gradient(140deg,var(--acc),var(--acc2)));color:#fff;flex-shrink:0;position:relative;z-index:10;
   padding:14px 18px 16px;
   padding-top:calc(14px + env(safe-area-inset-top,0px) + var(--ad-top,0px));
@@ -91,14 +91,13 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .hero h1 .sub{font-size:1.15rem;font-weight:600;letter-spacing:0;opacity:.85}
 .hero p{font-size:.86rem;opacity:.9;margin-top:5px;position:relative;z-index:1}
 
-.hdr h1,header.app-hdr h1{font-size:1.5rem;font-weight:900;display:flex;align-items:center;gap:10px}
-.hdr .ic{font-size:1.6rem}
-.hdr .title-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.hdr .brand{font-size:1.5rem;font-weight:900;letter-spacing:-.3px;opacity:.85;flex-shrink:0}
-header.app-hdr .sub{margin:3px 0 0;font-size:.82rem;opacity:.94;font-weight:600}
-.hdr .sub{font-size:.78rem;opacity:.9;margin-top:4px;font-weight:600}
+.wrap .hdr h1{font-size:1.5rem;font-weight:900;display:flex;align-items:center;gap:10px}
+.wrap .hdr .ic{font-size:1.6rem}
+.wrap .hdr .title-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.wrap .hdr .brand{font-size:1.5rem;font-weight:900;letter-spacing:-.3px;opacity:.85;flex-shrink:0}
+.wrap .hdr .sub{font-size:.78rem;opacity:.9;margin-top:4px;font-weight:600}
 
-.hdr-btns{display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap}
+.wrap .hdr-btns{display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap}
 .back,.hdr-btn{
   display:inline-flex;align-items:center;gap:6px;padding:5px 13px;
   background:rgba(255,255,255,.22);border-radius:20px;color:#fff;
@@ -112,16 +111,11 @@ header.app-hdr .sub{margin:3px 0 0;font-size:.82rem;opacity:.94;font-weight:600}
   padding:6px 16px calc(24px + env(safe-area-inset-bottom,0px))}
 
 /* Tabs + Screens (Arbeitsblatt-App) */
-.tabbar{flex-shrink:0;padding:10px 14px 0;background:var(--bg)}
-nav.tabs{display:flex;gap:6px;background:#fff;padding:5px;border-radius:14px;border:1px solid var(--line)}
-nav.tabs button{flex:1;border:0;background:transparent;color:var(--muted);
-  font:inherit;font-weight:800;font-size:.88rem;padding:9px 4px;border-radius:10px;cursor:pointer}
-nav.tabs button.on{background:var(--acc);color:#fff}
 
 .screens{flex:1;overflow:hidden;position:relative}
 .screen{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
   overscroll-behavior:contain;
-  padding:12px 14px calc(88px + env(safe-area-inset-bottom,0px));display:none}
+  padding:14px 14px calc(80px + env(safe-area-inset-bottom,0px));display:none}
 .screen.active{display:block}
 
 /* Fixierte Aktionsleiste unten */
@@ -129,13 +123,8 @@ nav.tabs button.on{background:var(--acc);color:#fff}
   width:100%;max-width:var(--shell);background:rgba(255,255,255,.97);
   border-top:1px solid var(--line);z-index:100;display:flex;gap:8px;
   padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px))}
-.sbar .btn{flex:1}
-.sbar .btn.narrow{flex:0 0 auto}
 
 /* ------------------------------------------------------- 3 Bedienelemente */
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-  padding:14px;margin-bottom:12px}
-.card h2{margin:0 0 4px;font-size:.94rem;font-weight:900;color:var(--acc)}
 .card p.hint{margin:0 0 10px;font-size:.78rem;color:var(--muted);font-weight:600;line-height:1.45}
 
 /* Auswahlkacheln (Themen, Aufgabentypen …) */
@@ -145,37 +134,19 @@ nav.tabs button.on{background:var(--acc);color:#fff}
   font:inherit;font-weight:800;font-size:.84rem;color:var(--ink);cursor:pointer;line-height:1.2}
 .pick .em{font-size:1.2rem;line-height:1}
 .pick small{display:block;font-weight:700;font-size:.69rem;color:var(--muted);margin-top:2px}
-.pick.on{border-color:var(--acc);background:var(--acc-soft)}
+.pick.sel{border-color:var(--acc);background:var(--acc-soft)}
 
 .chips{display:flex;flex-wrap:wrap;gap:7px}
 .chip{border:2px solid var(--line);background:#fff;border-radius:999px;padding:7px 13px;
   font:inherit;font-weight:800;font-size:.84rem;color:var(--ink);cursor:pointer}
-.chip.on{border-color:var(--acc);background:var(--acc);color:#fff}
+.chip.sel{border-color:var(--acc);background:var(--acc);color:#fff}
 
-.row{display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:9px 0;border-top:1px solid var(--line)}
-.row:first-of-type{border-top:0}
-.row .lbl{font-weight:800;font-size:.88rem}
-.row .lbl small{display:block;font-weight:700;font-size:.72rem;color:var(--muted);margin-top:2px}
-
-/* Schalter */
-.sw{position:relative;width:50px;height:29px;flex:0 0 auto}
-.sw input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2}
-.sw span{position:absolute;inset:0;background:#cbd5e1;border-radius:999px;transition:background .15s}
-.sw span::after{content:"";position:absolute;top:3px;left:3px;width:23px;height:23px;
-  background:#fff;border-radius:50%;transition:transform .15s}
-.sw input:checked + span{background:var(--acc)}
-.sw input:checked + span::after{transform:translateX(21px)}
 
 input[type=range]{width:100%;accent-color:var(--acc);margin:6px 0 0}
 .rangeval{font-weight:900;color:var(--acc);font-size:.88rem}
 
-.btn{border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:900;font-size:.94rem;
-  background:var(--acc);color:#fff;cursor:pointer}
 .btn:disabled{opacity:.5;cursor:default}
 .btn:active{filter:brightness(.94)}
-.btn.ghost{background:#fff;color:var(--acc);border:2px solid var(--acc-line)}
-.btn.narrow{padding:12px 15px;font-size:1.1rem;line-height:1}
 
 /* --------------------------------------------- 4 Navigationsseiten-Bausteine */
 .lead{padding:22px 22px 6px;font-size:.78rem;font-weight:800;letter-spacing:.6px;
@@ -268,7 +239,6 @@ input[type=range]{width:100%;accent-color:var(--acc);margin:6px 0 0}
 /* Kaffeekasse */
 .coffee-wrap{position:relative;display:inline-block;margin-bottom:14px}
 .hdr-btns .coffee-wrap{margin-bottom:0}
-.hdr-btns .coffee-wrap{margin-left:auto}
 .coffee{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:#fff;
   border:1.5px solid var(--line);border-radius:22px;color:#475569;font-size:.8rem;font-weight:800;
   cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(0,0,0,.05)}
@@ -323,8 +293,81 @@ input[type=range]{width:100%;accent-color:var(--acc);margin:6px 0 0}
 
 /* ------------------------------------------------------------------ 6 Druck */
 @media print{
-  .wrap,.app,.sbar,.tabbar,.hdr,.hero,header.app-hdr{display:none!important}
+  .wrap,.app,.sbar,.hdr,.hero{display:none!important}
+  .printarea{display:block!important}
   html,body{height:auto;overflow:visible;background:#fff}
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   @page{size:A4 portrait;margin:12mm 14mm}
 }
+
+
+/* ===========================================================================
+   7 Generator-Shell · gemeinsames Vokabular aller Arbeitsblatt-Generatoren
+   Übernommen aus dem bestehenden Bestand (nicht neu erfunden), Farben und
+   Breite über die Variablen oben. Struktur:
+       .app > .hdr + .tabs + .screens > .screen …  + .sbar
+   =========================================================================== */
+.hdr{
+  background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;
+  padding:12px 16px 10px;
+  padding-top:calc(12px + env(safe-area-inset-top,0px) + var(--ad-top,0px));
+  flex-shrink:0;
+}
+.hdr h1{font-size:1.15rem;font-weight:900}
+.hdr p{font-size:.68rem;opacity:.85;margin-top:1px}
+.hdr-btns{display:flex;gap:8px;margin-top:6px;align-items:center}
+.hdr-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;
+  background:rgba(255,255,255,.25);border-radius:20px;color:#fff;
+  font-family:Nunito,sans-serif;font-size:.72rem;font-weight:800;
+  text-decoration:none;cursor:pointer;border:none}
+
+/* Reiter mit Symbol und Unterstrich */
+.tabs{display:flex;background:#fff;border-bottom:2px solid var(--line);flex-shrink:0}
+.tab{flex:1;padding:10px 4px 8px;text-align:center;font-size:.65rem;font-weight:800;
+  color:#6b7280;cursor:pointer;border:none;background:none;
+  border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab.active{color:var(--acc);border-bottom-color:var(--acc)}
+.ti{display:block;font-size:1.1rem;margin-bottom:1px}
+
+/* Karten */
+.card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.07);
+  padding:14px;margin-bottom:10px;border:1px solid var(--line)}
+.card h2{font-size:.72rem;font-weight:800;color:var(--acc);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+
+/* Schaltflächen: .bp = primär, .bs = sekundär */
+.btn{width:100%;padding:12px;border:none;border-radius:12px;
+  font-family:Nunito,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer}
+.bp{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff}
+.bs{background:#f0f4f8;color:#6b7280;border:2px solid var(--line)}
+.btn-sm{padding:8px;font-size:.82rem}
+
+/* Schalter */
+.tgl{position:relative;width:44px;height:24px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0}
+.tgl-s{position:absolute;inset:0;background:#ccc;border-radius:24px;cursor:pointer;transition:.2s}
+.tgl-s::before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;
+  background:#fff;border-radius:50%;transition:.2s}
+.tgl input:checked+.tgl-s{background:var(--acc)}
+.tgl input:checked+.tgl-s::before{transform:translateX(20px)}
+
+/* Einstellungszeilen */
+.sr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;
+  border-bottom:1px solid var(--line)}
+.sr:last-child{border-bottom:none}
+.sl{font-size:.88rem;font-weight:600}
+.ss{font-size:.73rem;color:#6b7280;margin-top:1px}
+
+/* Zahleneingabe */
+.ni{width:100%;padding:8px 12px;border:2px solid var(--line);border-radius:9px;
+  font-family:Nunito,sans-serif;font-size:.9rem;font-weight:600;color:var(--ink);
+  background:var(--bg);outline:none}
+.ni:focus{border-color:var(--acc)}
+
+/* Druckbereich der Generatoren */
+.blk{display:block}
+.printarea{display:none}
+.ws-title{font-size:14pt;font-weight:900;font-family:Nunito,sans-serif;color:var(--acc)}
+.ws-sub{font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif}
+.ws-foot{margin-top:5mm;text-align:center;font-family:Nunito,sans-serif;font-size:7pt;
+  color:#bbb;border-top:1px solid #eee;padding-top:2mm}

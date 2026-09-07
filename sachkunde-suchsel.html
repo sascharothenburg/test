@@ -26,6 +26,7 @@
   box-shadow:0 2px 10px rgba(0,0,0,.12);border-radius:4px;display:block}
 .pstate{font-weight:800;color:var(--muted);font-size:.84rem;padding:26px 0}
 .err{color:#b91c1c}
+#btnRoll{width:auto;flex:0 0 auto;padding:12px 16px;font-size:1.1rem;line-height:1}
 </style>
 <script src="pdf-lib.min.js"></script>
 <script src="fontkit.umd.min.js"></script>
@@ -37,21 +38,19 @@
 
 <div class="app">
 
-<header class="app-hdr">
+<div class="hdr">
   <h1>&#127808; Suchsel</h1>
-  <p class="sub">Wortsuchr&auml;tsel f&uuml;r den Sachunterricht &middot; Klasse 1&ndash;4</p>
+  <p>Wortsuchr&auml;tsel f&uuml;r den Sachunterricht &middot; Klasse 1&ndash;4</p>
   <div class="hdr-btns">
     <a class="hdr-btn" href="sachkunde.html#acc-themen">&#8592; Zur&uuml;ck</a>
     <a class="hdr-btn" href="index.html">&#127968; Hauptmen&uuml;</a>
   </div>
-</header>
+</div>
 
-<div class="tabbar">
-  <nav class="tabs">
-    <button id="tb-thema" class="on" onclick="showTab('thema')">Thema</button>
-    <button id="tb-opts" onclick="showTab('opts')">Einstellungen</button>
-    <button id="tb-prev" onclick="showTab('prev')">Vorschau</button>
-  </nav>
+<div class="tabs">
+  <button id="tb-thema" class="tab active" onclick="showTab('thema')"><span class="ti">&#127808;</span>Thema</button>
+  <button id="tb-opts" class="tab" onclick="showTab('opts')"><span class="ti">&#9881;&#65039;</span>Einstellungen</button>
+  <button id="tb-prev" class="tab" onclick="showTab('prev')"><span class="ti">&#128065;&#65039;</span>Vorschau</button>
 </div>
 
 <div class="screens">
@@ -79,15 +78,15 @@
 
     <div class="card">
       <h2>Umfang</h2>
-      <div class="row">
-        <div class="lbl" style="flex:1">Anzahl W&ouml;rter <small>je Suchsel</small></div>
+      <div class="sr">
+        <div style="flex:1"><div class="sl">Anzahl W&ouml;rter</div><div class="ss">je Suchsel</div></div>
         <div class="rangeval" id="wcVal">8</div>
       </div>
       <input type="range" id="wcRange" min="5" max="10" value="8" oninput="setWordCount(this.value)">
-      <div class="row">
-        <div class="lbl">Seiten <small>ein oder zwei verschiedene Suchsel</small></div>
+      <div class="sr">
+        <div><div class="sl">Seiten</div><div class="ss">ein oder zwei verschiedene Suchsel</div></div>
         <div class="chips">
-          <button class="chip on" id="pg1" onclick="setPages(1)">1 Seite</button>
+          <button class="chip sel" id="pg1" onclick="setPages(1)">1 Seite</button>
           <button class="chip" id="pg2" onclick="setPages(2)">2 Seiten</button>
         </div>
       </div>
@@ -95,17 +94,17 @@
 
     <div class="card">
       <h2>Arbeitsblatt</h2>
-      <div class="row">
-        <div class="lbl">Kopfzeile Name / Datum</div>
-        <label class="sw"><input type="checkbox" id="cbHeader" checked onchange="setOpt('header',this.checked)"><span></span></label>
+      <div class="sr">
+        <div><div class="sl">Kopfzeile Name / Datum</div></div>
+        <label class="tgl"><input type="checkbox" id="cbHeader" checked onchange="setOpt('header',this.checked)"><span class="tgl-s"></span></label>
       </div>
-      <div class="row">
-        <div class="lbl">W&ouml;rterliste unter dem Gitter <small>ohne Liste wird es deutlich schwerer</small></div>
-        <label class="sw"><input type="checkbox" id="cbList" checked onchange="setOpt('list',this.checked)"><span></span></label>
+      <div class="sr">
+        <div><div class="sl">W&ouml;rterliste unter dem Gitter</div><div class="ss">ohne Liste wird es deutlich schwerer</div></div>
+        <label class="tgl"><input type="checkbox" id="cbList" checked onchange="setOpt('list',this.checked)"><span class="tgl-s"></span></label>
       </div>
-      <div class="row">
-        <div class="lbl">L&ouml;sungsblatt <small>als zus&auml;tzliche Seite am Ende</small></div>
-        <label class="sw"><input type="checkbox" id="cbSol" checked onchange="setOpt('sol',this.checked)"><span></span></label>
+      <div class="sr">
+        <div><div class="sl">L&ouml;sungsblatt</div><div class="ss">als zus&auml;tzliche Seite am Ende</div></div>
+        <label class="tgl"><input type="checkbox" id="cbSol" checked onchange="setOpt('sol',this.checked)"><span class="tgl-s"></span></label>
       </div>
     </div>
   </section>
@@ -122,9 +121,9 @@
 </div><!-- /.screens -->
 
 <div class="sbar">
-  <button class="btn" id="btnGoPre" onclick="showTab('prev')">&#128065; Vorschau &amp; Drucken</button>
-  <button class="btn" id="btnPrint" onclick="doPrint()" hidden>Drucken / PDF</button>
-  <button class="btn ghost narrow" id="btnRoll" onclick="reroll()" hidden title="Neu w&uuml;rfeln">&#127922;</button>
+  <button class="btn bp" id="btnGoPre" onclick="showTab('prev')">&#128065; Vorschau &amp; Drucken</button>
+  <button class="btn bp" id="btnPrint" onclick="doPrint()" hidden>Drucken / PDF</button>
+  <button class="btn bs" id="btnRoll" onclick="reroll()" hidden title="Neu w&uuml;rfeln">&#127922;</button>
 </div>
 
 </div><!-- /.app -->
@@ -555,7 +554,7 @@ function renderThemes(){
   var g=$('themeGrid'); g.innerHTML='';
   PAKETE.forEach(function(p){
     var b=document.createElement('button');
-    b.className='pick'+(p.id===selPkg.id?' on':'');
+    b.className='pick'+(p.id===selPkg.id?' sel':'');
     b.innerHTML='<span class="em">'+p.emoji+'</span><span>'+p.name+
                 '<small>'+poolFor(p,selStufe).length+' W\u00F6rter</small></span>';
     b.onclick=function(){ selPkg=p; optsDirty=true; renderThemes(); renderPool(); };
@@ -571,7 +570,7 @@ function renderStufen(){
   var c=$('stufeChips'); c.innerHTML='';
   STUFEN.forEach(function(s){
     var b=document.createElement('button');
-    b.className='chip'+(s.id===selStufe.id?' on':'');
+    b.className='chip'+(s.id===selStufe.id?' sel':'');
     b.textContent=s.label;
     b.onclick=function(){
       selStufe=s;
@@ -592,7 +591,7 @@ function syncRange(){
 function setWordCount(v){ wordCount=parseInt(v,10); $('wcVal').textContent=wordCount; optsDirty=true; }
 function setPages(n){
   numPages=n; optsDirty=true;
-  $('pg1').className='chip'+(n===1?' on':''); $('pg2').className='chip'+(n===2?' on':'');
+  $('pg1').className='chip'+(n===1?' sel':''); $('pg2').className='chip'+(n===2?' sel':'');
 }
 function setOpt(k,v){
   if(k==='header') optHeader=v; else if(k==='list') optList=v; else if(k==='sol') optSol=v;
@@ -603,7 +602,7 @@ function reroll(){ seed=(Math.random()*1e9)|0; optsDirty=true; buildPreview(); }
 function showTab(id){
   ['thema','opts','prev'].forEach(function(t){
     $('tab-'+t).className='screen'+(t===id?' active':'');
-    $('tb-'+t).className=(t===id?'on':'');
+    $('tb-'+t).className='tab'+(t===id?' active':'');
   });
   var pre=(id==='prev');
   $('btnGoPre').hidden=pre; $('btnPrint').hidden=!pre; $('btnRoll').hidden=!pre;
