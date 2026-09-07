@@ -58,6 +58,7 @@ body{
   -webkit-text-size-adjust:100%;
   -webkit-user-select:none; user-select:none;
   overscroll-behavior:none;
+  -webkit-tap-highlight-color:transparent;
 }
 input,textarea{-webkit-user-select:text;user-select:text}
 
@@ -189,7 +190,7 @@ input[type=range]{width:100%;accent-color:var(--acc);margin:6px 0 0}
   color:inherit;box-shadow:0 1px 4px rgba(0,0,0,.04);
   transition:transform .1s ease,box-shadow .1s ease,border-color .1s ease}
 .app-row:active{transform:scale(.985);box-shadow:0 1px 3px rgba(0,0,0,.08);border-color:var(--acc2)}
-.app-row .ai{width:42px;height:42px;flex-shrink:0;border-radius:11px;background:var(--acc-soft);
+.app-row .ai{width:42px;height:42px;flex-shrink:0;border-radius:11px;background:var(--bg);
   display:flex;align-items:center;justify-content:center;font-size:1.35rem}
 .app-row .at{flex:1;min-width:0;display:flex;flex-direction:column}
 .app-row .an{display:block;font-size:.98rem;font-weight:800;color:var(--ink)}
@@ -198,11 +199,10 @@ input[type=range]{width:100%;accent-color:var(--acc);margin:6px 0 0}
 .acc-head .hi{width:34px;height:34px;flex-shrink:0;border-radius:9px;display:flex;
   align-items:center;justify-content:center;font-size:1.15rem;background:var(--acc-soft)}
 /* feste Fachfarben, wenn eine Seite mehrere Fächer mischt (Interaktiv) */
-.app-row .ai.m,.acc-head .hi.m{background:#e0f2fe}
-.app-row .ai.d,.acc-head .hi.d{background:#fee2e2}
-.app-row .ai.e,.acc-head .hi.e{background:#ede9fe}
-.app-row .ai.s,.acc-head .hi.s{background:#dcfce7}
-.app-row .ai.m,.app-row .ai.d,.app-row .ai.e,.app-row .ai.s{filter:saturate(.75)}
+.app-row .ai.m{background:#f0f9ff}  .acc-head .hi.m{background:#e0f2fe}
+.app-row .ai.d{background:#fef2f2}  .acc-head .hi.d{background:#fee2e2}
+.app-row .ai.e{background:#f5f3ff}  .acc-head .hi.e{background:#ede9fe}
+.app-row .ai.s{background:#f0fdf4}  .acc-head .hi.s{background:#dcfce7}
 .empty{text-align:center;color:var(--faint);font-size:.85rem;padding:40px 20px;line-height:1.7}
 
 /* Akkordeon */
@@ -371,3 +371,13 @@ input[type=range]{width:100%;accent-color:var(--acc);margin:6px 0 0}
 .ws-sub{font-size:8pt;color:#555;margin-top:1pt;font-family:Nunito,sans-serif}
 .ws-foot{margin-top:5mm;text-align:center;font-family:Nunito,sans-serif;font-size:7pt;
   color:#bbb;border-top:1px solid #eee;padding-top:2mm}
+
+/* ===========================================================================
+   8 Interaktiv-Apps · <body class="s-<fach> iv">
+   Andere Bauart als die Generatoren: Screens liegen im Fluss statt absolut,
+   Wechsel per Einblendung. Deshalb über body.iv eingegrenzt, damit .screen
+   der Generatoren unberührt bleibt.
+   =========================================================================== */
+body.iv .app{overflow:hidden}
+body.iv .screen{display:none;flex:1;flex-direction:column;animation:fade .25s ease}
+body.iv .screen.active{display:flex}
