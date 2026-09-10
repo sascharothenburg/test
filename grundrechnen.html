@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="app-shell.css">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Mathe-Aufgaben">
@@ -18,19 +19,16 @@
 <meta property="og:description" content="Additions- und Subtraktionsaufgaben für die Grundschule kostenlos erstellen. Zahlenraum frei wählbar, sofort als PDF ausdruckbar.">
 <meta property="og:image" content="https://uebio.de/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="app-shell.css">
 <style>
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{flex:1;min-width:60px;padding:9px 4px;border-radius:10px;border:2px solid #e2e8f0;background:#f8fafc;font-family:Nunito,sans-serif;font-size:.8rem;font-weight:800;color:#1e1b4b;cursor:pointer}
-.chip.sel{background:#0369a1;color:#fff;border-color:#0369a1}
-/* Mathe-spezifisch */
-.hint-box{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:10px 12px;font-size:.78rem;color:#6b7280;line-height:1.7;margin-bottom:10px}
-.hint-box code{background:#f0f9ff;color:#0369a1;padding:1px 6px;border-radius:5px;font-weight:700;font-family:monospace}
+/* Nur was app-shell.css nicht abdeckt. Farben ueber die Variablen der
+   Fachklasse s-mathe, damit ein Themewechsel hier nichts kaputt macht. */
+.hint-box{background:var(--acc-soft);border:1px solid var(--acc-line);border-radius:10px;padding:10px 12px;font-size:.78rem;color:var(--muted);line-height:1.7;margin-bottom:10px}
+.hint-box code{background:var(--acc-soft);color:var(--acc);padding:1px 6px;border-radius:5px;font-weight:700;font-family:monospace}
 .prob-list{display:flex;flex-direction:column;gap:7px}
 .prob-row{display:flex;align-items:center;gap:8px}
-.prob-row span{font-size:.8rem;font-weight:800;color:#0369a1;min-width:18px}
-.prob-row input{flex:1;padding:7px 10px;border:2px solid #e2e8f0;border-radius:8px;font-family:Nunito,monospace;font-size:.9rem;font-weight:600;color:#1e1b4b;background:#f0f9ff;outline:none}
-.prob-row input:focus{border-color:#0369a1}
+.prob-row span{font-size:.8rem;font-weight:800;color:var(--acc);min-width:18px}
+.prob-row input{flex:1;padding:7px 10px;border:2px solid var(--line);border-radius:8px;font-family:Nunito,monospace;font-size:.9rem;font-weight:600;color:var(--ink);background:var(--bg);outline:none}
+.prob-row input:focus{border-color:var(--acc)}
 .prob-row .del{width:30px;height:30px;flex-shrink:0;border:none;border-radius:8px;background:#fef2f2;color:#ef4444;font-size:.9rem;font-weight:800;cursor:pointer}
 </style>
 <script src="pdf-lib.min.js"></script>
